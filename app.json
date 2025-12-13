@@ -22,7 +22,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "backgroundColor": "#141411"
+      "backgroundColor": "#141411",
+      "package": "es.trena"
     },
     "web": {
       "output": "static",
