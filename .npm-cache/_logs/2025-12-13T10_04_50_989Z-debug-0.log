@@ -1,0 +1,197 @@
+0 verbose cli /opt/homebrew/Cellar/node@22/22.16.0/bin/node /opt/homebrew/opt/node@22/bin/npm
+1 info using npm@10.9.2
+2 info using node@v22.16.0
+3 silly config load:file:/opt/homebrew/Cellar/node@22/22.16.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/.npmrc
+5 silly config load:file:/Users/maparla/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm uninstall expo-av
+8 verbose argv "uninstall" "expo-av" "--no-fund" "--no-audit" "--cache" "./.npm-cache"
+9 verbose logfile logs-max:10 dir:/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/.npm-cache/_logs/2025-12-13T10_04_50_989Z-
+10 verbose logfile /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/.npm-cache/_logs/2025-12-13T10_04_50_989Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly reify mark retired [
+14 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/expo-av'
+14 silly reify ]
+15 silly reify moves {
+15 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/expo-av': '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/.expo-av-gTrsQWtf'
+15 silly reify }
+16 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-win32-x64-msvc
+17 silly reify mark deleted [
+17 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-win32-x64-msvc'
+17 silly reify ]
+18 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-win32-arm64-msvc
+19 silly reify mark deleted [
+19 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-win32-arm64-msvc'
+19 silly reify ]
+20 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-x64-musl
+21 silly reify mark deleted [
+21 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-x64-musl'
+21 silly reify ]
+22 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-x64-gnu
+23 silly reify mark deleted [
+23 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-x64-gnu'
+23 silly reify ]
+24 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-arm64-musl
+25 silly reify mark deleted [
+25 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-arm64-musl'
+25 silly reify ]
+26 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-arm64-gnu
+27 silly reify mark deleted [
+27 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-arm64-gnu'
+27 silly reify ]
+28 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-arm-gnueabihf
+29 silly reify mark deleted [
+29 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-linux-arm-gnueabihf'
+29 silly reify ]
+30 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-freebsd-x64
+31 silly reify mark deleted [
+31 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-freebsd-x64'
+31 silly reify ]
+32 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-darwin-x64
+33 silly reify mark deleted [
+33 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-darwin-x64'
+33 silly reify ]
+34 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-android-arm64
+35 silly reify mark deleted [
+35 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/lightningcss-android-arm64'
+35 silly reify ]
+36 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-win32-x64-msvc
+37 silly reify mark deleted [
+37 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-win32-x64-msvc'
+37 silly reify ]
+38 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-win32-ia32-msvc
+39 silly reify mark deleted [
+39 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-win32-ia32-msvc'
+39 silly reify ]
+40 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-win32-arm64-msvc
+41 silly reify mark deleted [
+41 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-win32-arm64-msvc'
+41 silly reify ]
+42 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-wasm32-wasi
+43 silly reify mark deleted [
+43 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-wasm32-wasi'
+43 silly reify ]
+44 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@napi-rs/wasm-runtime
+45 silly reify mark deleted [
+45 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@napi-rs/wasm-runtime'
+45 silly reify ]
+46 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@emnapi/core
+47 silly reify mark deleted [
+47 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@emnapi/core'
+47 silly reify ]
+48 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@emnapi/runtime
+49 silly reify mark deleted [
+49 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@emnapi/runtime'
+49 silly reify ]
+50 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@tybys/wasm-util
+51 silly reify mark deleted [
+51 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@tybys/wasm-util'
+51 silly reify ]
+52 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@emnapi/wasi-threads
+53 silly reify mark deleted [
+53 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@emnapi/wasi-threads'
+53 silly reify ]
+54 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-x64-musl
+55 silly reify mark deleted [
+55 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-x64-musl'
+55 silly reify ]
+56 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-x64-gnu
+57 silly reify mark deleted [
+57 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-x64-gnu'
+57 silly reify ]
+58 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-s390x-gnu
+59 silly reify mark deleted [
+59 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-s390x-gnu'
+59 silly reify ]
+60 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-riscv64-musl
+61 silly reify mark deleted [
+61 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-riscv64-musl'
+61 silly reify ]
+62 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-riscv64-gnu
+63 silly reify mark deleted [
+63 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-riscv64-gnu'
+63 silly reify ]
+64 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-ppc64-gnu
+65 silly reify mark deleted [
+65 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-ppc64-gnu'
+65 silly reify ]
+66 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm64-musl
+67 silly reify mark deleted [
+67 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm64-musl'
+67 silly reify ]
+68 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm64-gnu
+69 silly reify mark deleted [
+69 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm64-gnu'
+69 silly reify ]
+70 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm-musleabihf
+71 silly reify mark deleted [
+71 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm-musleabihf'
+71 silly reify ]
+72 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm-gnueabihf
+73 silly reify mark deleted [
+73 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-linux-arm-gnueabihf'
+73 silly reify ]
+74 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-freebsd-x64
+75 silly reify mark deleted [
+75 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-freebsd-x64'
+75 silly reify ]
+76 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-darwin-x64
+77 silly reify mark deleted [
+77 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-darwin-x64'
+77 silly reify ]
+78 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-android-arm64
+79 silly reify mark deleted [
+79 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-android-arm64'
+79 silly reify ]
+80 verbose reify failed optional dependency /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-android-arm-eabi
+81 silly reify mark deleted [
+81 silly reify   '/Users/maparla/Desktop/personal/mobile_apps/mi-primera-app/node_modules/@unrs/resolver-binding-android-arm-eabi'
+81 silly reify ]
+82 http cache @napi-rs/wasm-runtime@https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz 0ms (cache hit)
+83 http cache @tybys/wasm-util@https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz 0ms (cache hit)
+84 http cache @emnapi/wasi-threads@https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz 0ms (cache hit)
+85 http cache @emnapi/runtime@https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.7.1.tgz 0ms (cache hit)
+86 http cache @emnapi/core@https://registry.npmjs.org/@emnapi/core/-/core-1.7.1.tgz 0ms (cache hit)
+87 silly ADD
+88 silly ADD
+89 silly ADD
+90 silly ADD
+91 silly ADD
+92 silly ADD
+93 silly ADD
+94 silly ADD
+95 silly ADD
+96 silly ADD
+97 silly ADD
+98 silly ADD
+99 silly ADD
+100 silly ADD
+101 silly ADD
+102 silly ADD
+103 silly ADD
+104 silly ADD
+105 silly ADD
+106 silly ADD
+107 silly ADD
+108 silly ADD
+109 silly ADD
+110 silly ADD
+111 silly ADD
+112 silly ADD
+113 silly ADD
+114 silly ADD
+115 silly ADD
+116 silly ADD
+117 silly ADD
+118 silly ADD
+119 silly ADD
+120 silly REMOVE node_modules/expo-av
+121 verbose cwd /Users/maparla/Desktop/personal/mobile_apps/mi-primera-app
+122 verbose os Darwin 25.1.0
+123 verbose node v22.16.0
+124 verbose npm  v10.9.2
+125 verbose exit 0
+126 info ok

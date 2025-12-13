@@ -3,51 +3,30 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import { Platform } from 'react-native';
+export const TrenaColors = {
+  background: 'rgb(20, 20, 17)',
+  surface: 'rgb(197, 195, 184)',
+  primary: 'rgb(213 255 93)',
+  secondary: 'rgb(193, 202, 246)',
+  text: 'rgb(236, 235, 228)',
+  // Fosfi accent colors
+  accentPurple: 'rgb(177 92 255)',
+  accentRed: 'rgb(255 67 88)',
+  accentBlue: 'rgb(59 130 246)',
+} as const;
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// Back-compat alias (so imports like `Colors` won't immediately break during refactors).
+export const Colors = TrenaColors;
 
-export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
-};
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+/**
+ * Font family constants for Work Sans typography.
+ * Use these instead of fontWeight in StyleSheet for consistent cross-platform rendering.
+ */
+export const Fonts = {
+  regular: 'WorkSans_400Regular',
+  medium: 'WorkSans_500Medium',
+  semiBold: 'WorkSans_600SemiBold',
+  bold: 'WorkSans_700Bold',
+  extraBold: 'WorkSans_800ExtraBold',
+  black: 'WorkSans_900Black',
+} as const;
