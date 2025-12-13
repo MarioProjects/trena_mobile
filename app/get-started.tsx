@@ -9,8 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { FacebookIcon } from '@/components/FacebookIcon';
-import { GoogleIcon } from '@/components/GoogleIcon';
+import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { Fonts, TrenaColors } from '@/constants/theme';
 
@@ -51,6 +50,15 @@ export default function GetStartedScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={() => router.back()}
+            hitSlop={16}
+            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
+            <ChevronLeftIcon size={36} color={TrenaColors.primary} strokeWidth={2} />
+          </Pressable>
+
           {/* Header */}
           <View style={styles.header}>
             <TrenaLogo width={180} height={50} color="rgba(236, 235, 228, 0.95)" />
@@ -133,6 +141,17 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     justifyContent: 'center',
     gap: 24,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    padding: 8,
+    zIndex: 10,
+  },
+  backButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
   header: {
     alignItems: 'center',
