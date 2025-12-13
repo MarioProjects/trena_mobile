@@ -61,7 +61,7 @@ export default function GetStartedScreen() {
 
           {/* Header */}
           <View style={styles.header}>
-            <TrenaLogo width={180} height={50} color="rgba(236, 235, 228, 0.95)" />
+            <TrenaLogo width={180} height={50} color={TrenaColors.primary} />
             <Text style={styles.subtitle}>This is where your journey begins</Text>
           </View>
 
