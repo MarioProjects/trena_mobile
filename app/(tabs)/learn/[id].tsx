@@ -1,8 +1,8 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LearnItemRedirectScreen() {
@@ -14,8 +14,25 @@ export default function LearnItemRedirectScreen() {
     return learnData.find((x) => x.id === targetId);
   }, [targetId]);
 
-  if (item && targetId) {
-    return <Redirect href={`/learn/${item.type}/${targetId}`} />;
+  const targetHref = React.useMemo(() => {
+    if (!item || !targetId) return null;
+    return `/learn/${item.type}/${targetId}` as const;
+  }, [item, targetId]);
+
+  // Keep rendering a styled background while we navigate.
+  // `Redirect` can briefly render nothing, which may show a white frame.
+  React.useEffect(() => {
+    if (targetHref) router.replace(targetHref);
+  }, [targetHref]);
+
+  if (targetHref) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.loading}>
+          <ActivityIndicator size="small" color={TrenaColors.primary} />
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -43,6 +60,10 @@ const styles = StyleSheet.create({
     backgroundColor: TrenaColors.background,
     paddingHorizontal: 20,
     paddingVertical: 24,
+    justifyContent: 'center',
+  },
+  loading: {
+    alignItems: 'center',
     justifyContent: 'center',
   },
   card: {

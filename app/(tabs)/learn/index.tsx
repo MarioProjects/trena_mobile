@@ -114,7 +114,9 @@ function Section({ title, items }: { title: string; items: LearnItem[] }) {
             <Pressable
               key={item.id}
               accessibilityRole="button"
-              onPress={() => router.push(`/learn/${item.id}`)}
+              // Navigate directly to the final screen to avoid an extra redirect hop
+              // (which can cause a brief "white flash" during transitions).
+              onPress={() => router.push(`/learn/${item.type}/${item.id}`)}
               style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             >
               <View style={styles.cardImageWrap}>
