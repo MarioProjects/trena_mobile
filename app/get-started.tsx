@@ -55,7 +55,7 @@ export default function GetStartedScreen() {
   };
 
   if (isLoggedIn) {
-    return <Redirect href="/home" />;
+    return <Redirect href="/today" />;
   }
 
   return (

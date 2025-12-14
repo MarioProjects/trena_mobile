@@ -67,7 +67,7 @@ export default function HeroScreen() {
 
   // If already authenticated, skip the hero CTA and go straight home.
   if (!isLoading && isLoggedIn) {
-    return <Redirect href="/home" />;
+    return <Redirect href="/today" />;
   }
 
   return <HeroContent />;

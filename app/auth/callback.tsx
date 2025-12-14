@@ -26,47 +26,45 @@ export default function AuthCallbackScreen() {
   }>();
   const url = Linking.useURL();
   const [message, setMessage] = useState('Completing sign-in…');
+  const code = params.code;
+  const error = params.error;
+  const error_description = params.error_description;
 
   useEffect(() => {
     const run = async () => {
-      // eslint-disable-next-line no-console
-      console.log('[auth] callback url:', url);
-      // eslint-disable-next-line no-console
-      console.log('[auth] callback params:', params);
-
       const errorFromUrl = url
         ? (getParamFromUrl(url, 'error_description') ?? getParamFromUrl(url, 'error'))
         : undefined;
-      const error = params.error_description ?? params.error ?? errorFromUrl;
+      const errorValue = error_description ?? error ?? errorFromUrl;
 
-      if (error) {
-        setMessage(`Auth error: ${error}`);
+      if (errorValue) {
+        setMessage(`Auth error: ${errorValue}`);
         return;
       }
 
       const codeFromUrl = url ? getParamFromUrl(url, 'code') : undefined;
-      const code = params.code ?? codeFromUrl;
-      if (!code) {
+      const codeValue = code ?? codeFromUrl;
+      if (!codeValue) {
         setMessage('Missing OAuth code. You can go back and try again.');
         return;
       }
 
-      const exchanged = await supabase.auth.exchangeCodeForSession(code);
+      const exchanged = await supabase.auth.exchangeCodeForSession(codeValue);
       if (exchanged.error) {
         setMessage(`Auth error: ${exchanged.error.message}`);
         return;
       }
 
-      router.replace('/home');
+      router.replace('/today');
     };
 
     run().catch((e: unknown) => {
       setMessage(e instanceof Error ? `Auth error: ${e.message}` : 'Auth error: Unknown error');
     });
-  }, [params.code, params.error, params.error_description]);
+  }, [code, error, error_description, url]);
 
   if (isLoggedIn) {
-    return <Redirect href="/home" />;
+    return <Redirect href="/today" />;
   }
 
   return (

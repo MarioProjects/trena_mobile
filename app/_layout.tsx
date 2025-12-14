@@ -1,11 +1,11 @@
 import {
-    useFonts,
-    WorkSans_400Regular,
-    WorkSans_500Medium,
-    WorkSans_600SemiBold,
-    WorkSans_700Bold,
-    WorkSans_800ExtraBold,
-    WorkSans_900Black,
+  useFonts,
+  WorkSans_400Regular,
+  WorkSans_500Medium,
+  WorkSans_600SemiBold,
+  WorkSans_700Bold,
+  WorkSans_800ExtraBold,
+  WorkSans_900Black,
 } from '@expo-google-fonts/work-sans';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -61,6 +61,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="get-started" />
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="home" />
         <Stack.Screen name="auth/callback" />
       </Stack>
