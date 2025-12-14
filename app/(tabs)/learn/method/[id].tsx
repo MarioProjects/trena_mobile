@@ -198,7 +198,7 @@ export default function MethodDetailScreen() {
           </View>
 
           <View style={styles.section}>
-            <SectionTitle>About</SectionTitle>
+            <SectionTitle>How it works</SectionTitle>
             <Text style={styles.body}>{item.long_description || item.description}</Text>
           </View>
 
