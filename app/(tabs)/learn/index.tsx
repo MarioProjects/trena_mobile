@@ -9,6 +9,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const placeholderImage = require('@/assets/images/mock.webp');
+const localLearnImages: Record<string, number> = {
+  'assets/images/learn/methods/bilbo.webp': require('@/assets/images/learn/methods/bilbo.webp'),
+};
 
 type PrimaryFilter = 'all' | 'method' | 'exercise';
 type CanonicalLevel = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -16,6 +19,7 @@ type CanonicalLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 function getImageSource(image: string | undefined) {
   if (!image) return placeholderImage;
   if (image.includes('mock.webp')) return placeholderImage;
+  if (localLearnImages[image]) return localLearnImages[image];
   if (image.startsWith('http://') || image.startsWith('https://')) return { uri: image };
   return placeholderImage;
 }
@@ -46,6 +50,16 @@ function normalizeLevels(level: string | undefined): CanonicalLevel[] {
 function formatLevels(level: string | undefined) {
   const normalized = normalizeLevels(level);
   return normalized.length ? normalized.join('/') : level ?? '—';
+}
+
+function getDaysPerWeekMeta(item: LearnItem): string | null {
+  // Exercises shouldn't show a schedule; also ignore placeholder values like "N/A".
+  if (item.type !== 'method') return null;
+  const raw = item.days_per_week?.trim();
+  if (!raw) return null;
+  const lower = raw.toLowerCase();
+  if (lower === 'n/a' || lower === 'na' || lower === 'none' || lower === '-' || lower === '—') return null;
+  return `${raw} days/week`;
 }
 
 function extractDayNumbers(daysPerWeek: string | undefined) {
@@ -95,43 +109,45 @@ function Section({ title, items }: { title: string; items: LearnItem[] }) {
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <View style={styles.list}>
-        {items.map((item) => (
-          <Pressable
-            key={item.id}
-            accessibilityRole="button"
-            onPress={() => router.push(`/learn/${item.id}`)}
-            style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-          >
-            <Image source={getImageSource(item.image)} style={styles.cardImage} contentFit="cover" />
-
-            <View style={styles.cardBody}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle} numberOfLines={1}>
-                  {item.name}
-                </Text>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{item.type.toUpperCase()}</Text>
-                </View>
+        {items.map((item) => {
+          return (
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              onPress={() => router.push(`/learn/${item.id}`)}
+              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+            >
+              <View style={styles.cardImageWrap}>
+                <Image
+                  source={getImageSource(item.image)}
+                  style={StyleSheet.absoluteFillObject}
+                  contentFit="cover"
+                />
               </View>
 
-              <Text style={styles.cardMeta} numberOfLines={1}>
-                {formatLevels(item.level)} • {item.days_per_week} days/week • {item.goal}
-              </Text>
-
-              <Text style={styles.cardDesc} numberOfLines={2}>
-                {item.description}
-              </Text>
-
-              <View style={styles.tagsRow}>
-                {item.tags.slice(0, 4).map((tag) => (
-                  <View key={`${item.id}-${tag}`} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
+              <View style={styles.cardBody}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardTitle} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{item.type.toUpperCase()}</Text>
                   </View>
-                ))}
+                </View>
+
+                <Text style={styles.cardMeta} numberOfLines={1}>
+                  {[formatLevels(item.level), getDaysPerWeekMeta(item), item.goal ?? '—']
+                    .filter((x): x is string => Boolean(x))
+                    .join(' • ')}
+                </Text>
+
+                <Text style={styles.cardDesc} numberOfLines={2}>
+                  {item.description}
+                </Text>
               </View>
-            </View>
-          </Pressable>
-        ))}
+            </Pressable>
+          );
+        })}
       </View>
     </View>
   );
@@ -406,16 +422,16 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
   },
   cardPressed: {
     opacity: 0.92,
     transform: [{ scale: 0.997 }],
   },
-  cardImage: {
+  cardImageWrap: {
     width: 74,
-    height: 74,
     borderRadius: 12,
+    overflow: 'hidden',
     backgroundColor: 'rgba(236, 235, 228, 0.06)',
   },
   cardBody: {
@@ -462,26 +478,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     color: 'rgba(236, 235, 228, 0.85)',
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    paddingTop: 2,
-  },
-  tag: {
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  tagText: {
-    fontFamily: Fonts.medium,
-    fontSize: 11,
-    lineHeight: 14,
-    color: 'rgba(236, 235, 228, 0.75)',
   },
 });
 

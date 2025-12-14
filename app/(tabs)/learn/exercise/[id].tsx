@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ChevronLeftIcon } from '@/components/icons';
+import { ChevronLeftIcon, ExercisesIcon } from '@/components/icons';
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
@@ -13,10 +13,14 @@ import { Image } from 'expo-image';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 
 const placeholderImage = require('@/assets/images/mock.webp');
+const localLearnImages: Record<string, number> = {
+  'assets/images/learn/methods/bilbo.webp': require('@/assets/images/learn/methods/bilbo.webp'),
+};
 
 function getImageSource(image: string | undefined) {
   if (!image) return placeholderImage;
   if (image.includes('mock.webp')) return placeholderImage;
+  if (localLearnImages[image]) return localLearnImages[image];
   if (image.startsWith('http://') || image.startsWith('https://')) return { uri: image };
   return placeholderImage;
 }
@@ -165,14 +169,18 @@ export default function ExerciseDetailScreen() {
         </View>
 
         <View style={styles.sheet}>
-          <Text style={styles.title}>{item.name}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={1}>
+              {item.name}
+            </Text>
+            <ExercisesIcon size={22} color={TrenaColors.primary} />
+          </View>
           <Text style={styles.meta}>
             {item.level || '—'} • {item.goal || '—'}
           </Text>
           <Text style={styles.lede}>{item.description}</Text>
 
           <View style={styles.pillsRow}>
-            <Pill label="EXERCISE" />
             {(item.tags || []).slice(0, 8).map((t) => (
               <Pill key={t} label={t} />
             ))}
@@ -242,12 +250,19 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   title: {
     fontFamily: Fonts.extraBold,
     fontSize: 28,
     lineHeight: 34,
     color: TrenaColors.text,
     letterSpacing: -0.3,
+    flexShrink: 1,
+    minWidth: 0,
   },
   meta: {
     fontFamily: Fonts.medium,

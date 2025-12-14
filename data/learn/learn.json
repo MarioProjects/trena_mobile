@@ -3,7 +3,7 @@
     "id": "bilbo-method",
     "name": "Bilbo Method",
     "type": "method",
-    "level": "Intermediate",
+    "level": "Intermediate-Advanced",
     "days_per_week": "2-3",
     "goal": "Explosive Strength / Hypertrophy",
     "description": "A method focusing on explosive strength using a single set of high repetitions (15-50) to failure.",
@@ -19,7 +19,7 @@
       "Don't do this for every exercise; focus on main compounds."
     ],
     "tags": ["Hypertrophy", "Speed", "Bench Press Specialist"],
-    "image": "assets/images/mock.webp",
+    "image": "assets/images/learn/methods/bilbo.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_bilbo",
     "isFavorite": false
   },
@@ -45,30 +45,6 @@
     "tags": ["Powerlifting", "Strength", "Long-term"],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_531",
-    "isFavorite": false
-  },
-  {
-    "id": "starting-strength",
-    "name": "Starting Strength",
-    "type": "method",
-    "level": "Beginner",
-    "days_per_week": "3",
-    "goal": "Strength Foundation",
-    "description": "The gold standard for beginners. Uses linear progression on basic compound lifts.",
-    "long_description": "Mark Rippetoe's classic routine. You perform 3 sets of 5 reps on the main lifts, adding a small amount of weight (5lbs/2.5kg) every single workout. It builds a massive base of strength for novices.",
-    "equipment": ["Barbell", "Rack", "Bench"],
-    "dos": [
-      "Do eat a caloric surplus to support recovery.",
-      "Do focus entirely on perfecting your form.",
-      "Do rest 3-5 minutes between heavy sets."
-    ],
-    "donts": [
-      "Don't add extra isolation exercises; the program is enough.",
-      "Don't change the rep range (5 reps is the magic number)."
-    ],
-    "tags": ["Beginner", "Linear Progression", "Essentials"],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_ss",
     "isFavorite": false
   },
   {
@@ -112,7 +88,7 @@
       "Don't ignore stalling; switch to 3x5 when 5x5 becomes impossible.",
       "Don't train two days in a row."
     ],
-    "tags": ["Beginner", "Volume", "Simplicity"],
+    "tags": ["Volume", "Simplicity"],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_sl",
     "isFavorite": false
@@ -190,7 +166,7 @@
     "id": "upper-lower",
     "name": "Upper/Lower Split",
     "type": "method",
-    "level": "Basic-Intermediate",
+    "level": "Beginner-Intermediate",
     "days_per_week": "4",
     "goal": "General Fitness / Strength",
     "description": "Divides the body into Torso and Legs. Great for recovery and frequency.",
@@ -259,7 +235,7 @@
     "id": "exercise-squat",
     "name": "Barbell Squat",
     "type": "exercise",
-    "level": "Basic",
+    "level": "All levels",
     "days_per_week": "N/A",
     "goal": "Leg Strength",
     "description": "The king of lower body exercises. Targets quads, glutes, and core.",
@@ -282,7 +258,7 @@
     "id": "exercise-deadlift",
     "name": "Deadlift",
     "type": "exercise",
-    "level": "Intermediate",
+    "level": "All levels",
     "days_per_week": "N/A",
     "goal": "Posterior Chain",
     "description": "Lifting a dead weight from the floor. Builds total body strength.",
@@ -305,7 +281,7 @@
     "id": "exercise-bench",
     "name": "Bench Press",
     "type": "exercise",
-    "level": "Basic",
+    "level": "All levels",
     "days_per_week": "N/A",
     "goal": "Upper Body Strength",
     "description": "The primary upper body pushing exercise. Targets chest, shoulders, and triceps.",
