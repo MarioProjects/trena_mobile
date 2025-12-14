@@ -1,11 +1,11 @@
-import { ExercisesIcon, MethodsIcon } from '@/components/icons';
+import { ExercisesIcon, MethodsIcon, SearchIcon } from '@/components/icons';
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const placeholderImage = require('@/assets/images/mock.webp');
@@ -160,9 +160,23 @@ export default function LearnScreen() {
   const [methodLevel, setMethodLevel] = React.useState<CanonicalLevel | null>(null);
   const [methodDays, setMethodDays] = React.useState<number | null>(null);
   const [exerciseTag, setExerciseTag] = React.useState<string | null>(null);
+  const [search, setSearch] = React.useState('');
 
   const methods = React.useMemo(() => learnData.filter((x) => x.type === 'method'), []);
   const exercises = React.useMemo(() => learnData.filter((x) => x.type === 'exercise'), []);
+  const searchQuery = search.trim().toLowerCase();
+
+  const matchesSearch = React.useCallback(
+    (item: LearnItem) => {
+      if (!searchQuery) return true;
+      const haystack = [item.name, item.description, item.goal, ...(item.tags || [])]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(searchQuery);
+    },
+    [searchQuery],
+  );
 
   // Secondary filter options are conditional: only show values that produce results
   // given the other selected method filter (prevents impossible combinations).
@@ -235,8 +249,8 @@ export default function LearnScreen() {
     if (methodDays) {
       items = items.filter((m) => extractDayNumbers(m.days_per_week).includes(methodDays));
     }
-    return items;
-  }, [methods, methodLevel, methodDays]);
+    return items.filter(matchesSearch);
+  }, [methods, methodLevel, methodDays, matchesSearch]);
 
   const filteredExercises = React.useMemo(() => {
     let items = exercises;
@@ -244,16 +258,28 @@ export default function LearnScreen() {
       const target = exerciseTag.toLowerCase();
       items = items.filter((ex) => (ex.tags || []).some((t) => t.toLowerCase() === target));
     }
-    return items;
-  }, [exercises, exerciseTag]);
+    return items.filter(matchesSearch);
+  }, [exercises, exerciseTag, matchesSearch]);
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Learn</Text>
-        <Text style={styles.body}>
-          {learnData.length} items • {methods.length} methods • {exercises.length} exercises
-        </Text>
+        <View style={styles.searchWrap}>
+          <View style={styles.searchIcon}>
+            <SearchIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+          </View>
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search methods & exercises"
+            placeholderTextColor="rgba(236, 235, 228, 0.5)"
+            autoCorrect={false}
+            autoCapitalize="none"
+            clearButtonMode="while-editing"
+            style={styles.searchInput}
+          />
+        </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
           <Pill label="All" selected={primary === 'all'} onPress={() => setPrimary('all')} />
@@ -327,8 +353,8 @@ export default function LearnScreen() {
 
         {primary === 'all' ? (
           <>
-            <Section title="Methods" items={methods} />
-            <Section title="Exercises" items={exercises} />
+            <Section title="Methods" items={filteredMethods} />
+            <Section title="Exercises" items={filteredExercises} />
           </>
         ) : null}
 
@@ -361,6 +387,27 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 20,
+  },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    height: 46,
+  },
+  searchIcon: {
+    marginRight: 10,
+    opacity: 0.95,
+  },
+  searchInput: {
+    flex: 1,
+    height: '100%',
+    fontFamily: Fonts.medium,
+    fontSize: 14,
+    color: TrenaColors.text,
   },
   pillsRow: {
     paddingTop: 6,

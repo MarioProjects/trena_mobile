@@ -7,5 +7,6 @@ export { LearnIcon } from './LearnIcon';
 export { MethodsIcon } from './MethodsIcon';
 export { ExercisesIcon } from './ExercisesIcon';
 export { ProfileIcon } from './ProfileIcon';
+export { SearchIcon } from './SearchIcon';
 
 export type { IconProps, StrokeIconProps } from './types';
