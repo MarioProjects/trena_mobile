@@ -3,11 +3,12 @@ import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const placeholderImage = require('../../assets/images/mock.webp');
+const placeholderImage = require('@/assets/images/mock.webp');
 
 type PrimaryFilter = 'all' | 'method' | 'exercise';
 type CanonicalLevel = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -95,12 +96,13 @@ function Section({ title, items }: { title: string; items: LearnItem[] }) {
       <Text style={styles.sectionTitle}>{title}</Text>
       <View style={styles.list}>
         {items.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Image
-              source={getImageSource(item.image)}
-              style={styles.cardImage}
-              contentFit="cover"
-            />
+          <Pressable
+            key={item.id}
+            accessibilityRole="button"
+            onPress={() => router.push(`/learn/${item.id}`)}
+            style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+          >
+            <Image source={getImageSource(item.image)} style={styles.cardImage} contentFit="cover" />
 
             <View style={styles.cardBody}>
               <View style={styles.cardHeader}>
@@ -128,7 +130,7 @@ function Section({ title, items }: { title: string; items: LearnItem[] }) {
                 ))}
               </View>
             </View>
-          </View>
+          </Pressable>
         ))}
       </View>
     </View>
@@ -235,16 +237,8 @@ export default function LearnScreen() {
           {learnData.length} items • {methods.length} methods • {exercises.length} exercises
         </Text>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pillsRow}
-        >
-          <Pill
-            label="All"
-            selected={primary === 'all'}
-            onPress={() => setPrimary('all')}
-          />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
+          <Pill label="All" selected={primary === 'all'} onPress={() => setPrimary('all')} />
           <Pill
             label="Methods"
             selected={primary === 'method'}
@@ -271,16 +265,8 @@ export default function LearnScreen() {
 
         {primary === 'method' ? (
           <View style={styles.filtersBlock}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.pillsRow}
-            >
-              <Pill
-                label="All levels"
-                selected={!methodLevel}
-                onPress={() => setMethodLevel(null)}
-              />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
+              <Pill label="All levels" selected={!methodLevel} onPress={() => setMethodLevel(null)} />
               {methodLevelOptions.map((lvl) => (
                 <Pill
                   key={lvl}
@@ -291,16 +277,8 @@ export default function LearnScreen() {
               ))}
             </ScrollView>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.pillsRow}
-            >
-              <Pill
-                label="Any schedule"
-                selected={!methodDays}
-                onPress={() => setMethodDays(null)}
-              />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
+              <Pill label="Any schedule" selected={!methodDays} onPress={() => setMethodDays(null)} />
               {methodDayOptions.map((n) => (
                 <Pill
                   key={n}
@@ -315,16 +293,8 @@ export default function LearnScreen() {
 
         {primary === 'exercise' ? (
           <View style={styles.filtersBlock}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.pillsRow}
-            >
-              <Pill
-                label="All tags"
-                selected={!exerciseTag}
-                onPress={() => setExerciseTag(null)}
-              />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
+              <Pill label="All tags" selected={!exerciseTag} onPress={() => setExerciseTag(null)} />
               {exerciseTags.slice(0, 18).map((tag) => (
                 <Pill
                   key={tag}
@@ -438,6 +408,10 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: 'flex-start',
   },
+  cardPressed: {
+    opacity: 0.92,
+    transform: [{ scale: 0.997 }],
+  },
   cardImage: {
     width: 74,
     height: 74,
@@ -510,3 +484,4 @@ const styles = StyleSheet.create({
     color: 'rgba(236, 235, 228, 0.75)',
   },
 });
+
