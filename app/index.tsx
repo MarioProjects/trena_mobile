@@ -1,5 +1,5 @@
 import { useEvent } from 'expo';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -7,8 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { Fonts, TrenaColors } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
 
-export default function HeroScreen() {
+function HeroContent() {
   const player = useVideoPlayer(require('@/assets/videos/hero.mp4'), (p) => {
     p.loop = true;
     p.muted = true;
@@ -59,6 +60,17 @@ export default function HeroScreen() {
       </SafeAreaView>
     </View>
   );
+}
+
+export default function HeroScreen() {
+  const { isLoading, isLoggedIn } = useAuthContext();
+
+  // If already authenticated, skip the hero CTA and go straight home.
+  if (!isLoading && isLoggedIn) {
+    return <Redirect href="/home" />;
+  }
+
+  return <HeroContent />;
 }
 
 const styles = StyleSheet.create({

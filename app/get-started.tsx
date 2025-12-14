@@ -28,8 +28,6 @@ export default function GetStartedScreen() {
 
   const canSendMagicLink = useMemo(() => isProbablyEmail(email), [email]);
 
-  const goHome = () => router.replace('/home');
-
   const onGoogle = async () => {
     try {
       await signInWithGoogle();

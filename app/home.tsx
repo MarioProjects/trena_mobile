@@ -21,7 +21,8 @@ export default function HomeScreen() {
     undefined;
 
   if (!isLoading && !isLoggedIn) {
-    return <Redirect href="/get-started" />;
+    // If the user isn't logged in, send them to the initial hero screen (not the login screen).
+    return <Redirect href="/" />;
   }
 
   const onSignOut = async () => {
