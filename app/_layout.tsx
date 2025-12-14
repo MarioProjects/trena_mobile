@@ -14,9 +14,23 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { TrenaColors } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
+import AuthProvider from '@/providers/auth-provider';
 
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
+
+function SplashGate({ fontsReady }: { fontsReady: boolean }) {
+  const { isLoading } = useAuthContext();
+
+  useEffect(() => {
+    if (fontsReady && !isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsReady, isLoading]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -28,19 +42,16 @@ export default function RootLayout() {
     WorkSans_900Black,
   });
 
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, fontError]);
-
   // Wait for fonts to load before rendering
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
+  const fontsReady = !!fontsLoaded || !!fontError;
+
   return (
-    <>
+    <AuthProvider>
+      <SplashGate fontsReady={fontsReady} />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -51,8 +62,9 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="get-started" />
         <Stack.Screen name="home" />
+        <Stack.Screen name="auth/callback" />
       </Stack>
       <StatusBar style="light" />
-    </>
+    </AuthProvider>
   );
 }

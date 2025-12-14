@@ -1,23 +1,69 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Fonts, TrenaColors } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
+import { supabase } from '@/lib/supabase';
 
 export default function HomeScreen() {
+  const { isLoading, isLoggedIn, session } = useAuthContext();
+  const user = session?.user;
+  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+  const avatarUrl =
+    (typeof meta.avatar_url === 'string' && meta.avatar_url) ||
+    (typeof meta.picture === 'string' && meta.picture) ||
+    undefined;
+  const displayName =
+    (typeof meta.full_name === 'string' && meta.full_name) ||
+    (typeof meta.name === 'string' && meta.name) ||
+    undefined;
+
+  if (!isLoading && !isLoggedIn) {
+    return <Redirect href="/get-started" />;
+  }
+
+  const onSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      Alert.alert('Sign out failed', error.message);
+      return;
+    }
+    router.replace('/');
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <View style={styles.headerText}>
+          <View style={styles.headerLeft}>
+            <View style={styles.headerText}>
             <Text style={styles.title}>Today</Text>
-            <Text style={styles.subtitle}>Ready to train?</Text>
+              <Text style={styles.subtitle} numberOfLines={1} ellipsizeMode="tail">
+                {isLoading
+                  ? 'Loading…'
+                  : displayName
+                    ? displayName
+                    : (user?.email ?? 'Signed in')}
+              </Text>
+              {!!displayName && (
+                <Text style={styles.subtle} numberOfLines={1} ellipsizeMode="tail">
+                  {user?.email ?? ''}
+                </Text>
+              )}
+            </View>
+
+            {!!avatarUrl && (
+              <View style={styles.avatar}>
+                <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+              </View>
+            )}
           </View>
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.replace('/')}
+            onPress={onSignOut}
             style={({ pressed }) => [styles.ghostButton, pressed && styles.pressed]}>
             <Text style={styles.ghostButtonText}>Sign out</Text>
           </Pressable>
@@ -71,8 +117,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  headerLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minWidth: 0,
+  },
   headerText: {
-    gap: 6,
+    flex: 1,
+    gap: 4,
+    minWidth: 0,
   },
   title: {
     fontSize: 34,
@@ -87,6 +142,26 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     color: 'rgba(20, 20, 17, 0.7)',
   },
+  subtle: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontFamily: Fonts.medium,
+    color: 'rgba(20, 20, 17, 0.55)',
+  },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(20, 20, 17, 0.18)',
+    flexShrink: 0,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
   ghostButton: {
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -94,6 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: TrenaColors.surface,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(20, 20, 17, 0.18)',
+    flexShrink: 0,
   },
   ghostButtonText: {
     color: TrenaColors.text,

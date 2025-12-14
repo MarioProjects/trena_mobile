@@ -1,6 +1,7 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -12,6 +13,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { Fonts, TrenaColors } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
+import { signInWithGoogle } from '@/lib/google-oauth';
 
 function isProbablyEmail(email: string) {
   const v = email.trim();
@@ -19,6 +22,7 @@ function isProbablyEmail(email: string) {
 }
 
 export default function GetStartedScreen() {
+  const { isLoggedIn } = useAuthContext();
   const [email, setEmail] = useState('');
   const [showError, setShowError] = useState(false);
 
@@ -26,8 +30,15 @@ export default function GetStartedScreen() {
 
   const goHome = () => router.replace('/home');
 
-  const onGoogle = () => goHome();
-  const onFacebook = () => goHome();
+  const onGoogle = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Google sign-in failed.';
+      Alert.alert('Sign-in error', message);
+    }
+  };
+  const onFacebook = () => Alert.alert('Not implemented', 'Facebook auth is not wired yet.');
 
   const onLogin = () => {
     if (!canSendMagicLink) {
@@ -35,8 +46,7 @@ export default function GetStartedScreen() {
       return;
     }
     setShowError(false);
-    // TODO: Send magic link to email
-    goHome();
+    Alert.alert('Not implemented', 'Email magic-link login is not wired yet.');
   };
 
   const onEmailChange = (text: string) => {
@@ -45,6 +55,10 @@ export default function GetStartedScreen() {
       setShowError(false);
     }
   };
+
+  if (isLoggedIn) {
+    return <Redirect href="/home" />;
+  }
 
   return (
     <View style={styles.root}>
