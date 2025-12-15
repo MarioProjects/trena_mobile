@@ -53,14 +53,15 @@ export async function signInWithGoogle() {
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
     preferEphemeralSession: true,
   });
+  const resultUrl = 'url' in result ? (result as any).url : undefined;
   // eslint-disable-next-line no-console
-  console.log('[auth] openAuthSessionAsync result:', result.type, result.url ? '(url returned)' : '(no url)');
+  console.log('[auth] openAuthSessionAsync result:', result.type, resultUrl ? '(url returned)' : '(no url)');
 
-  if (result.type === 'success' && result.url) {
-    const oauthError = extractParamFromUrl(result.url, 'error_description') ?? extractParamFromUrl(result.url, 'error');
+  if (result.type === 'success' && resultUrl) {
+    const oauthError = extractParamFromUrl(resultUrl, 'error_description') ?? extractParamFromUrl(resultUrl, 'error');
     if (oauthError) throw new Error(oauthError);
 
-    const code = extractParamFromUrl(result.url, 'code');
+    const code = extractParamFromUrl(resultUrl, 'code');
     if (code) {
       const exchanged = await supabase.auth.exchangeCodeForSession(code);
       if (exchanged.error) throw exchanged.error;
@@ -68,8 +69,8 @@ export async function signInWithGoogle() {
     }
 
     // Expo Go / custom-scheme redirects can return tokens in the fragment instead of a code.
-    const access_token = extractParamFromUrl(result.url, 'access_token');
-    const refresh_token = extractParamFromUrl(result.url, 'refresh_token');
+    const access_token = extractParamFromUrl(resultUrl, 'access_token');
+    const refresh_token = extractParamFromUrl(resultUrl, 'refresh_token');
     if (access_token && refresh_token) {
       const set = await supabase.auth.setSession({ access_token, refresh_token });
       if (set.error) throw set.error;

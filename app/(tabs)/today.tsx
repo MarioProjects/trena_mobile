@@ -1,6 +1,7 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
+import { router } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TodayScreen() {
@@ -30,7 +31,7 @@ export default function TodayScreen() {
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => Alert.alert('Coming soon', 'Workout logging is next!')}
+            onPress={() => router.push('/activities/start' as any)}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
           >
             <Text style={styles.primaryButtonText}>New workout</Text>

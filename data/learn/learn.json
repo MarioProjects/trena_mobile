@@ -8,7 +8,11 @@
     "goal": "Explosive Strength / Hypertrophy",
     "description": "A method focusing on explosive strength using a single set of high repetitions (15-50) to failure.",
     "long_description": "The Bilbo Method operates on a cyclical progression model where athletes perform a single maximal-effort set to failure per session. Starting with moderate loads near 50% of capacity, the lifter executes repetitions with maximum explosive velocity, strictly ensuring a distinct muscular pause at the bottom to eliminate momentum and rebound. As weight increases incrementally each session, the repetition count naturally decreases from high ranges down to a 15-rep threshold, triggering a cycle reset that drives continuous neural and hypertrophic adaptation.",
-    "equipment": ["Barbell", "Bench", "Plates"],
+    "equipment": [
+      "Barbell",
+      "Bench",
+      "Plates"
+    ],
     "dos": [
       "Do warm up thoroughly before the main set.",
       "Do perform the repetitions as explosively as possible.",
@@ -18,7 +22,11 @@
       "Don't grind the reps; speed is key.",
       "Don't do this for every exercise; focus on main compounds."
     ],
-    "tags": ["Hypertrophy", "Speed", "Bench Press Specialist"],
+    "tags": [
+      "Hypertrophy",
+      "Speed",
+      "Bench Press Specialist"
+    ],
     "image": "assets/images/learn/methods/bilbo.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_bilbo",
     "isFavorite": false
@@ -32,7 +40,11 @@
     "goal": "Raw Strength",
     "description": "A slow and steady progression system based on monthly cycles using 90% of your 1RM.",
     "long_description": "One of the most popular strength programs in existence. It revolves around four main lifts (Squat, Deadlift, Bench, Press) and uses a wave loading progression over 3 or 4 weeks. It emphasizes starting light and progressing slowly.",
-    "equipment": ["Barbell", "Rack", "Plates"],
+    "equipment": [
+      "Barbell",
+      "Rack",
+      "Plates"
+    ],
     "dos": [
       "Do calculate your training max correctly (90% of true 1RM).",
       "Do focus on the PR set (the final set of the main lift).",
@@ -42,7 +54,11 @@
       "Don't increase the weight faster than the program prescribes.",
       "Don't skip the assistance work (but don't overdo it either)."
     ],
-    "tags": ["Powerlifting", "Strength", "Long-term"],
+    "tags": [
+      "Powerlifting",
+      "Strength",
+      "Long-term"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_531",
     "isFavorite": false
@@ -56,7 +72,11 @@
     "goal": "Strength",
     "description": "A weekly periodization model for those who have stalled on beginner linear progression.",
     "long_description": "Unlike beginner programs where you increase weight every workout, Madcow increases weight weekly. It utilizes 'ramping sets' where only the final set of 5 is the heavy top set.",
-    "equipment": ["Barbell", "Rack", "Bench"],
+    "equipment": [
+      "Barbell",
+      "Rack",
+      "Bench"
+    ],
     "dos": [
       "Do follow the spreadsheet/calculator strictly.",
       "Do treat the light day (Wednesday) seriously for recovery."
@@ -65,7 +85,11 @@
       "Don't underestimate the volume; it catches up quickly.",
       "Don't skip the deload weeks."
     ],
-    "tags": ["Strength", "Old School", "5x5"],
+    "tags": [
+      "Strength",
+      "Old School",
+      "5x5"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_madcow",
     "isFavorite": false
@@ -79,7 +103,11 @@
     "goal": "Strength / Muscle",
     "description": "Simple and effective. 5 sets of 5 reps on compound exercises.",
     "long_description": "Similar to Starting Strength but with more volume (5x5 instead of 3x5). It includes two workouts (A and B) alternated three times a week. Excellent for mastering technique through repetition.",
-    "equipment": ["Barbell", "Rack", "Bench"],
+    "equipment": [
+      "Barbell",
+      "Rack",
+      "Bench"
+    ],
     "dos": [
       "Do download the tracking app or use a logbook.",
       "Do start with an empty bar if you are a total beginner."
@@ -88,7 +116,10 @@
       "Don't ignore stalling; switch to 3x5 when 5x5 becomes impossible.",
       "Don't train two days in a row."
     ],
-    "tags": ["Volume", "Simplicity"],
+    "tags": [
+      "Volume",
+      "Simplicity"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_sl",
     "isFavorite": false
@@ -102,7 +133,12 @@
     "goal": "Powerlifting",
     "description": "Rotates exercises weekly to avoid accommodation. Combines Max Effort and Dynamic Effort days.",
     "long_description": "Developed by Louie Simmons, this method splits training into Max Effort (lifting 1RM-3RM) and Dynamic Effort (speed work). It relies heavily on exercise variation (using bands, chains, and different bars).",
-    "equipment": ["Barbell", "Bands", "Chains", "Specialty Bars"],
+    "equipment": [
+      "Barbell",
+      "Bands",
+      "Chains",
+      "Specialty Bars"
+    ],
     "dos": [
       "Do rotate your main lift every single week.",
       "Do focus on your weak points (triceps, glutes, lower back)."
@@ -111,7 +147,11 @@
       "Don't try this without a solid strength foundation.",
       "Don't skip the speed work; it builds explosive power."
     ],
-    "tags": ["Powerlifting", "Complex", "Elite"],
+    "tags": [
+      "Powerlifting",
+      "Complex",
+      "Elite"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_westside",
     "isFavorite": false
@@ -125,7 +165,9 @@
     "goal": "Hypertrophy & Strength",
     "description": "Power Hypertrophy Adaptive Training. Combines heavy lifting and bodybuilding work.",
     "long_description": "Dr. Layne Norton's program. The first two days of the week are split into Upper and Lower Power days. The last three days are bodybuilding 'hypertrophy' days with higher reps and shorter rest periods.",
-    "equipment": ["Full Gym Access"],
+    "equipment": [
+      "Full Gym Access"
+    ],
     "dos": [
       "Do keep the power days heavy and the hypertrophy days explosive.",
       "Do manage fatigue; this is a high-volume program."
@@ -134,7 +176,11 @@
       "Don't lift heavy on hypertrophy days; focus on the 'pump'.",
       "Don't skip the rest days."
     ],
-    "tags": ["Bodybuilding", "Hybrid", "Aesthetics"],
+    "tags": [
+      "Bodybuilding",
+      "Hybrid",
+      "Aesthetics"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_phat",
     "isFavorite": false
@@ -148,7 +194,9 @@
     "goal": "Aesthetics / Balance",
     "description": "Splits movements into pushing, pulling, and leg exercises. Highly adaptable.",
     "long_description": "Push days target chest, shoulders, and triceps. Pull days target back and biceps. Legs target quads, hams, and calves. Can be run 3 days a week (low frequency) or 6 days (high frequency).",
-    "equipment": ["Full Gym Access"],
+    "equipment": [
+      "Full Gym Access"
+    ],
     "dos": [
       "Do balance compound lifts with isolation movements.",
       "Do organize exercises from most demanding to least demanding."
@@ -157,7 +205,11 @@
       "Don't neglect the rear delts on Pull day.",
       "Don't skip Leg day."
     ],
-    "tags": ["Split", "Popular", "Flexible"],
+    "tags": [
+      "Split",
+      "Popular",
+      "Flexible"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_ppl",
     "isFavorite": false
@@ -171,7 +223,9 @@
     "goal": "General Fitness / Strength",
     "description": "Divides the body into Torso and Legs. Great for recovery and frequency.",
     "long_description": "Typically run as: Upper A, Lower A, Rest, Upper B, Lower B. This allows you to hit every muscle group twice a week with ample recovery time in between.",
-    "equipment": ["Full Gym Access"],
+    "equipment": [
+      "Full Gym Access"
+    ],
     "dos": [
       "Do include both vertical and horizontal pushing/pulling.",
       "Do vary the rep ranges between the A and B days."
@@ -180,7 +234,11 @@
       "Don't perform two Upper days in a row.",
       "Don't forget core work on Lower days."
     ],
-    "tags": ["Split", "Recovery", "Standard"],
+    "tags": [
+      "Split",
+      "Recovery",
+      "Standard"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_ul",
     "isFavorite": false
@@ -194,7 +252,10 @@
     "goal": "Hypertrophy",
     "description": "10 sets of 10 reps. A brutal method for maximizing muscle size.",
     "long_description": "Also known as the '10 sets method'. You select a weight you can do for 20 reps (approx 60% 1RM) and perform 10 sets of 10 reps with strict rest intervals (60-90s).",
-    "equipment": ["Barbell", "Dumbbells"],
+    "equipment": [
+      "Barbell",
+      "Dumbbells"
+    ],
     "dos": [
       "Do strict timing on your rest periods.",
       "Do expect soreness like you've never felt before."
@@ -203,7 +264,11 @@
       "Don't increase the weight until you complete 10x10 strictly.",
       "Don't use this method for deadlifts or highly technical lifts."
     ],
-    "tags": ["Hypertrophy", "High Volume", "Shock"],
+    "tags": [
+      "Hypertrophy",
+      "High Volume",
+      "Shock"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_gvt",
     "isFavorite": false
@@ -217,7 +282,9 @@
     "goal": "Peaking Strength",
     "description": "A very intense Russian squat cycle designed to add significant weight to your max.",
     "long_description": "Split into phases (Base, Switching, Intense). It requires squatting 4 times a week at high percentages. High risk of injury but high reward.",
-    "equipment": ["Squat Rack"],
+    "equipment": [
+      "Squat Rack"
+    ],
     "dos": [
       "Do eat and sleep significantly more than usual.",
       "Do stretch and foam roll daily."
@@ -226,7 +293,11 @@
       "Don't do this if you have any existing injuries.",
       "Don't perform other heavy leg work (deadlifts) during the Base cycle."
     ],
-    "tags": ["Squat", "Peaking", "Russian"],
+    "tags": [
+      "Squat",
+      "Peaking",
+      "Russian"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_smolov",
     "isFavorite": false
@@ -240,7 +311,10 @@
     "goal": "Leg Strength",
     "description": "The king of lower body exercises. Targets quads, glutes, and core.",
     "long_description": "A compound movement where the weight is placed on the upper back/traps. The athlete squats down until the hip crease is below the knee (parallel) and returns to standing.",
-    "equipment": ["Barbell", "Rack"],
+    "equipment": [
+      "Barbell",
+      "Rack"
+    ],
     "dos": [
       "Do keep your chest up and core braced.",
       "Do drive your knees out to track over your toes."
@@ -249,7 +323,11 @@
       "Don't let your knees cave inward.",
       "Don't lift your heels off the ground."
     ],
-    "tags": ["Compound", "Legs", "Big 3"],
+    "tags": [
+      "Compound",
+      "Legs",
+      "Big 3"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_squat",
     "isFavorite": false
@@ -263,7 +341,10 @@
     "goal": "Posterior Chain",
     "description": "Lifting a dead weight from the floor. Builds total body strength.",
     "long_description": "Engages the hamstrings, glutes, lower back, lats, and grip. It is a pure test of strength requiring lifting the bar from the floor to a lockout position.",
-    "equipment": ["Barbell", "Plates"],
+    "equipment": [
+      "Barbell",
+      "Plates"
+    ],
     "dos": [
       "Do keep the bar close to your shins.",
       "Do engage your lats before pulling."
@@ -272,7 +353,11 @@
       "Don't round your lower back (cat back).",
       "Don't hyperextend your back at the top."
     ],
-    "tags": ["Compound", "Back", "Big 3"],
+    "tags": [
+      "Compound",
+      "Back",
+      "Big 3"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_deadlift",
     "isFavorite": false
@@ -286,7 +371,10 @@
     "goal": "Upper Body Strength",
     "description": "The primary upper body pushing exercise. Targets chest, shoulders, and triceps.",
     "long_description": "Lying on a bench, the athlete un-racks the weight, lowers it to the chest, and presses it back up. It allows for the heaviest loading of the upper body musculature.",
-    "equipment": ["Bench", "Barbell"],
+    "equipment": [
+      "Bench",
+      "Barbell"
+    ],
     "dos": [
       "Do keep your feet planted firmly on the floor.",
       "Do retract your shoulder blades (pinch them together)."
@@ -295,7 +383,11 @@
       "Don't flare your elbows out 90 degrees.",
       "Don't bounce the bar off your chest."
     ],
-    "tags": ["Compound", "Push", "Big 3"],
+    "tags": [
+      "Compound",
+      "Push",
+      "Big 3"
+    ],
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_bench",
     "isFavorite": false

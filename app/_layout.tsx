@@ -12,6 +12,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { TrenaColors } from '@/constants/theme';
@@ -64,23 +65,25 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={navTheme}>
-        <SplashGate fontsReady={fontsReady} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: TrenaColors.background },
-            animation: 'none',
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="get-started" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="home" />
-          <Stack.Screen name="auth/callback" />
-        </Stack>
-        <StatusBar style="light" />
-      </ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider value={navTheme}>
+          <SplashGate fontsReady={fontsReady} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: TrenaColors.background },
+              animation: 'none',
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="get-started" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="home" />
+            <Stack.Screen name="auth/callback" />
+          </Stack>
+          <StatusBar style="light" />
+        </ThemeProvider>
+      </GestureHandlerRootView>
     </AuthProvider>
   );
 }
