@@ -375,7 +375,22 @@ export async function updateSessionSnapshot(args: { id: string; snapshot: Workou
   return data as WorkoutSessionRow;
 }
 
-export async function finishSessionAndAdvanceMethods(args: { id: string; snapshot: WorkoutSessionSnapshotV1 }) {
+/**
+ * Check if a workout snapshot is empty (no exercises and no meaningful notes).
+ */
+function isSnapshotEmpty(snapshot: WorkoutSessionSnapshotV1): boolean {
+  const hasExercises = snapshot.exercises && snapshot.exercises.length > 0;
+  const hasNotes = snapshot.notes && snapshot.notes.trim().length > 0;
+  return !hasExercises && !hasNotes;
+}
+
+export async function finishSessionAndAdvanceMethods(args: { id: string; snapshot: WorkoutSessionSnapshotV1 }): Promise<WorkoutSessionRow | null> {
+  // Check if the workout is empty - if so, delete it instead of saving
+  if (isSnapshotEmpty(args.snapshot)) {
+    await deleteSession(args.id);
+    return null;
+  }
+
   // 1) Save the finished session.
   const { data: session, error: sessErr } = await supabase
     .from('workout_sessions')

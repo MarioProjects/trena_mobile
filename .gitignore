@@ -45,3 +45,7 @@ app-example
 
 # Environment variables
 .env
+
+# OAuth private keys
+trena-mobile-client-secret-oauth-android.json
+trena-mobile-client-secret-oauth-web.json

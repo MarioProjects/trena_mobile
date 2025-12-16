@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ExercisePicker } from '@/components/ExercisePicker';
 import { CalendarIcon, CheckIcon, DragHandleIcon, DuplicateIcon, EditIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, TrashIcon, XIcon } from '@/components/icons';
-import { finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes } from '@/lib/workouts/repo';
+import { deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes } from '@/lib/workouts/repo';
 import type {
   ExerciseRef,
   PerformedSet,
@@ -117,6 +117,8 @@ export default function SessionScreen() {
   const savingRef = React.useRef(false);
   const pendingRef = React.useRef<WorkoutSessionSnapshotV1 | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didFinishRef = React.useRef(false); // Track if workout was properly finished
+  const snapshotRef = React.useRef<WorkoutSessionSnapshotV1>(snapshot); // For cleanup access
 
   const showToast = React.useCallback((message: string) => {
     setToast(message);
@@ -199,6 +201,32 @@ export default function SessionScreen() {
   React.useEffect(() => {
     scheduleAutosave(snapshot);
   }, [scheduleAutosave, snapshot]);
+
+  // Keep snapshotRef in sync for cleanup access
+  React.useEffect(() => {
+    snapshotRef.current = snapshot;
+  }, [snapshot]);
+
+  // Cleanup: delete empty sessions when user navigates away without finishing
+  React.useEffect(() => {
+    return () => {
+      // Only cleanup if user didn't finish properly
+      if (didFinishRef.current) return;
+      if (!sessionId) return;
+
+      const currentSnapshot = snapshotRef.current;
+      const hasExercises = currentSnapshot.exercises && currentSnapshot.exercises.length > 0;
+      const hasNotes = currentSnapshot.notes && currentSnapshot.notes.trim().length > 0;
+      const isEmpty = !hasExercises && !hasNotes;
+
+      if (isEmpty) {
+        // Fire and forget - delete the empty session
+        deleteSession(sessionId).catch(() => {
+          // Silently ignore errors during cleanup
+        });
+      }
+    };
+  }, [sessionId]);
 
   const updateWorkoutNotes = (text: string) => {
     setSnapshot((cur) => ({ ...cur, notes: text }));
@@ -392,13 +420,21 @@ export default function SessionScreen() {
   const onFinish = async () => {
     if (!sessionId) return;
     if (isFinishing) return;
+    didFinishRef.current = true; // Mark as properly finished - skip cleanup on unmount
     setIsFinishing(true);
     try {
       const finished = await finishSessionAndAdvanceMethods({ id: sessionId, snapshot });
+      if (finished === null) {
+        // Empty workout was discarded
+        Alert.alert('Workout discarded', 'Empty workouts are not saved.');
+        router.replace('/activities' as any);
+        return;
+      }
       setRow(finished);
       Alert.alert('Workout saved', 'Nice work.');
       router.replace('/activities' as any);
     } catch (e: any) {
+      didFinishRef.current = false; // Reset if finish failed
       Alert.alert('Finish failed', e?.message ?? 'Unknown error');
     } finally {
       setIsFinishing(false);
