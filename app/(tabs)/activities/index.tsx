@@ -4,7 +4,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { DuplicateIcon, MoreHorizIcon, TrashIcon } from '@/components/icons';
+import { DuplicateIcon, MoreHorizIcon, PlusIcon, TrashIcon } from '@/components/icons';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions } from '@/lib/workouts/repo';
 import type { WorkoutSessionRow } from '@/lib/workouts/types';
@@ -87,109 +87,113 @@ export default function ActivitiesIndexScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Activities</Text>
+      <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+          <Text style={styles.title}>Activities</Text>
 
-        <View style={styles.ctaRow}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Recent workouts</Text>
+            {isLoading ? (
+              <WorkoutsSkeleton />
+            ) : sessions.length === 0 ? (
+              <Text style={styles.body}>No workouts yet. Start your first session.</Text>
+            ) : null}
+
+            {!isLoading && sessions.length > 0 && (
+              <View style={styles.list}>
+                {sessions.map((s) => {
+                  const inProgress = !s.ended_at;
+                  const exCount = s.snapshot?.exercises?.length ?? 0;
+                  const isBusy = deletingId === s.id || duplicatingId === s.id;
+                  return (
+                    <View key={s.id} style={styles.card}>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={isBusy}
+                        onPress={() => router.push(`/activities/session/${s.id}` as any)}
+                        style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
+                      >
+                        <View style={{ flex: 1, gap: 6 }}>
+                          <View style={styles.cardHeaderRow}>
+                            <Text style={styles.cardTitle} numberOfLines={1}>
+                              {s.title}
+                            </Text>
+                            <View style={[styles.badge, inProgress ? styles.badgeInProgress : styles.badgeDone]}>
+                              <Text style={styles.badgeText}>{inProgress ? 'IN PROGRESS' : 'DONE'}</Text>
+                            </View>
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel="Options"
+                              disabled={isBusy}
+                              onPress={() => setMenuTargetId(s.id)}
+                              hitSlop={10}
+                              style={({ pressed }) => [styles.iconButton, pressed && !isBusy && { opacity: 0.85 }]}
+                            >
+                              <MoreHorizIcon size={24} color={TrenaColors.text} />
+                            </Pressable>
+                          </View>
+                          <Text
+                            style={styles.cardMeta}
+                          >{`${formatDate(s.started_at)} • ${exCount} exercise${exCount === 1 ? '' : 's'}`}</Text>
+                        </View>
+                      </Pressable>
+
+                      {isBusy ? (
+                        <View style={styles.cardOverlay} pointerEvents="none">
+                          <ActivityIndicator color={TrenaColors.primary} />
+                        </View>
+                      ) : null}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push('/activities/start' as any)}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
           >
+            <PlusIcon size={20} color="#141B34" strokeWidth={1.5} />
             <Text style={styles.primaryButtonText}>Start workout</Text>
           </Pressable>
         </View>
+      </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent workouts</Text>
-          {isLoading ? (
-            <WorkoutsSkeleton />
-          ) : sessions.length === 0 ? (
-            <Text style={styles.body}>No workouts yet. Start your first session.</Text>
-          ) : null}
+      <Modal visible={!!menuTargetId} transparent animationType="fade" onRequestClose={() => setMenuTargetId(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setMenuTargetId(null)}>
+          <View style={styles.menuSheet} onStartShouldSetResponder={() => true}>
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuTargetId && onDuplicate(menuTargetId)}
+            >
+              <DuplicateIcon size={20} color={TrenaColors.text} />
+              <Text style={styles.menuItemText}>Duplicate Workout</Text>
+            </Pressable>
 
-          {!isLoading && sessions.length > 0 && (
-            <View style={styles.list}>
-              {sessions.map((s) => {
-                const inProgress = !s.ended_at;
-                const exCount = s.snapshot?.exercises?.length ?? 0;
-                const isBusy = deletingId === s.id || duplicatingId === s.id;
-                return (
-                  <View key={s.id} style={styles.card}>
-                    <Pressable
-                      accessibilityRole="button"
-                      disabled={isBusy}
-                      onPress={() => router.push(`/activities/session/${s.id}` as any)}
-                      style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
-                    >
-                      <View style={{ flex: 1, gap: 6 }}>
-                        <View style={styles.cardHeaderRow}>
-                          <Text style={styles.cardTitle} numberOfLines={1}>
-                            {s.title}
-                          </Text>
-                          <View style={[styles.badge, inProgress ? styles.badgeInProgress : styles.badgeDone]}>
-                            <Text style={styles.badgeText}>{inProgress ? 'IN PROGRESS' : 'DONE'}</Text>
-                          </View>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel="Options"
-                            disabled={isBusy}
-                            onPress={() => setMenuTargetId(s.id)}
-                            hitSlop={10}
-                            style={({ pressed }) => [styles.iconButton, pressed && !isBusy && { opacity: 0.85 }]}
-                          >
-                            <MoreHorizIcon size={24} color={TrenaColors.text} />
-                          </Pressable>
-                        </View>
-                        <Text style={styles.cardMeta}>{`${formatDate(s.started_at)} • ${exCount} exercise${exCount === 1 ? '' : 's'
-                          }`}</Text>
-                      </View>
-                    </Pressable>
+            <View style={styles.menuSeparator} />
 
-                    {isBusy ? (
-                      <View style={styles.cardOverlay} pointerEvents="none">
-                        <ActivityIndicator color={TrenaColors.primary} />
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        <Modal visible={!!menuTargetId} transparent animationType="fade" onRequestClose={() => setMenuTargetId(null)}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setMenuTargetId(null)}>
-            <View style={styles.menuSheet} onStartShouldSetResponder={() => true}>
-              <Pressable
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
-                onPress={() => menuTargetId && onDuplicate(menuTargetId)}
-              >
-                <DuplicateIcon size={20} color={TrenaColors.text} />
-                <Text style={styles.menuItemText}>Duplicate Workout</Text>
-              </Pressable>
-
-              <View style={styles.menuSeparator} />
-
-              <Pressable
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
-                onPress={() => menuTargetId && onDelete(menuTargetId)}
-              >
-                <TrashIcon size={20} color={TrenaColors.accentRed} />
-                <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Remove Workout</Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Modal>
-
-        {toast ? (
-          <View style={styles.toast} pointerEvents="none">
-            <Text style={styles.toastText}>{toast}</Text>
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuTargetId && onDelete(menuTargetId)}
+            >
+              <TrashIcon size={20} color={TrenaColors.accentRed} />
+              <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Remove Workout</Text>
+            </Pressable>
           </View>
-        ) : null}
-      </ScrollView>
+        </Pressable>
+      </Modal>
+
+      {toast ? (
+        <View style={styles.toast} pointerEvents="none">
+          <Text style={styles.toastText}>{toast}</Text>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -198,6 +202,9 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: TrenaColors.background,
+  },
+  content: {
+    flex: 1,
   },
   container: {
     paddingHorizontal: 20,
@@ -237,12 +244,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    columnGap: 8,
     backgroundColor: TrenaColors.primary,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.25)',
-    minWidth: 140,
+    width: '100%',
   },
   primaryButtonText: {
     color: '#000',
@@ -356,6 +365,12 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 4,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: TrenaColors.background,
   },
   modalBackdrop: {
     flex: 1,

@@ -13,6 +13,7 @@ export { LearnIcon } from './LearnIcon';
 export { MethodsIcon } from './MethodsIcon';
 export { MoreHorizIcon } from './MoreHorizIcon';
 export { NotebookIcon } from './NotebookIcon';
+export { PlusIcon } from './PlusIcon';
 export { ProfileIcon } from './ProfileIcon';
 export { SearchIcon } from './SearchIcon';
 export { SkipStatusIcon } from './SkipStatusIcon';

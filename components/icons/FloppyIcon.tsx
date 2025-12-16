@@ -22,3 +22,4 @@ export function FloppyIcon({ size = 24, color = '#141B34', strokeWidth = 1.5 }: 
     </Svg>
   );
 }
+
