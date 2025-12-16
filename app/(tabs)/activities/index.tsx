@@ -1,13 +1,15 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { router, useFocusEffect } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DuplicateIcon, MoreHorizIcon, PlusIcon, TrashIcon } from '@/components/icons';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions } from '@/lib/workouts/repo';
 import type { WorkoutSessionRow } from '@/lib/workouts/types';
+
+const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.png');
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -96,7 +98,12 @@ export default function ActivitiesIndexScreen() {
             {isLoading ? (
               <WorkoutsSkeleton />
             ) : sessions.length === 0 ? (
-              <Text style={styles.body}>No workouts yet. Start your first session.</Text>
+              <>
+                <Text style={styles.body}>No workouts yet. Start your first session to see it here.</Text>
+                <View style={styles.emptyIllustrationWrapper}>
+                  <Image source={DrinkWaterIllustration} style={styles.emptyImage} resizeMode="contain" />
+                </View>
+              </>
             ) : null}
 
             {!isLoading && sessions.length > 0 && (
@@ -210,6 +217,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 24,
     gap: 14,
+    flexGrow: 1,
   },
   title: {
     fontSize: 34,
@@ -221,6 +229,7 @@ const styles = StyleSheet.create({
   section: {
     gap: 10,
     paddingTop: 6,
+    flex: 1,
   },
   sectionTitle: {
     fontFamily: Fonts.bold,
@@ -234,6 +243,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 20,
+  },
+  emptyState: {
+    // kept for compatibility if reused elsewhere
+  },
+  emptyImage: {
+    width: '100%',
+    //maxWidth: '80%',
+    height: '80%',
+  },
+  emptyIllustrationWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 24,
   },
   ctaRow: {
     flexDirection: 'row',
