@@ -9,7 +9,7 @@ import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions } from '@/lib/workouts/repo';
 import type { WorkoutSessionRow } from '@/lib/workouts/types';
 
-const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.png');
+const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.webp');
 
 function formatDate(iso: string) {
   const d = new Date(iso);
