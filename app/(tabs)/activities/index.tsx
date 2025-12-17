@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   emptyImage: {
     width: '100%',
     //maxWidth: '80%',
-    height: '80%',
+    height: '70%',
   },
   emptyIllustrationWrapper: {
     flex: 1,

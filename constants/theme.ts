@@ -10,22 +10,20 @@ export const TrenaColors = {
   secondary: 'rgb(59, 130, 246)',
   text: 'rgb(236, 235, 228)',
   // Fosfi accent colors
-  accentPurple: 'rgb(177 92 255)',
-  accentRed: 'rgb(255 67 88)',
-  accentBlue: 'rgb(59 130 246)',
+  accentPurple: 'rgb(177, 92, 255)',
+  accentRed: 'rgb(255, 67, 88)',
 } as const;
 
 /* Inital vibrant Dark Theme
 export const TrenaColors = {
   background: 'rgb(20, 20, 17)',
   surface: 'rgb(197, 195, 184)',
-  primary: 'rgb(213 255 93)',
-  secondary: 'rgb(59 130 246)',
+  primary: 'rgb(213, 255, 93)',
+  secondary: 'rgb(59, 130, 246)',
   text: 'rgb(236, 235, 228)',
   // Fosfi accent colors
-  accentPurple: 'rgb(177 92 255)',
-  accentRed: 'rgb(255 67 88)',
-  accentBlue: 'rgb(59 130 246)',
+  accentPurple: 'rgb(177, 92, 255)',
+  accentRed: 'rgb(255, 67, 88)',
 } as const;
  */
 

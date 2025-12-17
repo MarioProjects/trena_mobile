@@ -1,30 +1,16 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { router } from 'expo-router';
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { listTemplates, startQuickSession, startSessionFromTemplate } from '@/lib/workouts/repo';
-import type { WorkoutTemplate } from '@/lib/workouts/types';
+import { startQuickSession } from '@/lib/workouts/repo';
 
 export default function StartWorkoutScreen() {
-  const [templates, setTemplates] = React.useState<WorkoutTemplate[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
   const [isStarting, setIsStarting] = React.useState(false);
 
-  const load = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const t = await listTemplates();
-      setTemplates(t);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    load();
-  }, [load]);
+  const NotebookManIllustration = require('../../../assets/images/illustrations/activities/notebook_man.webp');
+  const RobotIllustration = require('../../../assets/images/illustrations/activities/robot_ai.webp');
 
   const onQuickWorkout = async () => {
     if (isStarting) return;
@@ -39,124 +25,182 @@ export default function StartWorkoutScreen() {
     }
   };
 
-  const onStartTemplate = async (templateId: string) => {
-    if (isStarting) return;
-    setIsStarting(true);
-    try {
-      const session = await startSessionFromTemplate({ templateId });
-      router.replace(`/activities/session/${session.id}` as any);
-    } catch (e: any) {
-      Alert.alert('Could not start workout', e?.message ?? 'Unknown error');
-    } finally {
-      setIsStarting(false);
-    }
+  const onAIWorkout = () => {
+    Alert.alert('AI workout', 'Coming soon.');
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.heroCard}>
-          <Text style={styles.heroTitle}>Start a workout</Text>
-          <Text style={styles.heroBody}>Quick workout for free logging, or pick a routine.</Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={onQuickWorkout}
-            disabled={isStarting}
-            style={({ pressed }) => [styles.primaryButton, (pressed || isStarting) && styles.pressed]}
-          >
-            <Text style={styles.primaryButtonText}>{isStarting ? 'Starting…' : 'Quick workout'}</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Your Routines</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push('/activities/templates' as any)}
-              style={({ pressed }) => [styles.linkButton, pressed && styles.pressed]}
-            >
-              <Text style={styles.linkButtonText}>Manage</Text>
-            </Pressable>
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
+      <View style={styles.container}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Fast Track"
+          onPress={onQuickWorkout}
+          disabled={isStarting}
+          style={({ pressed }) => [styles.bigCard, styles.freeCard, (pressed || isStarting) && styles.pressed]}
+        >
+          <View style={styles.cardContentRow}>
+            <View style={styles.textCol}>
+              <Text style={styles.freeTitle}>Fast Track</Text>
+              <Text style={styles.freeSubtitle}>Quick workout for free logging</Text>
+            </View>
+            <View style={[styles.imageCol, styles.imageColRight]}>
+              <Image source={NotebookManIllustration} style={[styles.illustration, styles.illustrationRight]} resizeMode="contain" />
+            </View>
           </View>
+        </Pressable>
 
-          {isLoading ? <Text style={styles.body}>Loading…</Text> : null}
-          {!isLoading && templates.length === 0 ? (
-            <Text style={styles.body}>No routines yet. Create one in Manage.</Text>
-          ) : null}
-
-          <View style={styles.list}>
-            {templates.map((t) => (
-              <Pressable
-                key={t.id}
-                accessibilityRole="button"
-                onPress={() => onStartTemplate(t.id)}
-                disabled={isStarting}
-                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Template"
+          onPress={() => router.push('/activities/templates' as any)}
+          style={({ pressed }) => [styles.bigCard, styles.templateCard, pressed && styles.pressed]}
+        >
+          <View style={[styles.cardContentRow, styles.templateRow]}>
+            <View style={[styles.imageCol, styles.imageColLeft, styles.templateImageCol]}>
+              <Image
+                source={NotebookManIllustration}
+                style={[styles.illustration, styles.illustrationLeft, styles.illustrationFlipped]}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={[styles.textCol, styles.textColRight, styles.templateTextCol]}>
+              <Text
+                style={styles.templateTitle}
+                numberOfLines={1}
+                ellipsizeMode="tail"
               >
-                <View style={{ flex: 1, gap: 6 }}>
-                  <Text style={styles.cardTitle} numberOfLines={1}>
-                    {t.name}
-                  </Text>
-                  <Text style={styles.cardMeta}>{`${t.items.length} item${t.items.length === 1 ? '' : 's'}`}</Text>
-                </View>
-              </Pressable>
-            ))}
+                Template
+              </Text>
+              <Text style={styles.templateSubtitle}>Use your predefined workout template</Text>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="AI Plan"
+          onPress={onAIWorkout}
+          style={({ pressed }) => [styles.bigCard, styles.aiCard, pressed && styles.pressed]}
+        >
+          <View style={styles.cardContentRow}>
+            <View style={styles.textCol}>
+              <Text style={styles.aiTitle}>AI Plan</Text>
+              <Text style={styles.aiSubtitle}>Generate a workout from your goal</Text>
+            </View>
+            <View style={[styles.imageCol, styles.imageColRight]}>
+              <Image
+                source={RobotIllustration}
+                style={[styles.illustration, styles.illustrationRight, { opacity: 0.85 }]}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: TrenaColors.background },
-  container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
-  heroCard: {
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
-    borderRadius: 18,
-    padding: 16,
-    gap: 10,
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 0, paddingBottom: 16, gap: 12 },
+
+  bigCard: {
+    flex: 1,
+    borderRadius: 22,
+    overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
   },
-  heroTitle: { color: TrenaColors.text, fontSize: 22, fontFamily: Fonts.extraBold, letterSpacing: -0.2 },
-  heroBody: { color: 'rgba(236, 235, 228, 0.8)', fontSize: 14, lineHeight: 20, fontFamily: Fonts.regular },
-  primaryButton: {
-    marginTop: 4,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
+  pressed: { transform: [{ scale: 0.99 }], opacity: 0.96 },
+
+  cardContentRow: {
+    flex: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  templateRow: {
+    paddingHorizontal: 14,
+  },
+  textCol: {
+    flex: 2,
+    gap: 10,
+    paddingRight: 14,
+    justifyContent: 'center',
+  },
+  textColRight: {
+    paddingRight: 0,
+    paddingLeft: 14,
+    justifyContent: 'center',
+    alignItems: 'stretch',
+  },
+  imageCol: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'flex-end',
+  },
+  templateImageCol: {
+    flex: 0.85,
+  },
+  templateTextCol: {
+    flex: 2.15,
+    paddingLeft: 10,
+  },
+  imageColRight: {
+    alignItems: 'flex-end',
+  },
+  imageColLeft: {
+    alignItems: 'flex-start',
+  },
+
+  freeCard: {
     backgroundColor: TrenaColors.primary,
-    borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
-  primaryButtonText: { color: '#000', fontSize: 16, fontFamily: Fonts.extraBold },
-  pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
-  section: { gap: 10, paddingTop: 4 },
-  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: TrenaColors.text },
-  linkButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+  freeTitle: { color: '#000', fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  freeSubtitle: { color: TrenaColors.background, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium, width: '80%' },
+
+  templateCard: {
+    backgroundColor: TrenaColors.secondary,
   },
-  linkButtonText: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.9)' },
-  body: { color: 'rgba(236, 235, 228, 0.8)', fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20 },
-  list: { gap: 12 },
-  card: {
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    padding: 12,
-    borderRadius: 14,
-    flexDirection: 'row',
-    gap: 12,
+  templateTitle: {
+    color: '#fff',
+    fontSize: 32,
+    lineHeight: 30,
+    fontFamily: Fonts.extraBold,
+    letterSpacing: -0.3,
+    textAlign: 'right',
   },
-  cardPressed: { opacity: 0.92 },
-  cardTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: TrenaColors.text },
-  cardMeta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: 'rgba(236, 235, 228, 0.75)' },
+  templateSubtitle: {
+    color: TrenaColors.text,
+    fontSize: 16,
+    lineHeight: 22,
+    fontFamily: Fonts.medium,
+    textAlign: 'right',
+  },
+
+  aiCard: {
+    backgroundColor: TrenaColors.accentPurple,
+  },
+  aiTitle: { color: '#fff', fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  aiSubtitle: { color: TrenaColors.text, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
+
+  illustration: {
+    position: 'absolute',
+    bottom: -20,
+    width: 190,
+    height: 175,
+    //opacity: 0.95,
+  },
+  illustrationRight: {
+    right: -32,
+  },
+  illustrationLeft: {
+    left: -32,
+  },
+  illustrationFlipped: {
+    transform: [{ scaleX: -1 }],
+  },
 });
