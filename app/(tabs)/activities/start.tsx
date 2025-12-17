@@ -9,6 +9,7 @@ import { startQuickSession } from '@/lib/workouts/repo';
 export default function StartWorkoutScreen() {
   const [isStarting, setIsStarting] = React.useState(false);
 
+  const DumbellManIllustration = require('../../../assets/images/illustrations/activities/dumbell.webp');
   const NotebookManIllustration = require('../../../assets/images/illustrations/activities/notebook_man.webp');
   const RobotIllustration = require('../../../assets/images/illustrations/activities/robot_ai.webp');
 
@@ -45,7 +46,7 @@ export default function StartWorkoutScreen() {
               <Text style={styles.freeSubtitle}>Quick workout for free logging</Text>
             </View>
             <View style={[styles.imageCol, styles.imageColRight]}>
-              <Image source={NotebookManIllustration} style={[styles.illustration, styles.illustrationRight]} resizeMode="contain" />
+              <Image source={DumbellManIllustration} style={[styles.illustration, styles.illustrationRight]} resizeMode="contain" />
             </View>
           </View>
         </Pressable>
@@ -191,14 +192,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -20,
     width: 190,
-    height: 175,
+    height: 185,
     //opacity: 0.95,
   },
   illustrationRight: {
-    right: -32,
+    right: -48,
   },
   illustrationLeft: {
-    left: -32,
+    left: -48,
   },
   illustrationFlipped: {
     transform: [{ scaleX: -1 }],
