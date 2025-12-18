@@ -1,5 +1,6 @@
 export { ActivitiesIcon } from './ActivitiesIcon';
 export { CalendarIcon } from './CalendarIcon';
+export { CharacterIcon } from './CharacterIcon';
 export { CheckIcon } from './CheckIcon';
 export { ChevronLeftIcon } from './ChevronLeftIcon';
 export { DragHandleIcon } from './DragHandleIcon';

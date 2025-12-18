@@ -1,12 +1,12 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { router, useFocusEffect } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { DuplicateIcon, MoreHorizIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { CharacterIcon, DuplicateIcon, MoreHorizIcon, PlusIcon, TrashIcon, XIcon } from '@/components/icons';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
-import { deleteSession, duplicateSession, listSessions } from '@/lib/workouts/repo';
+import { deleteSession, duplicateSession, listSessions, updateSessionTitle } from '@/lib/workouts/repo';
 import type { WorkoutSessionRow } from '@/lib/workouts/types';
 
 const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.webp');
@@ -57,6 +57,9 @@ export default function ActivitiesIndexScreen() {
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = React.useState<string | null>(null);
   const [menuTargetId, setMenuTargetId] = React.useState<string | null>(null);
+  const [renamingId, setRenamingId] = React.useState<string | null>(null);
+  const [renameValue, setRenameValue] = React.useState('');
+  const [isSavingRename, setIsSavingRename] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
 
   const hasLoaded = React.useRef(false);
@@ -119,6 +122,38 @@ export default function ActivitiesIndexScreen() {
       showToast(e?.message ?? 'Duplicate failed');
     } finally {
       setDuplicatingId(null);
+    }
+  };
+
+  const openRename = (id: string) => {
+    const s = sessions.find((x) => x.id === id);
+    setMenuTargetId(null);
+    setRenamingId(id);
+    setRenameValue(s?.title ?? '');
+  };
+
+  const closeRename = () => {
+    setRenamingId(null);
+    setRenameValue('');
+    setIsSavingRename(false);
+  };
+
+  const onSaveRename = async () => {
+    if (!renamingId) return;
+    const nextTitle = renameValue.trim();
+    if (!nextTitle) {
+      showToast('Workout name cannot be empty');
+      return;
+    }
+    try {
+      setIsSavingRename(true);
+      const updated = await updateSessionTitle({ id: renamingId, title: nextTitle });
+      setSessions((cur) => cur.map((x) => (x.id === updated.id ? { ...x, title: updated.title } : x)));
+      showToast('Workout renamed');
+      closeRename();
+    } catch (e: any) {
+      showToast(e?.message ?? 'Rename failed');
+      setIsSavingRename(false);
     }
   };
 
@@ -241,6 +276,17 @@ export default function ActivitiesIndexScreen() {
             <Pressable
               accessibilityRole="button"
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuTargetId && openRename(menuTargetId)}
+            >
+              <CharacterIcon size={20} color={TrenaColors.text} />
+              <Text style={styles.menuItemText}>Rename Workout</Text>
+            </Pressable>
+
+            <View style={styles.menuSeparator} />
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuTargetId && onDuplicate(menuTargetId)}
             >
               <DuplicateIcon size={20} color={TrenaColors.text} />
@@ -257,6 +303,56 @@ export default function ActivitiesIndexScreen() {
               <TrashIcon size={20} color={TrenaColors.accentRed} />
               <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Remove Workout</Text>
             </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={!!renamingId} transparent animationType="fade" onRequestClose={closeRename}>
+        <Pressable style={styles.modalBackdrop} onPress={closeRename}>
+          <View style={styles.renameCard} onStartShouldSetResponder={() => true}>
+            <View style={styles.renameHeader}>
+              <Text style={styles.renameTitle}>Rename workout</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                onPress={closeRename}
+                hitSlop={10}
+                style={({ pressed }) => [styles.renameClose, pressed && { opacity: 0.8 }]}
+              >
+                <XIcon size={18} color={TrenaColors.text} />
+              </Pressable>
+            </View>
+
+            <TextInput
+              value={renameValue}
+              onChangeText={setRenameValue}
+              placeholder="Workout name"
+              placeholderTextColor="rgba(236, 235, 228, 0.5)"
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={onSaveRename}
+              editable={!isSavingRename}
+              style={styles.renameInput}
+            />
+
+            <View style={styles.renameActionsRow}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={closeRename}
+                disabled={isSavingRename}
+                style={({ pressed }) => [styles.secondaryButton, pressed && !isSavingRename && styles.pressed, { flex: 1 }]}
+              >
+                <Text style={styles.secondaryButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={onSaveRename}
+                disabled={isSavingRename}
+                style={({ pressed }) => [styles.primaryButton, (pressed || isSavingRename) && styles.pressed, { flex: 1 }]}
+              >
+                <Text style={styles.primaryButtonText}>{isSavingRename ? 'Saving…' : 'Save'}</Text>
+              </Pressable>
+            </View>
           </View>
         </Pressable>
       </Modal>
@@ -494,5 +590,45 @@ const styles = StyleSheet.create({
   menuSeparator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: 'rgba(236, 235, 228, 0.1)',
+  },
+
+  renameCard: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    backgroundColor: '#1C1C1E',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    padding: 16,
+    gap: 12,
+  },
+  renameHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  renameTitle: {
+    fontFamily: Fonts.extraBold,
+    fontSize: 16,
+    color: TrenaColors.text,
+  },
+  renameClose: {
+    padding: 6,
+  },
+  renameInput: {
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+    fontSize: 14,
+  },
+  renameActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
 });

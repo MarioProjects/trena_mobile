@@ -9,9 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
-import { CalendarIcon, CheckIcon, DragHandleIcon, DuplicateIcon, EditIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, TrashIcon } from '@/components/icons';
+import { CalendarIcon, CheckIcon, DragHandleIcon, DuplicateIcon, EditIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, TrashIcon, XIcon } from '@/components/icons';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
-import { buildSessionExerciseFromMethodSelection, deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes } from '@/lib/workouts/repo';
+import { buildSessionExerciseFromMethodSelection, deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes, updateSessionTitle } from '@/lib/workouts/repo';
 import type {
     ExerciseRef,
     PerformedSet,
@@ -84,6 +84,9 @@ export default function SessionScreen() {
   const [isAutoSaving, setIsAutoSaving] = React.useState(false);
   const [isFinishing, setIsFinishing] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = React.useState(false);
+  const [titleDraft, setTitleDraft] = React.useState('');
+  const [isSavingTitle, setIsSavingTitle] = React.useState(false);
   // Removed explicit reorderMode state
   const heightsRef = React.useRef<Record<string, number>>({});
   const positionsRef = React.useRef<string[]>([]);
@@ -195,6 +198,7 @@ export default function SessionScreen() {
     try {
       const s = await getSession(sessionId);
       setRow(s);
+      setTitleDraft(s.title ?? '');
       const hydrated = ensureSnapshot(s.snapshot);
       setSnapshot(hydrated);
       didHydrateRef.current = true;
@@ -209,6 +213,36 @@ export default function SessionScreen() {
       setIsLoading(false);
     }
   }, [sessionId]);
+
+  const cancelTitleEdit = () => {
+    setIsEditingTitle(false);
+    setTitleDraft(row?.title ?? '');
+    setIsSavingTitle(false);
+  };
+
+  const saveTitle = async () => {
+    if (!sessionId) return;
+    const nextTitle = titleDraft.trim();
+    if (!nextTitle) {
+      showToast('Workout name cannot be empty');
+      return;
+    }
+    if (row?.title === nextTitle) {
+      setIsEditingTitle(false);
+      return;
+    }
+    try {
+      setIsSavingTitle(true);
+      const updated = await updateSessionTitle({ id: sessionId, title: nextTitle });
+      setRow(updated);
+      setIsEditingTitle(false);
+      showToast('Workout renamed');
+    } catch (e: any) {
+      showToast(e?.message ?? 'Rename failed');
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
 
   React.useEffect(() => {
     load();
@@ -603,9 +637,53 @@ export default function SessionScreen() {
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.title} numberOfLines={1}>
-              {row?.title ?? 'Workout'}
-            </Text>
+            {isEditingTitle ? (
+              <View style={styles.titleEditRow}>
+                <TextInput
+                  value={titleDraft}
+                  onChangeText={setTitleDraft}
+                  autoFocus
+                  returnKeyType="done"
+                  onSubmitEditing={saveTitle}
+                  editable={!isSavingTitle}
+                  style={[styles.title, styles.titleInput, { flex: 1 }]}
+                />
+                <View style={styles.titleEditActions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Cancel rename"
+                    onPress={cancelTitleEdit}
+                    disabled={isSavingTitle}
+                    style={({ pressed }) => [styles.iconButton, (pressed || isSavingTitle) && styles.pressed]}
+                  >
+                    <XIcon size={20} color={TrenaColors.text} />
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Save workout name"
+                    onPress={saveTitle}
+                    disabled={isSavingTitle}
+                    style={({ pressed }) => [styles.iconButton, (pressed || isSavingTitle) && styles.pressed]}
+                  >
+                    <CheckIcon size={20} color={TrenaColors.text} />
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Rename workout"
+                onPress={() => {
+                  setTitleDraft(row?.title ?? '');
+                  setIsEditingTitle(true);
+                }}
+                hitSlop={6}
+              >
+                <Text style={styles.title} numberOfLines={1}>
+                  {row?.title ?? 'Workout'}
+                </Text>
+              </Pressable>
+            )}
             <View style={styles.metaRow}>
               <Text style={styles.meta} numberOfLines={1}>
                 {row?.started_at
@@ -624,14 +702,16 @@ export default function SessionScreen() {
             </View>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Edit workout date"
-            onPress={onCalendarPress}
-            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
-          >
-            <CalendarIcon size={22} color={TrenaColors.text} />
-          </Pressable>
+          {!isEditingTitle ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit workout date"
+              onPress={onCalendarPress}
+              style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+            >
+              <CalendarIcon size={22} color={TrenaColors.text} />
+            </Pressable>
+          ) : null}
 
 
         </View>
@@ -1123,6 +1203,23 @@ const styles = StyleSheet.create({
   container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   title: { fontSize: 26, lineHeight: 32, fontFamily: Fonts.extraBold, color: TrenaColors.text, letterSpacing: -0.25 },
+  titleInput: {
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  titleEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  titleEditActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   meta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: 'rgba(236, 235, 228, 0.75)' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   iconButton: {

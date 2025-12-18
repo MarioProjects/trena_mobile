@@ -272,6 +272,17 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
   return data as WorkoutSessionRow;
 }
 
+export async function updateSessionTitle(args: { id: string; title: string }) {
+  const { data, error } = await supabase
+    .from('workout_sessions')
+    .update({ title: args.title })
+    .eq('id', args.id)
+    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .single();
+  if (error) throw error;
+  return data as WorkoutSessionRow;
+}
+
 async function fetchMethodInstancesByIds(ids: string[]) {
   if (!ids.length) return new Map<string, MethodInstanceRow>();
   const unique = Array.from(new Set(ids));
