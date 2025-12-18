@@ -1,5 +1,6 @@
 import { TrashIcon } from '@/components/icons';
 import { Fonts, TrenaColors } from '@/constants/theme';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,6 +33,11 @@ function Pill({ label, selected, onPress }: { label: string; selected: boolean; 
 }
 
 export default function ProgramsScreen() {
+  const { editId, returnTo } = useLocalSearchParams<{ editId?: string; returnTo?: string }>();
+  const editIdParam = typeof editId === 'string' ? editId : null;
+  const shouldReturnToSelector = returnTo === 'selector' && !!editIdParam;
+  const didAutoOpenEditRef = React.useRef(false);
+
   const [rows, setRows] = React.useState<MethodInstanceRow[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
@@ -73,9 +79,29 @@ export default function ProgramsScreen() {
     load();
   }, [load]);
 
-  const beginCreate = () => {
+  React.useEffect(() => {
+    if (!editIdParam) return;
+    if (didAutoOpenEditRef.current) return;
+    if (isLoading) return;
+    const hit = rows.find((m) => m.id === editIdParam);
+    if (!hit) return;
+    beginEdit(hit);
+    didAutoOpenEditRef.current = true;
+  }, [editIdParam, isLoading, rows]);
+
+  const onHeaderAction = () => {
+    // If we arrived here from the exercise selector edit flow, "Close" should return there.
+    if (creating || editingId) {
+      if (shouldReturnToSelector) {
+        router.back();
+        return;
+      }
+      setCreating(false);
+      setEditingId(null);
+      return;
+    }
     setEditingId(null);
-    setCreating((v) => !v);
+    setCreating(true);
   };
 
   const beginEdit = (m: MethodInstanceRow) => {
@@ -225,6 +251,7 @@ export default function ProgramsScreen() {
 
       await load({ silent: true });
       setEditingId(null);
+      if (shouldReturnToSelector) router.back();
     } catch (e: any) {
       showToast(e?.message ?? 'Could not save changes');
     } finally {
@@ -232,7 +259,7 @@ export default function ProgramsScreen() {
     }
   };
 
-  const onDelete = async (id: string) => {
+  const onDelete = async (id: string, opts?: { afterDelete?: () => void }) => {
     Alert.alert('Delete progression?', 'This cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -244,6 +271,7 @@ export default function ProgramsScreen() {
             await deleteMethodInstance(id);
             setRows((cur) => cur.filter((x) => x.id !== id));
             await load({ silent: true });
+            opts?.afterDelete?.();
           } catch (e: any) {
             showToast(e?.message ?? 'Could not delete');
           } finally {
@@ -255,13 +283,13 @@ export default function ProgramsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Progressions</Text>
           <Pressable
             accessibilityRole="button"
-            onPress={beginCreate}
+            onPress={onHeaderAction}
             style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
           >
             <Text style={styles.headerButtonText}>{creating || editingId ? 'Close' : 'New'}</Text>
@@ -272,10 +300,12 @@ export default function ProgramsScreen() {
           <View style={styles.formCard}>
             <Text style={styles.sectionTitle}>{editingId ? 'Edit' : 'Create'}</Text>
 
-            <View style={styles.pillsRow}>
-              <Pill label="Bilbo" selected={kind === 'bilbo'} onPress={() => (!editingId ? setKind('bilbo') : undefined)} />
-              <Pill label="5/3/1" selected={kind === 'wendler_531'} onPress={() => (!editingId ? setKind('wendler_531') : undefined)} />
-            </View>
+            {!editingId ? (
+              <View style={styles.pillsRow}>
+                <Pill label="Bilbo" selected={kind === 'bilbo'} onPress={() => setKind('bilbo')} />
+                <Pill label="5/3/1" selected={kind === 'wendler_531'} onPress={() => setKind('wendler_531')} />
+              </View>
+            ) : null}
 
             {kind === 'bilbo' ? (
               <View style={{ gap: 12 }}>
@@ -350,54 +380,79 @@ export default function ProgramsScreen() {
             >
               <Text style={styles.primaryButtonText}>{editingId ? (isSaving ? 'Saving…' : 'Save changes') : isSaving ? 'Creating…' : 'Create'}</Text>
             </Pressable>
+
+            {editingId ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Remove progression"
+                disabled={isSaving || deletingId === editingId}
+                onPress={() =>
+                  onDelete(editingId, {
+                    afterDelete: () => {
+                      setEditingId(null);
+                      if (shouldReturnToSelector) router.back();
+                    },
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.destructiveButton,
+                  (pressed || isSaving || deletingId === editingId) && styles.pressed,
+                  (isSaving || deletingId === editingId) && { opacity: 0.7 },
+                ]}
+              >
+                <Text style={styles.destructiveButtonText}>{deletingId === editingId ? 'Removing…' : 'Remove progression'}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your progressions</Text>
-          {!isLoading && rows.length === 0 ? <Text style={styles.body}>No programs yet.</Text> : null}
+        {!editingId ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Your progressions</Text>
+            {!isLoading && rows.length === 0 ? <Text style={styles.body}>No programs yet.</Text> : null}
 
-          <View style={styles.list}>
-            {rows.map((m) => {
-              const isDeletingThis = deletingId === m.id;
-              return (
-                <View key={m.id} style={styles.card}>
-                  <View style={{ flex: 1, gap: 6 }}>
-                    <View style={styles.cardHeaderRow}>
-                      <Pressable
-                        accessibilityRole="button"
-                        disabled={isDeletingThis}
-                        onPress={() => beginEdit(m)}
-                        style={({ pressed }) => [styles.cardTitleButton, pressed && !isDeletingThis && { opacity: 0.85 }]}
-                      >
-                        <Text style={styles.cardTitle} numberOfLines={1}>
-                          {m.name}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel="Delete program"
-                        disabled={isDeletingThis}
-                        onPress={() => onDelete(m.id)}
-                        hitSlop={10}
-                        style={({ pressed }) => [styles.trashButton, pressed && !isDeletingThis && { opacity: 0.85 }]}
-                      >
-                        <TrashIcon size={20} color={TrenaColors.accentRed} />
-                      </Pressable>
+            <View style={styles.list}>
+              {rows.map((m) => {
+                const isDeletingThis = deletingId === m.id;
+                return (
+                  <View key={m.id} style={styles.card}>
+                    <View style={{ flex: 1, gap: 6 }}>
+                      <View style={styles.cardHeaderRow}>
+                        <Pressable
+                          accessibilityRole="button"
+                          disabled={isDeletingThis}
+                          onPress={() => beginEdit(m)}
+                          style={({ pressed }) => [styles.cardTitleButton, pressed && !isDeletingThis && { opacity: 0.85 }]}
+                        >
+                          <Text style={styles.cardTitle} numberOfLines={1}>
+                            {m.name}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel="Delete program"
+                          disabled={isDeletingThis}
+                          onPress={() => onDelete(m.id)}
+                          hitSlop={10}
+                          style={({ pressed }) => [styles.trashButton, pressed && !isDeletingThis && { opacity: 0.85 }]}
+                        >
+                          <TrashIcon size={20} color={TrenaColors.accentRed} />
+                        </Pressable>
+                      </View>
+                      <Text style={styles.cardMeta}>{m.method_key === 'bilbo' ? 'Bilbo' : '5/3/1'} • {m.scope}</Text>
                     </View>
-                    <Text style={styles.cardMeta}>{m.method_key === 'bilbo' ? 'Bilbo' : '5/3/1'} • {m.scope}</Text>
+
+                    {isDeletingThis ? (
+                      <View style={styles.cardOverlay} pointerEvents="none">
+                        <ActivityIndicator color={TrenaColors.accentRed} />
+                      </View>
+                    ) : null}
                   </View>
-
-                  {isDeletingThis ? (
-                    <View style={styles.cardOverlay} pointerEvents="none">
-                      <ActivityIndicator color={TrenaColors.accentRed} />
-                    </View>
-                  ) : null}
-                </View>
-              );
-            })}
+                );
+              })}
+            </View>
           </View>
-        </View>
+        ) : null}
 
         {toast ? (
           <View style={styles.toast} pointerEvents="none">
@@ -464,6 +519,15 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
   primaryButtonText: { color: '#000', fontSize: 16, fontFamily: Fonts.extraBold },
+  destructiveButton: {
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: TrenaColors.accentRed,
+    borderWidth: 1,
+    borderColor: TrenaColors.accentRed,
+  },
+  destructiveButtonText: { color: TrenaColors.background, fontSize: 15, fontFamily: Fonts.extraBold },
   pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
   list: { gap: 12 },
   card: {

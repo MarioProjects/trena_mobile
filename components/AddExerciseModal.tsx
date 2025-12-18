@@ -1,10 +1,11 @@
-import { SearchIcon } from '@/components/icons';
+import { EditIcon, SearchIcon } from '@/components/icons';
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { clearAddExerciseDraft, getAddExerciseDraft, setAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import { consumeMethodInstanceCreatedQueue, subscribeMethodInstanceCreated } from '@/lib/workouts/methods/ui-events';
 import { listDistinctFreeExercises, listMethodInstances } from '@/lib/workouts/repo';
 import type { ExerciseRef, MethodBinding, MethodInstanceRow, MethodKey, WendlerLiftKey } from '@/lib/workouts/types';
+import { router } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -62,7 +63,17 @@ function matchesBilboExercise(mi: MethodInstanceRow, ex: ExerciseRef) {
   return cfgEx.learnExerciseId === (ex as any).learnExerciseId;
 }
 
-function Pill({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+function Pill({
+  label,
+  selected,
+  onPress,
+  onEdit,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  onEdit?: () => void;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -73,7 +84,24 @@ function Pill({ label, selected, onPress }: { label: string; selected: boolean; 
         pressed && { opacity: 0.85 },
       ]}
     >
-      <Text style={[styles.pillText, selected ? styles.pillTextSelected : styles.pillTextUnselected]}>{label}</Text>
+      <View style={styles.pillInner}>
+        {selected && onEdit ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Edit ${label}`}
+            onPress={onEdit}
+            hitSlop={10}
+            style={({ pressed }) => [styles.pillEditButton, pressed && { opacity: 0.85 }]}
+          >
+            <EditIcon
+              size={16}
+              color={selected ? TrenaColors.background : 'rgba(236, 235, 228, 0.9)'}
+              strokeWidth={2}
+            />
+          </Pressable>
+        ) : null}
+        <Text style={[styles.pillText, selected ? styles.pillTextSelected : styles.pillTextUnselected]}>{label}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -242,6 +270,21 @@ export function AddExerciseModal({
     onRequestCreateMethod?.(key);
   };
 
+  const onEditMethod = (methodInstanceId: string) => {
+    const mi = methods.find((m) => m.id === methodInstanceId);
+    if (!mi) return;
+    setAddExerciseDraft({
+      shouldReopen: true,
+      selectedExercise,
+      methodChoice: mi.method_key,
+      selectedMethodInstanceId: methodInstanceId,
+      wendlerLift,
+      awaitingCreatedMethodKey: null,
+    });
+    onClose();
+    router.push(`/activities/programs?editId=${encodeURIComponent(methodInstanceId)}&returnTo=selector` as any);
+  };
+
   const confirm = () => {
     if (!methodChoice) {
       if (!selectedExercise) return;
@@ -332,6 +375,7 @@ export function AddExerciseModal({
                             key={m.id}
                             label={m.name}
                             selected={selectedMethodInstanceId === m.id}
+                            onEdit={selectedMethodInstanceId === m.id ? () => onEditMethod(m.id) : undefined}
                             onPress={() => {
                               setSelectedExercise(null);
                               setSelectedMethodInstanceId(m.id);
@@ -361,6 +405,7 @@ export function AddExerciseModal({
                             key={m.id}
                             label={m.name}
                             selected={selectedMethodInstanceId === m.id}
+                            onEdit={selectedMethodInstanceId === m.id ? () => onEditMethod(m.id) : undefined}
                             onPress={() => {
                               setSelectedExercise(null);
                               setSelectedMethodInstanceId(m.id);
@@ -568,6 +613,8 @@ const styles = StyleSheet.create({
   pill: { borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1 },
   pillSelected: { backgroundColor: TrenaColors.primary, borderColor: TrenaColors.primary },
   pillUnselected: { backgroundColor: 'rgba(236, 235, 228, 0.04)', borderColor: 'rgba(236, 235, 228, 0.12)' },
+  pillInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  pillEditButton: { padding: 1 },
   pillText: { fontFamily: Fonts.semiBold, fontSize: 13, lineHeight: 16 },
   pillTextSelected: { color: TrenaColors.background },
   pillTextUnselected: { color: 'rgba(236, 235, 228, 0.9)' },
