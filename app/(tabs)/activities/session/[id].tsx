@@ -66,6 +66,8 @@ function numOrEmpty(x: string) {
   return Number.isNaN(n) ? undefined : n;
 }
 
+const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // treat as "scheduled" if > now + 15m
+
 function pad2(n: number) {
   return n.toString().padStart(2, '0');
 }
@@ -120,11 +122,24 @@ export default function SessionScreen() {
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const didFinishRef = React.useRef(false); // Track if workout was properly finished
   const snapshotRef = React.useRef<WorkoutSessionSnapshotV1>(snapshot); // For cleanup access
+  const isProgrammedRef = React.useRef(false);
 
   const showToast = React.useCallback((message: string) => {
     setToast(message);
     setTimeout(() => setToast(null), 2200);
   }, []);
+
+  const isProgrammed = React.useMemo(() => {
+    const iso = row?.started_at;
+    if (!iso) return false;
+    const t = new Date(iso).getTime();
+    if (Number.isNaN(t)) return false;
+    return t > Date.now() + PROGRAM_THRESHOLD_MS;
+  }, [row?.started_at]);
+
+  React.useEffect(() => {
+    isProgrammedRef.current = isProgrammed;
+  }, [isProgrammed]);
 
   const flushAutosave = React.useCallback(async () => {
     if (!sessionId) return;
@@ -214,6 +229,8 @@ export default function SessionScreen() {
       // Only cleanup if user didn't finish properly
       if (didFinishRef.current) return;
       if (!sessionId) return;
+      // If it's a scheduled/programmed workout, don't auto-delete empties.
+      if (isProgrammedRef.current) return;
 
       const currentSnapshot = snapshotRef.current;
       const hasExercises = currentSnapshot.exercises && currentSnapshot.exercises.length > 0;
@@ -311,6 +328,14 @@ export default function SessionScreen() {
   const setPlannedReps = (exerciseId: string, plannedSet: PlannedSet, text: string) => {
     const reps = numOrEmpty(text);
     if (reps === undefined && text.trim() === '') {
+      if (isProgrammedRef.current) {
+        // For programmed workouts, allow blank values without removing the set.
+        updateExercise(exerciseId, (ex) => ({
+          ...ex,
+          performedSets: (ex.performedSets ?? []).filter((s) => s.id !== plannedSet.id),
+        }));
+        return;
+      }
       // remove set?
       Alert.alert('Remove set?', 'This cannot be undone.', [
         { text: 'Cancel', style: 'cancel' },
@@ -458,6 +483,26 @@ export default function SessionScreen() {
     } catch (e: any) {
       didFinishRef.current = false; // Reset if finish failed
       Alert.alert('Finish failed', e?.message ?? 'Unknown error');
+    } finally {
+      setIsFinishing(false);
+    }
+  };
+
+  const onProgram = async () => {
+    if (!sessionId) return;
+    if (isFinishing) return;
+    didFinishRef.current = true; // Mark as intentionally saved - skip cleanup on unmount
+    setIsFinishing(true);
+    try {
+      // Ensure latest edits are persisted before leaving.
+      await flushAutosave();
+      const updated = await updateSessionSnapshot({ id: sessionId, snapshot });
+      setRow(updated);
+      Alert.alert('Workout programmed', 'Saved for later.');
+      router.replace('/activities' as any);
+    } catch (e: any) {
+      didFinishRef.current = false;
+      Alert.alert('Program failed', e?.message ?? 'Unknown error');
     } finally {
       setIsFinishing(false);
     }
@@ -950,11 +995,16 @@ export default function SessionScreen() {
         <View style={styles.actionsRow}>
           <Pressable
             accessibilityRole="button"
-            onPress={onFinish}
+            onPress={isProgrammed ? onProgram : onFinish}
             disabled={isFinishing}
-            style={({ pressed }) => [styles.primaryButton, (pressed || isFinishing) && styles.pressed]}
+            style={({ pressed }) => [
+              isProgrammed ? styles.programButton : styles.primaryButton,
+              (pressed || isFinishing) && styles.pressed,
+            ]}
           >
-            <Text style={styles.primaryButtonText}>{isFinishing ? 'Finishing…' : 'Finish workout'}</Text>
+            <Text style={isProgrammed ? styles.programButtonText : styles.primaryButtonText}>
+              {isFinishing ? (isProgrammed ? 'Programming…' : 'Finishing…') : isProgrammed ? 'Program workout' : 'Finish workout'}
+            </Text>
           </Pressable>
         </View>
 
@@ -1264,6 +1314,16 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
   primaryButtonText: { color: '#000', fontSize: 15, fontFamily: Fonts.extraBold },
+  programButton: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: TrenaColors.secondary,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+  },
+  programButtonText: { color: TrenaColors.text, fontSize: 15, fontFamily: Fonts.extraBold },
   secondaryButton: {
     borderRadius: 14,
     paddingVertical: 14,

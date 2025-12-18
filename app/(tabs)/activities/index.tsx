@@ -17,6 +17,40 @@ function formatDate(iso: string) {
   return d.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+function startOfLocalDay(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
+  const now = new Date();
+  const todayStart = startOfLocalDay(now);
+  const tomorrowStart = startOfLocalDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+
+  const today: WorkoutSessionRow[] = [];
+  const future: WorkoutSessionRow[] = [];
+  const recent: WorkoutSessionRow[] = [];
+
+  for (const s of sessions) {
+    const t = new Date(s.started_at).getTime();
+    if (Number.isNaN(t)) {
+      recent.push(s);
+      continue;
+    }
+    if (t >= todayStart && t < tomorrowStart) today.push(s);
+    else if (t >= tomorrowStart) future.push(s);
+    else recent.push(s);
+  }
+
+  // Keep UX sensible: today/recent are usually newest-first, future earliest-first.
+  today.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+  recent.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+  future.sort((a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime());
+
+  return { today, future, recent };
+}
+
+const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // keep consistent with session screen
+
 export default function ActivitiesIndexScreen() {
   const [sessions, setSessions] = React.useState<WorkoutSessionRow[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -31,7 +65,8 @@ export default function ActivitiesIndexScreen() {
     const shouldLoad = !opts?.silent && !hasLoaded.current;
     if (shouldLoad) setIsLoading(true);
     try {
-      const rows = await listSessions(20);
+      // Fetch a bigger window so today/future/recent sections have enough data.
+      const rows = await listSessions(200);
       setSessions(rows);
       hasLoaded.current = true;
     } finally {
@@ -87,6 +122,60 @@ export default function ActivitiesIndexScreen() {
     }
   };
 
+  const { today, future, recent } = React.useMemo(() => bucketSessionsByDay(sessions), [sessions]);
+  const totalCount = sessions.length;
+
+  const renderSessionCard = (s: WorkoutSessionRow) => {
+    const startedMs = new Date(s.started_at).getTime();
+    const isScheduled = !s.ended_at && !Number.isNaN(startedMs) && startedMs > Date.now() + PROGRAM_THRESHOLD_MS;
+    const inProgress = !s.ended_at && !isScheduled;
+    const exCount = s.snapshot?.exercises?.length ?? 0;
+    const isBusy = deletingId === s.id || duplicatingId === s.id;
+    return (
+      <View key={s.id} style={styles.card}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={isBusy}
+          onPress={() => router.push(`/activities/session/${s.id}` as any)}
+          style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
+        >
+          <View style={{ flex: 1, gap: 6 }}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardTitle} numberOfLines={1}>
+                {s.title}
+              </Text>
+              <View
+                style={[
+                  styles.badge,
+                  isScheduled ? styles.badgeScheduled : inProgress ? styles.badgeInProgress : styles.badgeDone,
+                ]}
+              >
+                <Text style={styles.badgeText}>{isScheduled ? 'SCHEDULED' : inProgress ? 'IN PROGRESS' : 'DONE'}</Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Options"
+                disabled={isBusy}
+                onPress={() => setMenuTargetId(s.id)}
+                hitSlop={10}
+                style={({ pressed }) => [styles.iconButton, pressed && !isBusy && { opacity: 0.85 }]}
+              >
+                <MoreHorizIcon size={24} color={TrenaColors.text} />
+              </Pressable>
+            </View>
+            <Text style={styles.cardMeta}>{`${formatDate(s.started_at)} • ${exCount} exercise${exCount === 1 ? '' : 's'}`}</Text>
+          </View>
+        </Pressable>
+
+        {isBusy ? (
+          <View style={styles.cardOverlay} pointerEvents="none">
+            <ActivityIndicator color={TrenaColors.primary} />
+          </View>
+        ) : null}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.content}>
@@ -94,68 +183,44 @@ export default function ActivitiesIndexScreen() {
           <Text style={styles.title}>Activities</Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent workouts</Text>
+            <Text style={styles.sectionTitle}>Today workouts</Text>
             {isLoading ? (
               <WorkoutsSkeleton />
-            ) : sessions.length === 0 ? (
+            ) : totalCount === 0 ? (
               <>
                 <Text style={styles.body}>No workouts yet. Start your first session to see it here.</Text>
                 <View style={styles.emptyIllustrationWrapper}>
                   <Image source={DrinkWaterIllustration} style={styles.emptyImage} resizeMode="contain" />
                 </View>
               </>
-            ) : null}
-
-            {!isLoading && sessions.length > 0 && (
-              <View style={styles.list}>
-                {sessions.map((s) => {
-                  const inProgress = !s.ended_at;
-                  const exCount = s.snapshot?.exercises?.length ?? 0;
-                  const isBusy = deletingId === s.id || duplicatingId === s.id;
-                  return (
-                    <View key={s.id} style={styles.card}>
-                      <Pressable
-                        accessibilityRole="button"
-                        disabled={isBusy}
-                        onPress={() => router.push(`/activities/session/${s.id}` as any)}
-                        style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
-                      >
-                        <View style={{ flex: 1, gap: 6 }}>
-                          <View style={styles.cardHeaderRow}>
-                            <Text style={styles.cardTitle} numberOfLines={1}>
-                              {s.title}
-                            </Text>
-                            <View style={[styles.badge, inProgress ? styles.badgeInProgress : styles.badgeDone]}>
-                              <Text style={styles.badgeText}>{inProgress ? 'IN PROGRESS' : 'DONE'}</Text>
-                            </View>
-                            <Pressable
-                              accessibilityRole="button"
-                              accessibilityLabel="Options"
-                              disabled={isBusy}
-                              onPress={() => setMenuTargetId(s.id)}
-                              hitSlop={10}
-                              style={({ pressed }) => [styles.iconButton, pressed && !isBusy && { opacity: 0.85 }]}
-                            >
-                              <MoreHorizIcon size={24} color={TrenaColors.text} />
-                            </Pressable>
-                          </View>
-                          <Text
-                            style={styles.cardMeta}
-                          >{`${formatDate(s.started_at)} • ${exCount} exercise${exCount === 1 ? '' : 's'}`}</Text>
-                        </View>
-                      </Pressable>
-
-                      {isBusy ? (
-                        <View style={styles.cardOverlay} pointerEvents="none">
-                          <ActivityIndicator color={TrenaColors.primary} />
-                        </View>
-                      ) : null}
-                    </View>
-                  );
-                })}
-              </View>
+            ) : today.length === 0 ? (
+              <Text style={styles.body}>No workouts logged today.</Text>
+            ) : (
+              <View style={styles.list}>{today.map(renderSessionCard)}</View>
             )}
           </View>
+
+          {!isLoading && totalCount > 0 ? (
+            <>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Future workouts</Text>
+                {future.length === 0 ? (
+                  <Text style={styles.body}>No future workouts.</Text>
+                ) : (
+                  <View style={styles.list}>{future.map(renderSessionCard)}</View>
+                )}
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Recent workouts</Text>
+                {recent.length === 0 ? (
+                  <Text style={styles.body}>No recent workouts.</Text>
+                ) : (
+                  <View style={styles.list}>{recent.map(renderSessionCard)}</View>
+                )}
+              </View>
+            </>
+          ) : null}
         </ScrollView>
 
         <View style={styles.footer}>
@@ -229,12 +294,11 @@ const styles = StyleSheet.create({
   section: {
     gap: 10,
     paddingTop: 6,
-    flex: 1,
   },
   sectionTitle: {
     fontFamily: Fonts.bold,
-    fontSize: 16,
-    lineHeight: 20,
+    fontSize: 18,
+    lineHeight: 22,
     color: TrenaColors.text,
     letterSpacing: -0.2,
   },
@@ -250,14 +314,14 @@ const styles = StyleSheet.create({
   emptyImage: {
     width: '100%',
     //maxWidth: '80%',
-    height: '70%',
+    height: '100%',
   },
   emptyIllustrationWrapper: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 24,
+    height: 260,
   },
   ctaRow: {
     flexDirection: 'row',
@@ -360,6 +424,10 @@ const styles = StyleSheet.create({
   badgeDone: {
     borderColor: 'rgba(70, 255, 150, 0.25)',
     backgroundColor: 'rgba(70, 255, 150, 0.08)',
+  },
+  badgeScheduled: {
+    borderColor: 'rgba(59, 130, 246, 0.45)',
+    backgroundColor: 'rgba(59, 130, 246, 0.16)',
   },
   badgeText: {
     fontFamily: Fonts.medium,
