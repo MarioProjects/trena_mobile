@@ -31,6 +31,8 @@ export default function ActivitiesLayout() {
       <Stack.Screen name="start" options={{ title: 'Start workout' }} />
       <Stack.Screen name="templates" options={{ title: 'Templates' }} />
       <Stack.Screen name="programs" options={{ title: 'Programs' }} />
+      <Stack.Screen name="methods/bilbo/create" options={{ title: 'Create Bilbo' }} />
+      <Stack.Screen name="methods/wendler_531/create" options={{ title: 'Create 5/3/1' }} />
       <Stack.Screen name="session/[id]" options={{ title: 'Workout' }} />
     </Stack>
   );

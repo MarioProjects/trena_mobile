@@ -2,16 +2,16 @@ import { supabase } from '@/lib/supabase';
 
 import { applyMethodResult, generatePlannedSets } from './methods';
 import type {
-  ExerciseRef,
-  MethodBinding,
-  MethodInstanceRow,
-  MethodKey,
-  PerformedSet,
-  SessionExercise,
-  WorkoutSessionRow,
-  WorkoutSessionSnapshotV1,
-  WorkoutTemplate,
-  WorkoutTemplateItem,
+    ExerciseRef,
+    MethodBinding,
+    MethodInstanceRow,
+    MethodKey,
+    PerformedSet,
+    SessionExercise,
+    WorkoutSessionRow,
+    WorkoutSessionSnapshotV1,
+    WorkoutTemplate,
+    WorkoutTemplateItem,
 } from './types';
 
 function makeLocalId(prefix: string) {
@@ -173,6 +173,28 @@ export async function deleteTemplate(id: string) {
   if (error) throw error;
 }
 
+export async function duplicateTemplate(id: string) {
+  const user_id = await requireUserId();
+
+  // 1) Fetch original
+  const { data: original, error: getErr } = await supabase
+    .from('workout_templates')
+    .select('name, items')
+    .eq('id', id)
+    .single();
+  if (getErr) throw getErr;
+
+  // 2) Insert copy
+  const nextName = `${original.name} (copy)`;
+  const { data, error } = await supabase
+    .from('workout_templates')
+    .insert({ user_id, name: nextName, items: original.items })
+    .select('id, name, items, created_at, updated_at')
+    .single();
+  if (error) throw error;
+  return coerceTemplateRow(data);
+}
+
 export async function listSessions(limit = 20) {
   const { data, error } = await supabase
     .from('workout_sessions')
@@ -261,6 +283,39 @@ async function fetchMethodInstancesByIds(ids: string[]) {
   const map = new Map<string, MethodInstanceRow>();
   for (const row of data ?? []) map.set(row.id, row as MethodInstanceRow);
   return map;
+}
+
+export async function getMethodInstancesByIds(ids: string[]) {
+  return await fetchMethodInstancesByIds(ids);
+}
+
+export function buildSessionExerciseFromMethodSelection(args: {
+  exercise: ExerciseRef;
+  methodInstanceId: string;
+  methodInstance: MethodInstanceRow;
+  binding: MethodBinding;
+}): SessionExercise {
+  const { plannedSets, coercedConfig, coercedState } = generatePlannedSets({
+    methodKey: args.methodInstance.method_key,
+    binding: args.binding,
+    methodConfig: args.methodInstance.config ?? {},
+    methodState: args.methodInstance.state ?? {},
+  });
+
+  return {
+    id: makeLocalId('sx'),
+    exercise: args.exercise,
+    source: {
+      type: 'method',
+      methodInstanceId: args.methodInstanceId,
+      methodKey: args.methodInstance.method_key,
+      binding: args.binding,
+      methodConfig: coercedConfig,
+      methodStateAtStart: coercedState,
+    },
+    plannedSets,
+    performedSets: [],
+  };
 }
 
 function buildSessionExerciseFromTemplateItem(args: {

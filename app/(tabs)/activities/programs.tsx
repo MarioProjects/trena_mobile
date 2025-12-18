@@ -46,7 +46,7 @@ export default function ProgramsScreen() {
   const [bilboName, setBilboName] = React.useState('Bilbo');
   const [bilboExercise, setBilboExercise] = React.useState<ExerciseRef>({
     kind: 'learn',
-    learnExerciseId: 'exercise-bench-press-barbell', // fallback default
+    learnExerciseId: 'exercise-bench', // fallback default
   });
   const [bilboStart, setBilboStart] = React.useState('20');
   const [bilboInc, setBilboInc] = React.useState('2.5');

@@ -1,22 +1,24 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
-import { CalendarIcon, CheckIcon, DragHandleIcon, DuplicateIcon, EditIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, TrashIcon, XIcon } from '@/components/icons';
-import { deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes } from '@/lib/workouts/repo';
+import { CalendarIcon, CheckIcon, DragHandleIcon, DuplicateIcon, EditIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, TrashIcon } from '@/components/icons';
+import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
+import { buildSessionExerciseFromMethodSelection, deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes } from '@/lib/workouts/repo';
 import type {
-  ExerciseRef,
-  PerformedSet,
-  PlannedSet,
-  SessionExercise,
-  WorkoutSessionRow,
-  WorkoutSessionSnapshotV1,
+    ExerciseRef,
+    PerformedSet,
+    PlannedSet,
+    SessionExercise,
+    WorkoutSessionRow,
+    WorkoutSessionSnapshotV1,
 } from '@/lib/workouts/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -104,9 +106,8 @@ export default function SessionScreen() {
 
 
   // Add exercise
-  const [adding, setAdding] = React.useState(false);
+  const [addOpen, setAddOpen] = React.useState(false);
   const [editingExerciseId, setEditingExerciseId] = React.useState<string | null>(null);
-  const [newExercise, setNewExercise] = React.useState<ExerciseRef | null>(null);
 
   // Exercise options menu state
   const [menuExerciseId, setMenuExerciseId] = React.useState<string | null>(null);
@@ -395,27 +396,48 @@ export default function SessionScreen() {
     });
   };
 
-  const addExercise = () => {
-    const exercise = newExercise;
-    if (!exercise) return;
+  const onConfirmAdd = (selection: AddExerciseSelection) => {
+    setSnapshot((cur) => {
+      const exercise = selection.exercise;
+      if (!selection.method) {
+        return {
+          ...cur,
+          exercises: [
+            ...cur.exercises,
+            {
+              id: makeLocalId('sx'),
+              exercise,
+              source: { type: 'free' },
+              plannedSets: [],
+              performedSets: [],
+            },
+          ],
+        };
+      }
 
-    setSnapshot((cur) => ({
-      ...cur,
-      exercises: [
-        ...cur.exercises,
-        {
-          id: makeLocalId('sx'),
-          exercise,
-          source: { type: 'free' },
-          plannedSets: [],
-          performedSets: [],
-        },
-      ],
-    }));
+      const sx = buildSessionExerciseFromMethodSelection({
+        exercise,
+        methodInstanceId: selection.method.methodInstanceId,
+        methodInstance: selection.method.methodInstance,
+        binding: selection.method.binding,
+      });
 
-    setAdding(false);
-    setNewExercise(null);
+      return { ...cur, exercises: [...cur.exercises, sx] };
+    });
+    setAddOpen(false);
   };
+
+  const onRequestCreateMethod = (key: 'bilbo' | 'wendler_531') => {
+    if (key === 'bilbo') router.push('/activities/methods/bilbo/create' as any);
+    else router.push('/activities/methods/wendler_531/create' as any);
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const d = getAddExerciseDraft();
+      if (d?.shouldReopen) setAddOpen(true);
+    }, [])
+  );
 
   const onFinish = async () => {
     if (!sessionId) return;
@@ -905,44 +927,14 @@ export default function SessionScreen() {
             })}
           </View>
 
-          {!adding ? (
+          {!addOpen ? (
             <Pressable
               accessibilityRole="button"
-              onPress={() => setAdding(true)}
+              onPress={() => setAddOpen(true)}
               style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
             >
               <Text style={styles.secondaryButtonText}>Add exercise</Text>
             </Pressable>
-          ) : null}
-
-          {adding ? (
-            <View style={styles.addCard}>
-              <View style={{ gap: 8 }}>
-                <Text style={[styles.sectionTitle, { fontSize: 15 }]}>Select exercise to add</Text>
-                <ExercisePicker value={newExercise} onChange={setNewExercise} />
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => {
-                    setAdding(false);
-                    setNewExercise(null);
-                  }}
-                  style={({ pressed }) => [styles.iconButton, { backgroundColor: 'rgba(236, 235, 228, 0.08)', borderRadius: 14, width: 48, height: 48 }, pressed && styles.pressed]}
-                >
-                  <XIcon size={22} color={TrenaColors.text} />
-                </Pressable>
-
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={addExercise}
-                  style={({ pressed }) => [styles.primaryButton, { flex: 1, backgroundColor: TrenaColors.secondary }, pressed && styles.pressed]}
-                >
-                  <Text style={[styles.primaryButtonText, { color: '#fff' }]}>Add</Text>
-                </Pressable>
-              </View>
-            </View>
           ) : null}
 
           {editingExerciseId ? (
@@ -1013,6 +1005,15 @@ export default function SessionScreen() {
           </Pressable>
         </Modal>
       </ScrollView>
+
+      <AddExerciseModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onConfirm={onConfirmAdd}
+        title="Add exercise"
+        confirmLabel="Add"
+        onRequestCreateMethod={onRequestCreateMethod}
+      />
     </SafeAreaView >
   );
 }
