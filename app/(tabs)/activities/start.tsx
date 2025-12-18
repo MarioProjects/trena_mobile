@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
 
   aiCard: {
-    backgroundColor: TrenaColors.accentPurple,
+    backgroundColor: TrenaColors.tertiary,
   },
   aiTitle: { color: TrenaColors.background, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
   aiSubtitle: { color: TrenaColors.background, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },

@@ -10,7 +10,7 @@ export const TrenaColors = {
   secondary: 'rgb(91, 79, 243)',
   text: 'rgb(236, 235, 228)',
   // Fosfi accent colors
-  accentPurple: 'rgb(242, 137, 201)',
+  tertiary: 'rgb(242, 137, 201)',
   accentRed: 'rgb(255, 67, 88)',
 } as const;
 
@@ -22,7 +22,7 @@ export const TrenaColors = {
   secondary: 'rgb(59, 130, 246)',
   text: 'rgb(236, 235, 228)',
   // Fosfi accent colors
-  accentPurple: 'rgb(177, 92, 255)',
+  tertiary: 'rgb(177, 92, 255)',
   accentRed: 'rgb(255, 67, 88)',
 } as const;
  */

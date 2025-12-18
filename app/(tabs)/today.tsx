@@ -11,10 +11,10 @@ export default function TodayScreen() {
         <Text style={styles.title}>Today</Text>
 
         <View style={styles.cardsRow}>
-          <View style={[styles.card, { backgroundColor: TrenaColors.accentPurple }]}>
-            <Text style={styles.cardLabel}>Workouts</Text>
-            <Text style={styles.cardValue}>0</Text>
-            <Text style={styles.cardHint}>this week</Text>
+          <View style={[styles.card, { backgroundColor: TrenaColors.tertiary }]}>
+            <Text style={[styles.cardLabel, styles.cardTextOnTertiary]}>Workouts</Text>
+            <Text style={[styles.cardValue, styles.cardTextOnTertiary]}>0</Text>
+            <Text style={[styles.cardHint, styles.cardTextOnTertiary]}>this week</Text>
           </View>
           <View style={[styles.card, { backgroundColor: TrenaColors.secondary }]}>
             <Text style={styles.cardLabel}>Volume</Text>
@@ -89,6 +89,9 @@ const styles = StyleSheet.create({
     color: 'rgba(236, 235, 228, 0.75)',
     fontSize: 12,
     fontFamily: Fonts.semiBold,
+  },
+  cardTextOnTertiary: {
+    color: TrenaColors.background,
   },
   mainCard: {
     backgroundColor: 'rgba(236, 235, 228, 0.08)',
