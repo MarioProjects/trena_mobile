@@ -11,10 +11,10 @@ import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import { createTemplate, deleteTemplate, duplicateTemplate, listTemplates, startSessionFromTemplate, updateTemplate } from '@/lib/workouts/repo';
 import type {
-    ExerciseRef,
-    MethodKey,
-    WorkoutTemplate,
-    WorkoutTemplateItem,
+  ExerciseRef,
+  MethodKey,
+  WorkoutTemplate,
+  WorkoutTemplateItem,
 } from '@/lib/workouts/types';
 
 const learnExercises = learnData.filter((x) => x.type === 'exercise');
