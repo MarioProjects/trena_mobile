@@ -6,11 +6,11 @@
 export const TrenaColors = {
   background: 'rgb(20, 20, 17)',
   surface: 'rgb(197, 195, 184)',
-  primary: 'rgb(213, 255, 93)',
-  secondary: 'rgb(59, 130, 246)',
+  primary: 'rgb(163, 220, 64)',
+  secondary: 'rgb(91, 79, 243)',
   text: 'rgb(236, 235, 228)',
   // Fosfi accent colors
-  accentPurple: 'rgb(177, 92, 255)',
+  accentPurple: 'rgb(242, 137, 201)',
   accentRed: 'rgb(255, 67, 88)',
 } as const;
 

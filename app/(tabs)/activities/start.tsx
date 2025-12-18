@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: TrenaColors.secondary,
   },
   templateTitle: {
-    color: '#fff',
+    color: TrenaColors.text,
     fontSize: 32,
     lineHeight: 30,
     fontFamily: Fonts.extraBold,
@@ -185,8 +185,8 @@ const styles = StyleSheet.create({
   aiCard: {
     backgroundColor: TrenaColors.accentPurple,
   },
-  aiTitle: { color: '#fff', fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
-  aiSubtitle: { color: TrenaColors.text, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
+  aiTitle: { color: TrenaColors.background, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  aiSubtitle: { color: TrenaColors.background, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
 
   illustration: {
     position: 'absolute',
