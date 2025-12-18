@@ -4,7 +4,7 @@
  */
 
 export const TrenaColors = {
-  background: 'rgb(20, 20, 17)',
+  background: 'rgb(26, 26, 26)',
   surface: 'rgb(197, 195, 184)',
   primary: 'rgb(163, 220, 64)',
   secondary: 'rgb(91, 79, 243)',
