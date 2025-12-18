@@ -206,7 +206,7 @@ export default function TemplatesScreen() {
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>Routines</Text>
+            <Text style={styles.title}>The Routine</Text>
           </View>
 
         {editingId ? (
@@ -253,10 +253,12 @@ export default function TemplatesScreen() {
             <Text style={styles.sectionTitle}>Add item</Text>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel="Add exercise or method"
               onPress={() => setAddOpen(true)}
               style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
             >
-              <Text style={styles.secondaryButtonText}>Add exercise (optional progression)</Text>
+              <PlusIcon size={18} color={TrenaColors.text} strokeWidth={1.8} />
+              <Text style={styles.secondaryButtonText}>Add exercise or method</Text>
             </Pressable>
 
           </View>
@@ -489,7 +491,10 @@ const styles = StyleSheet.create({
   secondaryButton: {
     borderRadius: 14,
     paddingVertical: 14,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: 8,
     backgroundColor: 'rgba(236, 235, 228, 0.08)',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(236, 235, 228, 0.12)',

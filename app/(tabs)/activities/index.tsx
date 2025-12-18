@@ -159,6 +159,7 @@ export default function ActivitiesIndexScreen() {
 
   const { today, future, recent } = React.useMemo(() => bucketSessionsByDay(sessions), [sessions]);
   const totalCount = sessions.length;
+  const todaySectionTitle = !isLoading && totalCount === 0 ? 'Your workouts' : 'Today workouts';
 
   const renderSessionCard = (s: WorkoutSessionRow) => {
     const startedMs = new Date(s.started_at).getTime();
@@ -217,17 +218,17 @@ export default function ActivitiesIndexScreen() {
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
           <Text style={styles.title}>Activities</Text>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Today workouts</Text>
+          <View style={[styles.section, !isLoading && totalCount === 0 && styles.sectionFill]}>
+            <Text style={styles.sectionTitle}>{todaySectionTitle}</Text>
             {isLoading ? (
               <WorkoutsSkeleton />
             ) : totalCount === 0 ? (
-              <>
+              <View style={styles.emptyStateContent}>
                 <Text style={styles.body}>No workouts yet. Start your first session to see it here.</Text>
                 <View style={styles.emptyIllustrationWrapper}>
                   <Image source={DrinkWaterIllustration} style={styles.emptyImage} resizeMode="contain" />
                 </View>
-              </>
+              </View>
             ) : today.length === 0 ? (
               <Text style={styles.body}>No workouts logged today.</Text>
             ) : (
@@ -391,6 +392,9 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingTop: 6,
   },
+  sectionFill: {
+    flex: 1,
+  },
   sectionTitle: {
     fontFamily: Fonts.bold,
     fontSize: 18,
@@ -407,17 +411,22 @@ const styles = StyleSheet.create({
   emptyState: {
     // kept for compatibility if reused elsewhere
   },
+  emptyStateContent: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 12,
+  },
   emptyImage: {
     width: '100%',
-    //maxWidth: '80%',
-    height: '100%',
+    maxWidth: 380,
+    height: 320,
   },
   emptyIllustrationWrapper: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
     paddingHorizontal: 8,
-    paddingVertical: 24,
-    height: 260,
   },
   ctaRow: {
     flexDirection: 'row',
