@@ -225,7 +225,13 @@ export default function TemplatesScreen() {
                 {items.map((it, idx) => (
                   <View key={it.id} style={styles.itemRow}>
                     <View style={{ flex: 1, gap: 4 }}>
-                      <Text style={styles.itemTitle} numberOfLines={1}>{`${idx + 1}. ${coerceExerciseName(it.exercise)}`}</Text>
+                      <Text style={styles.itemTitle} numberOfLines={1}>
+                        {`${idx + 1}. ${
+                          it.type === 'method' && it.binding.methodKey === 'bilbo'
+                            ? `Bilbo - ${coerceExerciseName(it.exercise)}`
+                            : coerceExerciseName(it.exercise)
+                        }`}
+                      </Text>
                       <Text style={styles.itemMeta}>
                         {it.type === 'free'
                           ? 'Free'

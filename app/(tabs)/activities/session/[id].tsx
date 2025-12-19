@@ -9,7 +9,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
-import { CalendarIcon, CheckIcon, DragHandleIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, XIcon } from '@/components/icons';
+import {
+    CalendarIcon,
+    CheckIcon,
+    DragHandleIcon,
+    DuplicateIcon,
+    EditIcon,
+    FloppyIcon,
+    MoreHorizIcon,
+    NotebookIcon,
+    SkipStatusIcon,
+    StickyNoteIcon,
+    TrashIcon,
+    XIcon,
+} from '@/components/icons';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import { buildSessionExerciseFromMethodSelection, deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes, updateSessionTitle } from '@/lib/workouts/repo';
 import type {
@@ -633,7 +646,12 @@ export default function SessionScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom', 'left', 'right']}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <View style={styles.headerRow}>
           <View style={{ flex: 1, gap: 4 }}>
             {isEditingTitle ? (
@@ -808,7 +826,9 @@ export default function SessionScreen() {
 
           <View style={styles.list}>
             {snapshot.exercises.map((ex) => {
-              const name = formatExerciseName(ex.exercise);
+              const bilbo = isBilboExercise(ex);
+              const baseName = formatExerciseName(ex.exercise);
+              const name = bilbo ? `Bilbo - ${baseName}` : baseName;
 
               const onLayout = (h: number) => {
                 heightsRef.current[ex.id] = h;
@@ -1118,6 +1138,53 @@ export default function SessionScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={!!menuExerciseId}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuExerciseId(null)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setMenuExerciseId(null)}>
+          {/* Swallow presses so backdrop doesn't close when tapping sheet */}
+          <Pressable style={styles.menuSheet} onPress={() => {}}>
+            <Text style={styles.menuTitle} numberOfLines={1}>
+              {menuExercise ? formatExerciseName(menuExercise.exercise) : 'Exercise'}
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuExerciseId && startEditingExercise(menuExerciseId)}
+            >
+              <EditIcon size={20} color={TrenaColors.text} />
+              <Text style={styles.menuItemText}>Edit Exercise</Text>
+            </Pressable>
+
+            <View style={styles.menuSeparator} />
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuExerciseId && duplicateExercise(menuExerciseId)}
+            >
+              <DuplicateIcon size={20} color={TrenaColors.text} />
+              <Text style={styles.menuItemText}>Duplicate Exercise</Text>
+            </Pressable>
+
+            <View style={styles.menuSeparator} />
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuExerciseId && removeExercise(menuExerciseId)}
+            >
+              <TrashIcon size={20} color={TrenaColors.accentRed} />
+              <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Delete Exercise</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {toast ? (
         <View pointerEvents="none" style={styles.toast}>
