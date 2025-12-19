@@ -7,9 +7,9 @@ import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-hand
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
+import { type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
-import { CalendarIcon, CheckIcon, DragHandleIcon, DuplicateIcon, EditIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, TrashIcon, XIcon } from '@/components/icons';
+import { CalendarIcon, CheckIcon, DragHandleIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, XIcon } from '@/components/icons';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import { buildSessionExerciseFromMethodSelection, deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes, updateSessionTitle } from '@/lib/workouts/repo';
 import type {
@@ -35,8 +35,7 @@ function formatExerciseName(ref: ExerciseRef) {
 }
 
 function isBilboExercise(ex: SessionExercise) {
-  if (ex.exercise.kind === 'learn' && ex.exercise.learnExerciseId === 'bilbo_chest') return true;
-  return false;
+  return ex.source.type === 'method' && ex.source.methodKey === 'bilbo';
 }
 
 function removeSetByIndex(performed: PerformedSet[], index: number) {
@@ -868,6 +867,56 @@ export default function SessionScreen() {
                             const cur = (ex.performedSets ?? []).find((s) => s.id === ps.id);
                             const repsText = cur && typeof cur.reps === 'number' && cur.reps > 0 ? String(cur.reps) : '';
                             const bilbo = isBilboExercise(ex);
+                            if (bilbo) {
+                              return (
+                                <View key={ps.id} style={{ gap: 6 }}>
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onLongPress={() =>
+                                      Alert.alert('Set options', ps.label ?? 'Set', [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                          text: getDone(cur) ? 'Mark not done' : 'Mark done',
+                                          onPress: () => setPlannedMeta(ex.id, ps, { done: !getDone(cur) }),
+                                        },
+                                        {
+                                          text: 'Remove set',
+                                          style: 'destructive',
+                                          onPress: () => setPlannedReps(ex.id, ps, ''),
+                                        },
+                                      ])
+                                    }
+                                    style={[styles.setLabelWrap, { alignSelf: 'flex-start' }]}
+                                  >
+                                    <Text style={styles.setLabel}>{ps.label ?? 'Set'}</Text>
+                                  </Pressable>
+
+                                  <View style={styles.setRow}>
+                                    <TextInput
+                                      value={repsText}
+                                      onChangeText={(t) => setPlannedReps(ex.id, ps, t)}
+                                      placeholder="reps"
+                                      placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                      keyboardType="numeric"
+                                      style={styles.repsInput}
+                                    />
+                                    <Text style={styles.times}>x</Text>
+                                    <Text style={styles.setWeight}>{`${ps.weightKg} kg`}</Text>
+                                    <Pressable
+                                      accessibilityRole="button"
+                                      onPress={() => setPlannedMeta(ex.id, ps, { done: !getDone(cur) })}
+                                      style={({ pressed }) => [
+                                        styles.donePill,
+                                        getDone(cur) ? styles.donePillOn : styles.donePillOff,
+                                        pressed && { opacity: 0.85 },
+                                      ]}
+                                    >
+                                      {getDone(cur) ? <CheckIcon size={18} color="#000" /> : <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />}
+                                    </Pressable>
+                                  </View>
+                                </View>
+                              );
+                            }
                             return (
                               <View key={ps.id} style={styles.setRow}>
                                 <Pressable
@@ -890,34 +939,426 @@ export default function SessionScreen() {
                                 >
                                   <Text style={styles.setLabel}>{ps.label ?? 'Set'}</Text>
                                 </Pressable>
-                                {bilbo ? (
-                                  <>
-                                    <Text style={styles.setWeight}>{`${ps.weightKg} kg`}</Text>
-                                    <Text style={styles.times}>x</Text>
-                                    <TextInput
-                                      value={repsText}
-                                      onChangeText={(t) => setPlannedReps(ex.id, ps, t)}
-                                      placeholder="reps"
-                                      placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                      keyboardType="numeric"
-                                      style={styles.repsInputCompact}
-                                    />
-                                  </>
-                                ) : (
-                                  <>
-                                    <TextInput
-                                      value={repsText}
-                                      onChangeText={(t) => setPlannedReps(ex.id, ps, t)}
-                                      placeholder="reps"
-                                      placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                      keyboardType="numeric"
-                                      style={styles.repsInput}
-                                    />
-                                    <Text style={styles.times}>x</Text>
-                                    <Text style={styles.setWeight}>{`${ps.weightKg} kg`}</Text>
-                                  </>
-                                )}
-                                {!bilbo ? (
+                                <>
+                                  <TextInput
+                                    value={repsText}
+                                    onChangeText={(t) => setPlannedReps(ex.id, ps, t)}
+                                    placeholder="reps"
+                                    placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                    keyboardType="numeric"
+                                    style={styles.repsInput}
+                                  />
+                                  <Text style={styles.times}>x</Text>
+                                  <Text style={styles.setWeight}>{`${ps.weightKg} kg`}</Text>
+                                </>
+                                <TextInput
+                                  value={getRirText(cur)}
+                                  onChangeText={(t) => {
+                                    const n = numOrEmpty(t);
+                                    setPlannedMeta(ex.id, ps, { rir: n });
+                                  }}
+                                  placeholder="RIR"
+                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  keyboardType="numeric"
+                                  style={styles.rirInput}
+                                />
+                                <Pressable
+                                  accessibilityRole="button"
+                                  onPress={() => setPlannedMeta(ex.id, ps, { done: !getDone(cur) })}
+                                  style={({ pressed }) => [
+                                    styles.donePill,
+                                    getDone(cur) ? styles.donePillOn : styles.donePillOff,
+                                    pressed && { opacity: 0.85 },
+                                  ]}
+                                >
+                                  {getDone(cur) ? <CheckIcon size={18} color="#000" /> : <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />}
+                                </Pressable>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      ) : (
+                        <View style={{ gap: 10 }}>
+                          {(ex.performedSets ?? []).map((s, idx) => (
+                            <View key={s.id} style={styles.freeSetRow}>
+                              <Pressable
+                                accessibilityRole="button"
+                                onLongPress={() =>
+                                  Alert.alert('Set options', `Set ${idx + 1}`, [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                      text: s.done ? 'Mark not done' : 'Mark done',
+                                      onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                    },
+                                    {
+                                      text: 'Remove set',
+                                      style: 'destructive',
+                                      onPress: () => removeFreeSet(ex.id, idx),
+                                    },
+                                  ])
+                                }
+                                style={styles.freeSetIndex}
+                              >
+                                <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
+                              </Pressable>
+                              <TextInput
+                                value={s.reps ? String(s.reps) : ''}
+                                onChangeText={(t) => {
+                                  const n = numOrEmpty(t);
+                                  setFreeSetValue(ex.id, idx, { reps: n ?? 0 });
+                                }}
+                                placeholder="reps"
+                                placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                keyboardType="numeric"
+                                style={styles.freeInput}
+                              />
+                              <Text style={styles.times}>x</Text>
+                              <TextInput
+                                value={s.weightKg ? String(s.weightKg) : ''}
+                                onChangeText={(t) => {
+                                  const n = numOrEmpty(t);
+                                  setFreeSetValue(ex.id, idx, { weightKg: n ?? 0 });
+                                }}
+                                placeholder="kg"
+                                placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                keyboardType="numeric"
+                                style={styles.freeInput}
+                              />
+                              <TextInput
+                                value={getRirText(s)}
+                                onChangeText={(t) => {
+                                  const n = numOrEmpty(t);
+                                  setFreeSetValue(ex.id, idx, { rir: n });
+                                }}
+                                placeholder="RIR"
+                                placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                keyboardType="numeric"
+                                style={styles.rirInput}
+                              />
+                              <Pressable
+                                accessibilityRole="button"
+                                onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                style={({ pressed }) => [
+                                  styles.donePill,
+                                  s.done ? styles.donePillOn : styles.donePillOff,
+                                  pressed && { opacity: 0.85 },
+                                ]}
+                              >
+                                {s.done ? <CheckIcon size={18} color="#000" /> : <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />}
+                              </Pressable>
+                            </View>
+                          ))}
+
+                          <Pressable
+                            accessibilityRole="button"
+                            onPress={() => addFreeSet(ex.id)}
+                            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+                          >
+                            <Text style={styles.secondaryButtonText}>Add set</Text>
+                          </Pressable>
+                        </View>
+                      )}
+
+                      <View style={styles.exerciseNotesContainer}>
+                        <View style={styles.exerciseNotesHeader}>
+                          <StickyNoteIcon size={14} color="rgba(236, 235, 228, 0.5)" />
+                          <Text style={styles.exerciseNotesLabel}>Notes</Text>
+                        </View>
+                        <TextInput
+                          value={ex.notes ?? ''}
+                          onChangeText={(t) => updateExercise(ex.id, (old) => ({ ...old, notes: t }))}
+                          placeholder="Add exercise notes…"
+                          placeholderTextColor="rgba(236, 235, 228, 0.35)"
+                          multiline
+                          style={styles.exerciseNotesInput}
+                        />
+                      </View>
+                    </View>
+                  )}
+                </DraggableExercise>
+              );
+            })}
+          </View>
+
+          {!addOpen ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setAddOpen(true)}
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.secondaryButtonText}>Add exercise</Text>
+            </Pressable>
+          ) : null}
+
+          {editingExerciseId ? (
+            <ExercisePicker
+              value={null}
+              onChange={handleEditExerciseSelect}
+              initialOpen={true}
+              onClose={handleEditExerciseClose}
+            />
+          ) : null}
+        </View>
+
+        <View style={styles.actionsRow}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={isProgrammed ? onProgram : onFinish}
+            disabled={isFinishing}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              isProgrammed && styles.programButton,
+              (pressed || isFinishing) && styles.pressed,
+              isFinishing && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={[styles.primaryButtonText, isProgrammed && styles.programButtonText]}>
+              {isFinishing ? 'Finishing…' : isProgrammed ? 'Program workout' : 'Finish workout'}
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+
+      {toast ? (
+        <View pointerEvents="none" style={styles.toast}>
+          <Text style={styles.toastText}>{toast}</Text>
+        </View>
+      ) : null}
+    </SafeAreaView>
+  );
+}
+
+/*
+ * NOTE:
+ * The block below is a duplicate/partial copy of the screen + an older `styles` object that
+ * was accidentally pasted into this file. It breaks Metro/Babel parsing (and also redeclares
+ * `styles`). We keep it commented out to preserve any reference while ensuring the module
+ * remains syntactically valid.
+ *
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#000' },
+  header: { padding: 16, paddingBottom: 10, gap: 10 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  title: { fontFamily: Fonts.extraBold, fontSize: 22, lineHeight: 28, color: TrenaColors.text, flex: 1 },
+  titleInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: TrenaColors.text,
+    fontFamily: Fonts.extraBold,
+    fontSize: 18,
+  },
+  titleActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+  },
+  iconButtonDanger: {
+    borderColor: 'rgba(255, 90, 90, 0.25)',
+    backgroundColor: 'rgba(255, 90, 90, 0.10)',
+  },
+  metaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  meta: { fontFamily: Fonts.medium, fontSize: 13, color: 'rgba(236, 235, 228, 0.75)' },
+  pill: {
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+  },
+  pillText: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.9)' },
+  autoSaveText: {
+    fontFamily: Fonts.medium,
+    fontSize: 12,
+    color: 'rgba(236, 235, 228, 0.6)',
+    textAlign: 'center',
+    paddingVertical: 8,
+    marginBottom: 4,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 16,
+  },
+  menuItemPressed: {
+    opacity: 0.7,
+  },
+  menuItemText: {
+    fontFamily: Fonts.bold,
+    fontSize: 16,
+    color: TrenaColors.text,
+  },
+  menuSeparator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(236, 235, 228, 0.1)',
+  },
+  setLabelWrap: { width: 110 },
+  setLabelWrapBilbo: { alignSelf: 'flex-start' },
+  setRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  setLabel: { width: 110, fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.75)' },
+  setLabelBilbo: { fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.75)' },
+  setWeight: { width: 80, fontFamily: Fonts.bold, fontSize: 13, color: TrenaColors.text },
+  times: { fontFamily: Fonts.bold, fontSize: 14, color: 'rgba(236, 235, 228, 0.75)' },
+  repsInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+  },
+  repsInputCompact: {
+    width: 72,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+  },
+  freeSetRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  freeSetIndex: {
+    width: 26,
+    height: 26,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+  },
+  freeSetIndexText: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.85)' },
+  freeInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+  },
+  rirInput: {
+    width: 54,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+  },
+  donePill: {
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    minWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  donePillOn: {
+    backgroundColor: TrenaColors.primary,
+    borderColor: TrenaColors.primary,
+  },
+  donePillOff: {
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+  },
+  actionsRow: { flexDirection: 'row', gap: 10, paddingTop: 4 },
+  primaryButton: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: TrenaColors.primary,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0, 0, 0, 0.25)',
+  },
+  primaryButtonText: { color: '#000', fontSize: 15, fontFamily: Fonts.extraBold },
+  programButton: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: TrenaColors.secondary,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+  },
+  programButtonText: { color: TrenaColors.text, fontSize: 15, fontFamily: Fonts.extraBold },
+  secondaryButton: {
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+  },
+  secondaryButtonText: { color: TrenaColors.text, fontSize: 14, fontFamily: Fonts.bold },
+  pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
+  toast: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: Platform.select({ ios: 24, android: 16, default: 16 }),
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(236, 235, 228, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.18)',
+    alignItems: 'center',
+  },
+  toastText: { fontFamily: Fonts.bold, fontSize: 13, color: TrenaColors.text },
+  exerciseNotesContainer: { gap: 8, paddingTop: 6 },
+  exerciseNotesHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  exerciseNotesLabel: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.6)' },
+  exerciseNotesInput: {
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 44,
+    color: TrenaColors.text,
+    fontFamily: Fonts.medium,
+  },
+});
                                   <TextInput
                                     value={getRirText(cur)}
                                     onChangeText={(t) => {
@@ -1147,6 +1588,8 @@ export default function SessionScreen() {
     </SafeAreaView >
   );
 }
+
+*/
 
 function clamp(n: number, min: number, max: number) {
   'worklet';

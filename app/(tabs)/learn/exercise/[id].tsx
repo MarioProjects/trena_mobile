@@ -2,7 +2,7 @@ import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChevronLeftIcon, ExercisesIcon } from '@/components/icons';
@@ -82,7 +82,7 @@ function EmbeddableVideo({ uri }: { uri: string }) {
       style={[styles.video, { height: videoHeight }]}
       contentFit="cover"
       nativeControls
-      surfaceType="textureView"
+      surfaceType={Platform.OS === 'android' ? 'surfaceView' : undefined}
       allowsFullscreen
       allowsPictureInPicture
     />

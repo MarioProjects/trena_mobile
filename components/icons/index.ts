@@ -6,6 +6,7 @@ export { ChevronLeftIcon } from './ChevronLeftIcon';
 export { DragHandleIcon } from './DragHandleIcon';
 export { DuplicateIcon } from './DuplicateIcon';
 export { EditIcon } from './EditIcon';
+export { EnergyIcon } from './EnergyIcon';
 export { ExercisesIcon } from './ExercisesIcon';
 export { FacebookIcon } from './FacebookIcon';
 export { FloppyIcon } from './FloppyIcon';

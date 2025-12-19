@@ -1,25 +1,33 @@
 import { useEvent } from 'expo';
+import { Asset } from 'expo-asset';
 import { Redirect, router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SvgUri } from 'react-native-svg';
 
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 
+const splashSvgUri = Asset.fromModule(require('@/assets/images/splash-letter.svg')).uri;
+
 function HeroContent() {
+  const { width } = useWindowDimensions();
+  void width; // keep hook for future responsive tweaks without lint warnings
+
   const player = useVideoPlayer(require('@/assets/videos/hero.mp4'), (p) => {
     p.loop = true;
     p.muted = true;
   });
 
   const { status } = useEvent(player, 'statusChange', { status: player.status });
+  const showLoadingSplash = status === 'idle' || status === 'loading';
 
   useEffect(() => {
     // On some platforms, calling play() too early can be ignored. Kick off playback once ready.
-    if (status === 'readyToPlay') {
+    if (status !== 'idle' && status !== 'loading' && status !== 'error') {
       player.play();
     }
   }, [player, status]);
@@ -31,33 +39,47 @@ function HeroContent() {
         style={styles.video}
         contentFit="cover"
         nativeControls={false}
-        surfaceType="textureView"
+        // TextureVideoView can crash on some Android devices/fast-refresh with:
+        // "Cannot use shared object that was already released".
+        // SurfaceView is safer; our UI also works without relying on texture overlays.
+        surfaceType={Platform.OS === 'android' ? 'surfaceView' : undefined}
       />
 
       {/* Dark overlay + desaturation effect */}
       <View style={styles.overlay} pointerEvents="none" />
       <View style={styles.desaturateOverlay} pointerEvents="none" />
 
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.content}>
-          <View style={styles.centerBlock}>
-            <TrenaLogo width={200} height={55} color={TrenaColors.primary} />
-            <Text style={styles.tagline}>Start training right now</Text>
-          </View>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push('/get-started')}
-            style={({ pressed }) => [
-              styles.cta,
-              { backgroundColor: TrenaColors.primary },
-              pressed && styles.pressed
-            ]}
-          >
-            <Text style={styles.ctaText}>Get started</Text>
-          </Pressable>
+      {showLoadingSplash ? (
+        <View style={styles.loadingSplash} pointerEvents="none">
+          <SvgUri
+            uri={splashSvgUri}
+            width={180}
+            height={50}
+            color={TrenaColors.primary}
+          />
         </View>
-      </SafeAreaView>
+      ) : (
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.content}>
+            <View style={styles.centerBlock}>
+              <TrenaLogo width={200} height={55} color={TrenaColors.primary} />
+              <Text style={styles.tagline}>Start training right now</Text>
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/get-started')}
+              style={({ pressed }) => [
+                styles.cta,
+                { backgroundColor: TrenaColors.primary },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.ctaText}>Get started</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      )}
     </View>
   );
 }
@@ -93,6 +115,13 @@ const styles = StyleSheet.create({
     zIndex: 1,
     // Semi-transparent gray to wash out colors and reduce saturation
     backgroundColor: 'rgba(20, 20, 20, 0.65)',
+  },
+  loadingSplash: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 3,
+    backgroundColor: TrenaColors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   safe: {
     flex: 1,

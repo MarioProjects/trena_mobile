@@ -1,4 +1,4 @@
-import { ActivitiesIcon, LearnIcon, ProfileIcon, TodayIcon } from '@/components/icons';
+import { ActivitiesIcon, EnergyIcon, LearnIcon, ProfileIcon, TodayIcon } from '@/components/icons';
 import { TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { Redirect, Tabs } from 'expo-router';
@@ -51,6 +51,15 @@ export default function TabsLayout() {
         name="activities"
         options={{
           title: 'Activities',
+          tabBarIcon: ({ color, size }) => (
+            <EnergyIcon color={color} size={typeof size === 'number' ? size : 24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: 'Stats',
           tabBarIcon: ({ color, size }) => (
             <ActivitiesIcon color={color} size={typeof size === 'number' ? size : 24} />
           ),

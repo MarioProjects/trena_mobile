@@ -179,7 +179,11 @@ export function AddExerciseModal({
       setSelectedMethodInstanceId(row.id);
       setAwaitingCreatedMethodKey(null);
     });
-    return unsub;
+    return () => {
+      // `subscribeMethodInstanceCreated` currently returns a function that may return a boolean;
+      // React effect cleanups must return void.
+      unsub();
+    };
   }, [awaitingCreatedMethodKey, open]);
 
   React.useEffect(() => {
