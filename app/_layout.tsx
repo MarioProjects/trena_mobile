@@ -29,8 +29,8 @@ const splashSvgUri = Asset.fromModule(
   require('../assets/images/splash-letter.svg')
 ).uri;
 
-const SPLASH_LOGO_WIDTH = 180;
-const SPLASH_LOGO_HEIGHT = 50;
+const SPLASH_LOGO_WIDTH = 240;
+const SPLASH_LOGO_HEIGHT = 160;
 
 function LoadingSplash() {
   return (

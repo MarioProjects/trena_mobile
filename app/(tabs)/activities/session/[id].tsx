@@ -7,7 +7,7 @@ import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-hand
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { type AddExerciseSelection } from '@/components/AddExerciseModal';
+import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
 import { CalendarIcon, CheckIcon, DragHandleIcon, FloppyIcon, MoreHorizIcon, NotebookIcon, SkipStatusIcon, StickyNoteIcon, XIcon } from '@/components/icons';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
@@ -1124,6 +1124,15 @@ export default function SessionScreen() {
           <Text style={styles.toastText}>{toast}</Text>
         </View>
       ) : null}
+
+      <AddExerciseModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onConfirm={onConfirmAdd}
+        title="Add exercise"
+        confirmLabel="Add"
+        onRequestCreateMethod={onRequestCreateMethod}
+      />
     </SafeAreaView>
   );
 }
