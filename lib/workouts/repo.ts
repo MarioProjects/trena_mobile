@@ -217,6 +217,29 @@ export async function listSessions(limit = 20) {
   return (data ?? []).map(coerceSessionRow);
 }
 
+/**
+ * Fetch completed sessions for stats.\n+ *\n+ * Uses pagination to avoid PostgREST row limits. Defaults are conservative but should\n+ * cover typical personal-use datasets.\n+ */
+export async function listCompletedSessionsForStats(args?: { max?: number; pageSize?: number }) {
+  const max = Math.max(1, args?.max ?? 5000);
+  const pageSize = Math.max(1, Math.min(1000, args?.pageSize ?? 500));
+
+  const out: any[] = [];
+  for (let from = 0; from < max; from += pageSize) {
+    const to = Math.min(from + pageSize - 1, max - 1);
+    const { data, error } = await supabase
+      .from('workout_sessions')
+      .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+      .not('ended_at', 'is', null)
+      .order('ended_at', { ascending: false })
+      .range(from, to);
+    if (error) throw error;
+    out.push(...(data ?? []));
+    if (!data || data.length < to - from + 1) break;
+  }
+
+  return (out ?? []).map(coerceSessionRow);
+}
+
 export async function getSession(id: string) {
   const { data, error } = await supabase
     .from('workout_sessions')
