@@ -4,9 +4,47 @@ import React from 'react';
 import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CharacterIcon, DuplicateIcon, MoreHorizIcon, PlusIcon, TrashIcon, XIcon } from '@/components/icons';
+import {
+    AppleIcon,
+    BackpackIcon,
+    BallIcon,
+    BatteryIcon,
+    BicycleIcon,
+    BrainIcon,
+    BugIcon,
+    CarIcon,
+    CharacterIcon,
+    ChessIcon,
+    DropIcon,
+    DumbbellIcon,
+    DuplicateIcon,
+    FireIcon,
+    HappyIcon,
+    HourglassIcon,
+    LeafIcon,
+    LegIcon,
+    MoreHorizIcon,
+    MountainIcon,
+    MuscleIcon,
+    NeutralIcon,
+    PinIcon,
+    PizzaIcon,
+    PlusIcon,
+    RainIcon,
+    RollerskateIcon,
+    SadIcon,
+    ShoeIcon,
+    SkippingRopeIcon,
+    SnowIcon,
+    StarIcon,
+    TrashIcon,
+    VideoIcon,
+    XIcon,
+    YogaIcon,
+} from '@/components/icons';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions, updateSessionTitle } from '@/lib/workouts/repo';
+import type { WorkoutTag } from '@/lib/workouts/tags';
 import type { WorkoutSessionRow } from '@/lib/workouts/types';
 
 const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.webp');
@@ -50,6 +88,71 @@ function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
 }
 
 const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // keep consistent with session screen
+
+function WorkoutTagIcon({ tag, size = 16, color = 'rgba(236, 235, 228, 0.9)' }: { tag: WorkoutTag; size?: number; color?: string }) {
+  switch (tag) {
+    case 'skippingrope':
+      return <SkippingRopeIcon size={size} color={color} />;
+    case 'leg':
+      return <LegIcon size={size} color={color} />;
+    case 'yoga':
+      return <YogaIcon size={size} color={color} />;
+    case 'chess':
+      return <ChessIcon size={size} color={color} />;
+    case 'bicycle':
+      return <BicycleIcon size={size} color={color} />;
+    case 'snow':
+      return <SnowIcon size={size} color={color} />;
+    case 'hourglass':
+      return <HourglassIcon size={size} color={color} />;
+    case 'pin':
+      return <PinIcon size={size} color={color} />;
+    case 'pizza':
+      return <PizzaIcon size={size} color={color} />;
+    case 'rollerskate':
+      return <RollerskateIcon size={size} color={color} />;
+    case 'apple':
+      return <AppleIcon size={size} color={color} />;
+    case 'backpack':
+      return <BackpackIcon size={size} color={color} />;
+    case 'mountain':
+      return <MountainIcon size={size} color={color} />;
+    case 'bug':
+      return <BugIcon size={size} color={color} />;
+    case 'rain':
+      return <RainIcon size={size} color={color} />;
+    case 'car':
+      return <CarIcon size={size} color={color} />;
+    case 'video':
+      return <VideoIcon size={size} color={color} />;
+    case 'battery':
+      return <BatteryIcon size={size} color={color} />;
+    case 'muscle':
+      return <MuscleIcon size={size} color={color} />;
+    case 'leaf':
+      return <LeafIcon size={size} color={color} />;
+    case 'ball':
+      return <BallIcon size={size} color={color} />;
+    case 'drop':
+      return <DropIcon size={size} color={color} />;
+    case 'fire':
+      return <FireIcon size={size} color={color} />;
+    case 'shoe':
+      return <ShoeIcon size={size} color={color} />;
+    case 'happy':
+      return <HappyIcon size={size} color={color} />;
+    case 'neutral':
+      return <NeutralIcon size={size} color={color} />;
+    case 'sad':
+      return <SadIcon size={size} color={color} />;
+    case 'dumbbell':
+      return <DumbbellIcon size={size} color={color} />;
+    case 'star':
+      return <StarIcon size={size} color={color} />;
+    case 'brain':
+      return <BrainIcon size={size} color={color} />;
+  }
+}
 
 export default function ActivitiesIndexScreen() {
   const [sessions, setSessions] = React.useState<WorkoutSessionRow[]>([]);
@@ -202,6 +305,14 @@ export default function ActivitiesIndexScreen() {
             <Text style={styles.cardMeta}>{`${formatDate(s.started_at)} • ${exCount} exercise${exCount === 1 ? '' : 's'}`}</Text>
           </View>
         </Pressable>
+
+        {s.tags && s.tags.length > 0 ? (
+          <View style={styles.cardTags} pointerEvents="none">
+            {s.tags.slice(0, 3).map((tag) => (
+              <WorkoutTagIcon key={tag} tag={tag} />
+            ))}
+          </View>
+        ) : null}
 
         {isBusy ? (
           <View style={styles.cardOverlay} pointerEvents="none">
@@ -515,6 +626,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     color: 'rgba(236, 235, 228, 0.75)',
+  },
+  cardTags: {
+    position: 'absolute',
+    right: 12,
+    bottom: 10,
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+    opacity: 0.95,
   },
   badge: {
     borderWidth: 1,

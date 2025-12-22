@@ -1,3 +1,5 @@
+import type { WorkoutTag } from './tags';
+
 export type MethodKey = 'bilbo' | 'wendler_531';
 export type MethodScope = 'exercise' | 'group';
 
@@ -44,6 +46,7 @@ export type WorkoutTemplate = {
   id: string;
   name: string;
   items: WorkoutTemplateItem[];
+  tags?: WorkoutTag[];
   created_at?: string;
   updated_at?: string;
 };
@@ -100,6 +103,7 @@ export type WorkoutSessionRow = {
   template_id: string | null;
   started_at: string;
   ended_at: string | null;
+  tags?: WorkoutTag[];
   snapshot: WorkoutSessionSnapshotV1;
   created_at?: string;
   updated_at?: string;

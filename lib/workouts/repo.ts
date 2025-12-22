@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
 import { applyMethodResult, generatePlannedSets } from './methods';
+import { coerceWorkoutTags } from './tags';
 import type {
     ExerciseRef,
     MethodBinding,
@@ -74,8 +75,16 @@ function coerceTemplateRow(row: any): WorkoutTemplate {
     id: row.id,
     name: row.name,
     items,
+    tags: coerceWorkoutTags(row.tags),
     created_at: row.created_at,
     updated_at: row.updated_at,
+  };
+}
+
+function coerceSessionRow(row: any): WorkoutSessionRow {
+  return {
+    ...(row as WorkoutSessionRow),
+    tags: coerceWorkoutTags((row as any)?.tags),
   };
 }
 
@@ -140,29 +149,31 @@ export async function deleteMethodInstance(id: string) {
 export async function listTemplates() {
   const { data, error } = await supabase
     .from('workout_templates')
-    .select('id, name, items, created_at, updated_at')
+    .select('id, name, items, tags, created_at, updated_at')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data ?? []).map(coerceTemplateRow);
 }
 
-export async function createTemplate(args: { name: string; items: WorkoutTemplateItem[] }) {
+export async function createTemplate(args: { name: string; items: WorkoutTemplateItem[]; tags?: WorkoutTemplate['tags'] }) {
   const user_id = await requireUserId();
   const { data, error } = await supabase
     .from('workout_templates')
-    .insert({ user_id, name: args.name, items: args.items })
-    .select('id, name, items, created_at, updated_at')
+    .insert({ user_id, name: args.name, items: args.items, tags: coerceWorkoutTags(args.tags) })
+    .select('id, name, items, tags, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceTemplateRow(data);
 }
 
-export async function updateTemplate(args: { id: string; patch: Partial<Pick<WorkoutTemplate, 'name' | 'items'>> }) {
+export async function updateTemplate(args: { id: string; patch: Partial<Pick<WorkoutTemplate, 'name' | 'items' | 'tags'>> }) {
+  const patch: Record<string, unknown> = { ...(args.patch as any) };
+  if ('tags' in args.patch) patch.tags = coerceWorkoutTags((args.patch as any).tags);
   const { data, error } = await supabase
     .from('workout_templates')
-    .update(args.patch)
+    .update(patch)
     .eq('id', args.id)
-    .select('id, name, items, created_at, updated_at')
+    .select('id, name, items, tags, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceTemplateRow(data);
@@ -179,7 +190,7 @@ export async function duplicateTemplate(id: string) {
   // 1) Fetch original
   const { data: original, error: getErr } = await supabase
     .from('workout_templates')
-    .select('name, items')
+    .select('name, items, tags')
     .eq('id', id)
     .single();
   if (getErr) throw getErr;
@@ -188,8 +199,8 @@ export async function duplicateTemplate(id: string) {
   const nextName = `${original.name} (copy)`;
   const { data, error } = await supabase
     .from('workout_templates')
-    .insert({ user_id, name: nextName, items: original.items })
-    .select('id, name, items, created_at, updated_at')
+    .insert({ user_id, name: nextName, items: original.items, tags: coerceWorkoutTags((original as any).tags) })
+    .select('id, name, items, tags, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceTemplateRow(data);
@@ -198,21 +209,21 @@ export async function duplicateTemplate(id: string) {
 export async function listSessions(limit = 20) {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .order('started_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []) as WorkoutSessionRow[];
+  return (data ?? []).map(coerceSessionRow);
 }
 
 export async function getSession(id: string) {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .eq('id', id)
     .single();
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
 }
 
 export async function deleteSession(id: string) {
@@ -226,7 +237,7 @@ export async function duplicateSession(id: string) {
   // 1. Get original session
   const { data: original, error: getErr } = await supabase
     .from('workout_sessions')
-    .select('template_id, title, snapshot')
+    .select('template_id, title, tags, snapshot')
     .eq('id', id)
     .single();
 
@@ -248,14 +259,15 @@ export async function duplicateSession(id: string) {
       user_id,
       template_id: original.template_id,
       title: original.title,
+      tags: coerceWorkoutTags((original as any).tags),
       started_at: new Date().toISOString(),
       snapshot: newSnapshot,
     })
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
 
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
 }
 
 export async function updateSessionTimes(args: { id: string; started_at?: string; ended_at?: string | null }) {
@@ -266,10 +278,10 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
     .from('workout_sessions')
     .update(patch)
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
 }
 
 export async function updateSessionTitle(args: { id: string; title: string }) {
@@ -277,10 +289,21 @@ export async function updateSessionTitle(args: { id: string; title: string }) {
     .from('workout_sessions')
     .update({ title: args.title })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
+}
+
+export async function updateSessionTags(args: { id: string; tags: string[] }) {
+  const { data, error } = await supabase
+    .from('workout_sessions')
+    .update({ tags: coerceWorkoutTags(args.tags) })
+    .eq('id', args.id)
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .single();
+  if (error) throw error;
+  return coerceSessionRow(data);
 }
 
 async function fetchMethodInstancesByIds(ids: string[]) {
@@ -377,7 +400,7 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
   const user_id = await requireUserId();
   const { data: tplRow, error: tplErr } = await supabase
     .from('workout_templates')
-    .select('id, name, items')
+    .select('id, name, items, tags')
     .eq('id', args.templateId)
     .single();
   if (tplErr) throw tplErr;
@@ -403,13 +426,14 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
       user_id,
       template_id: tplRow.id,
       title: tplRow.name,
+      tags: coerceWorkoutTags((tplRow as any).tags),
       started_at: new Date().toISOString(),
       snapshot,
     })
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
 }
 
 export async function startQuickSession(args?: { title?: string }) {
@@ -424,10 +448,10 @@ export async function startQuickSession(args?: { title?: string }) {
       started_at: new Date().toISOString(),
       snapshot,
     })
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
 }
 
 export async function updateSessionSnapshot(args: { id: string; snapshot: WorkoutSessionSnapshotV1 }) {
@@ -435,10 +459,10 @@ export async function updateSessionSnapshot(args: { id: string; snapshot: Workou
     .from('workout_sessions')
     .update({ snapshot: args.snapshot })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
-  return data as WorkoutSessionRow;
+  return coerceSessionRow(data);
 }
 
 /**
@@ -462,7 +486,7 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
     .from('workout_sessions')
     .update({ ended_at: new Date().toISOString(), snapshot: args.snapshot })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
     .single();
   if (sessErr) throw sessErr;
 
@@ -514,7 +538,7 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
     if (error) throw error;
   }
 
-  return session as WorkoutSessionRow;
+  return coerceSessionRow(session);
 }
 
 export async function listDistinctFreeExercises() {

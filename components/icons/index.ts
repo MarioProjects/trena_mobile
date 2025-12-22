@@ -20,8 +20,31 @@ export { ProfileIcon } from './ProfileIcon';
 export { SearchIcon } from './SearchIcon';
 export { SkipStatusIcon } from './SkipStatusIcon';
 export { StickyNoteIcon } from './StickyNoteIcon';
+export { TagIcon } from './TagIcon';
 export { TodayIcon } from './TodayIcon';
 export { TrashIcon } from './TrashIcon';
 export { XIcon } from './XIcon';
+
+export {
+    AppleIcon,
+    BackpackIcon,
+    BallIcon,
+    BatteryIcon, BicycleIcon, BrainIcon, BugIcon, CarIcon, ChessIcon, DropIcon,
+    DumbbellIcon,
+    FireIcon,
+    HappyIcon,
+    HourglassIcon, LeafIcon, LegIcon, MountainIcon, MuscleIcon, NeutralIcon,
+    PinIcon,
+    PizzaIcon,
+    RainIcon,
+    RollerskateIcon,
+    SadIcon,
+    ShoeIcon,
+    SkippingRopeIcon,
+    SnowIcon,
+    StarIcon,
+    VideoIcon,
+    YogaIcon
+} from './tags';
 
 export type { IconProps, StrokeIconProps } from './types';

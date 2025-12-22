@@ -2,7 +2,7 @@ import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,21 +10,62 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
 import {
+    AppleIcon,
+    BackpackIcon,
+    BallIcon,
+    BatteryIcon,
+    BicycleIcon,
+    BrainIcon,
+    BugIcon,
     CalendarIcon,
+    CarIcon,
     CheckIcon,
+    ChessIcon,
     DragHandleIcon,
+    DropIcon,
+    DumbbellIcon,
     DuplicateIcon,
     EditIcon,
+    FireIcon,
     FloppyIcon,
+    HappyIcon,
+    HourglassIcon,
+    LeafIcon,
+    LegIcon,
     MoreHorizIcon,
+    MountainIcon,
+    MuscleIcon,
+    NeutralIcon,
     NotebookIcon,
+    PinIcon,
+    PizzaIcon,
+    RainIcon,
+    RollerskateIcon,
+    SadIcon,
+    ShoeIcon,
+    SkippingRopeIcon,
     SkipStatusIcon,
+    SnowIcon,
+    StarIcon,
     StickyNoteIcon,
+    TagIcon,
     TrashIcon,
+    VideoIcon,
     XIcon,
+    YogaIcon,
 } from '@/components/icons';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
-import { buildSessionExerciseFromMethodSelection, deleteSession, finishSessionAndAdvanceMethods, getSession, updateSessionSnapshot, updateSessionTimes, updateSessionTitle } from '@/lib/workouts/repo';
+import {
+    buildSessionExerciseFromMethodSelection,
+    deleteSession,
+    finishSessionAndAdvanceMethods,
+    getSession,
+    updateSessionSnapshot,
+    updateSessionTags,
+    updateSessionTimes,
+    updateSessionTitle,
+} from '@/lib/workouts/repo';
+import { MAX_WORKOUT_TAGS, sortWorkoutTags, WORKOUT_TAGS, type WorkoutTag } from '@/lib/workouts/tags';
 import type {
     ExerciseRef,
     PerformedSet,
@@ -37,6 +78,71 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 const learnExercises = learnData.filter((x) => x.type === 'exercise');
 const learnExerciseNameById = new Map(learnExercises.map((x) => [x.id, x.name]));
+
+function WorkoutTagIcon({ tag, size = 18, color = '#141B34' }: { tag: WorkoutTag; size?: number; color?: string }) {
+  switch (tag) {
+    case 'skippingrope':
+      return <SkippingRopeIcon size={size} color={color} />;
+    case 'leg':
+      return <LegIcon size={size} color={color} />;
+    case 'yoga':
+      return <YogaIcon size={size} color={color} />;
+    case 'chess':
+      return <ChessIcon size={size} color={color} />;
+    case 'bicycle':
+      return <BicycleIcon size={size} color={color} />;
+    case 'snow':
+      return <SnowIcon size={size} color={color} />;
+    case 'hourglass':
+      return <HourglassIcon size={size} color={color} />;
+    case 'pin':
+      return <PinIcon size={size} color={color} />;
+    case 'pizza':
+      return <PizzaIcon size={size} color={color} />;
+    case 'rollerskate':
+      return <RollerskateIcon size={size} color={color} />;
+    case 'apple':
+      return <AppleIcon size={size} color={color} />;
+    case 'backpack':
+      return <BackpackIcon size={size} color={color} />;
+    case 'mountain':
+      return <MountainIcon size={size} color={color} />;
+    case 'bug':
+      return <BugIcon size={size} color={color} />;
+    case 'rain':
+      return <RainIcon size={size} color={color} />;
+    case 'car':
+      return <CarIcon size={size} color={color} />;
+    case 'video':
+      return <VideoIcon size={size} color={color} />;
+    case 'battery':
+      return <BatteryIcon size={size} color={color} />;
+    case 'muscle':
+      return <MuscleIcon size={size} color={color} />;
+    case 'leaf':
+      return <LeafIcon size={size} color={color} />;
+    case 'ball':
+      return <BallIcon size={size} color={color} />;
+    case 'drop':
+      return <DropIcon size={size} color={color} />;
+    case 'fire':
+      return <FireIcon size={size} color={color} />;
+    case 'shoe':
+      return <ShoeIcon size={size} color={color} />;
+    case 'happy':
+      return <HappyIcon size={size} color={color} />;
+    case 'neutral':
+      return <NeutralIcon size={size} color={color} />;
+    case 'sad':
+      return <SadIcon size={size} color={color} />;
+    case 'dumbbell':
+      return <DumbbellIcon size={size} color={color} />;
+    case 'star':
+      return <StarIcon size={size} color={color} />;
+    case 'brain':
+      return <BrainIcon size={size} color={color} />;
+  }
+}
 
 function makeLocalId(prefix: string) {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
@@ -92,6 +198,9 @@ export default function SessionScreen() {
 
   const [row, setRow] = React.useState<WorkoutSessionRow | null>(null);
   const [snapshot, setSnapshot] = React.useState<WorkoutSessionSnapshotV1>({ version: 1, exercises: [] });
+  const [tags, setTags] = React.useState<WorkoutTag[]>([]);
+  const [isSavingTags, setIsSavingTags] = React.useState(false);
+  const [isTagsOpen, setIsTagsOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isAutoSaving, setIsAutoSaving] = React.useState(false);
   const [isFinishing, setIsFinishing] = React.useState(false);
@@ -132,9 +241,11 @@ export default function SessionScreen() {
 
   const didHydrateRef = React.useRef(false);
   const lastSavedJsonRef = React.useRef<string>('');
+  const lastSavedTagsJsonRef = React.useRef<string>('');
   const savingRef = React.useRef(false);
   const pendingRef = React.useRef<WorkoutSessionSnapshotV1 | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tagsTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const didFinishRef = React.useRef(false); // Track if workout was properly finished
   const snapshotRef = React.useRef<WorkoutSessionSnapshotV1>(snapshot); // For cleanup access
   const isProgrammedRef = React.useRef(false);
@@ -211,6 +322,9 @@ export default function SessionScreen() {
       const s = await getSession(sessionId);
       setRow(s);
       setTitleDraft(s.title ?? '');
+      const hydratedTags = (s.tags ?? []) as WorkoutTag[];
+      setTags(sortWorkoutTags(hydratedTags));
+      lastSavedTagsJsonRef.current = JSON.stringify(hydratedTags);
       const hydrated = ensureSnapshot(s.snapshot);
       setSnapshot(hydrated);
       didHydrateRef.current = true;
@@ -263,6 +377,45 @@ export default function SessionScreen() {
   React.useEffect(() => {
     scheduleAutosave(snapshot);
   }, [scheduleAutosave, snapshot]);
+
+  React.useEffect(() => {
+    if (!sessionId) return;
+    if (!didHydrateRef.current) return;
+    const json = JSON.stringify(tags);
+    if (json === lastSavedTagsJsonRef.current) return;
+
+    if (tagsTimerRef.current) clearTimeout(tagsTimerRef.current);
+    setIsSavingTags(true);
+    tagsTimerRef.current = setTimeout(async () => {
+      try {
+        const updated = await updateSessionTags({ id: sessionId, tags });
+        setRow(updated);
+        lastSavedTagsJsonRef.current = JSON.stringify(updated.tags ?? []);
+      } catch (e: any) {
+        showToast(e?.message ?? 'Saving tags failed');
+      } finally {
+        setIsSavingTags(false);
+      }
+    }, 450);
+
+    return () => {
+      if (tagsTimerRef.current) clearTimeout(tagsTimerRef.current);
+    };
+  }, [sessionId, showToast, tags]);
+
+  const toggleTag = React.useCallback(
+    (tag: WorkoutTag) => {
+      setTags((cur) => {
+        if (cur.includes(tag)) return sortWorkoutTags(cur.filter((t) => t !== tag));
+        if (cur.length >= MAX_WORKOUT_TAGS) {
+          showToast(`You can select up to ${MAX_WORKOUT_TAGS} tags`);
+          return cur;
+        }
+        return sortWorkoutTags([...cur, tag]);
+      });
+    },
+    [showToast],
+  );
 
   // Keep snapshotRef in sync for cleanup access
   React.useEffect(() => {
@@ -720,18 +873,78 @@ export default function SessionScreen() {
           </View>
 
           {!isEditingTitle ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Edit workout date"
-              onPress={onCalendarPress}
-              style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
-            >
-              <CalendarIcon size={22} color={TrenaColors.text} />
-            </Pressable>
+            <View style={styles.headerActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Edit workout tags"
+                onPress={() => setIsTagsOpen(true)}
+                style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+              >
+                <TagIcon size={22} color={TrenaColors.text} />
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Edit workout date"
+                onPress={onCalendarPress}
+                style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+              >
+                <CalendarIcon size={22} color={TrenaColors.text} />
+              </Pressable>
+            </View>
           ) : null}
 
 
         </View>
+
+        <Modal visible={isTagsOpen} transparent animationType="fade" onRequestClose={() => setIsTagsOpen(false)}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setIsTagsOpen(false)}>
+            <View style={styles.tagsSheet} onStartShouldSetResponder={() => true}>
+              <View style={styles.tagsSheetHeader}>
+                <Text style={styles.tagsSheetTitle}>Tags</Text>
+                <View style={styles.tagsSheetHeaderRight}>
+                  {isSavingTags ? <FloppyIcon size={14} color="rgba(236, 235, 228, 0.75)" /> : null}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Close tags"
+                    onPress={() => setIsTagsOpen(false)}
+                    hitSlop={10}
+                    style={({ pressed }) => [styles.tagsCloseButton, pressed && { opacity: 0.85 }]}
+                  >
+                    <XIcon size={18} color={TrenaColors.text} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <FlatList
+                data={WORKOUT_TAGS as unknown as WorkoutTag[]}
+                keyExtractor={(tag) => tag}
+                numColumns={6}
+                scrollEnabled={false}
+                contentContainerStyle={styles.tagsGridContent}
+                columnWrapperStyle={styles.tagsGridRow}
+                renderItem={({ item: tag }) => {
+                  const selected = tags.includes(tag);
+                  return (
+                    <View style={styles.tagsGridCell}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={selected ? `Remove ${tag} tag` : `Add ${tag} tag`}
+                        onPress={() => toggleTag(tag)}
+                        style={({ pressed }) => [
+                          styles.tagButton,
+                          selected ? styles.tagButtonSelected : styles.tagButtonUnselected,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <WorkoutTagIcon tag={tag} size={18} color={selected ? '#141B34' : 'rgba(236, 235, 228, 0.85)'} />
+                      </Pressable>
+                    </View>
+                  );
+                }}
+              />
+            </View>
+          </Pressable>
+        </Modal>
 
         <View style={styles.notesCard}>
           <View style={styles.notesHeader}>
@@ -1721,6 +1934,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: TrenaColors.background },
   container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   title: { fontSize: 26, lineHeight: 32, fontFamily: Fonts.extraBold, color: TrenaColors.text, letterSpacing: -0.25 },
   titleInput: {
     borderWidth: 1,
@@ -1980,6 +2194,38 @@ const styles = StyleSheet.create({
   pillText: { fontFamily: Fonts.semiBold, fontSize: 13, lineHeight: 16 },
   pillTextSelected: { color: TrenaColors.background },
   pillTextUnselected: { color: 'rgba(236, 235, 228, 0.9)' },
+  tagsGridContent: { paddingTop: 2, paddingBottom: 2, rowGap: 10 },
+  tagsGridRow: { columnGap: 10, justifyContent: 'flex-start' },
+  tagsGridCell: { flex: 1, alignItems: 'center' },
+  tagButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  tagButtonSelected: { backgroundColor: TrenaColors.primary, borderColor: TrenaColors.primary },
+  tagButtonUnselected: { backgroundColor: 'rgba(236, 235, 228, 0.04)', borderColor: 'rgba(236, 235, 228, 0.12)' },
+  tagsSheet: {
+    backgroundColor: '#1C1C1E',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.12)',
+  },
+  tagsSheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  tagsSheetTitle: { fontFamily: Fonts.extraBold, fontSize: 16, color: TrenaColors.text },
+  tagsSheetHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  tagsCloseButton: { padding: 6 },
   // Workout notes styles
   notesCard: {
     borderWidth: 1,
