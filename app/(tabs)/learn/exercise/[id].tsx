@@ -44,6 +44,14 @@ function Pill({ label }: { label: string }) {
   );
 }
 
+function trackingLabel(item: LearnItem): string {
+  const t = (item as any)?.tracking?.type as string | undefined;
+  if (!t || t === 'strength') return 'Tracking: reps + weight';
+  if (t === 'interval_time') return 'Tracking: timed intervals';
+  if (t === 'distance_time') return 'Tracking: distance + time (pace)';
+  return 'Tracking: —';
+}
+
 function SectionTitle({ children }: { children: string }) {
   return <Text style={styles.sectionTitle}>{children}</Text>;
 }
@@ -184,6 +192,11 @@ export default function ExerciseDetailScreen() {
             {(item.tags || []).slice(0, 8).map((t) => (
               <Pill key={t} label={t} />
             ))}
+          </View>
+
+          <View style={styles.section}>
+            <SectionTitle>Tracking</SectionTitle>
+            <Text style={styles.body}>{trackingLabel(item)}</Text>
           </View>
 
           <View style={styles.section}>

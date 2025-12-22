@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
+import { defaultTrackingForExerciseRef } from './exercise-tracking';
 import { applyMethodResult, generatePlannedSets } from './methods';
 import { coerceWorkoutTags } from './tags';
 import type {
@@ -363,6 +364,7 @@ function buildSessionExerciseFromTemplateItem(args: {
       id: makeLocalId('sx'),
       exercise: item.exercise,
       source: { type: 'free' },
+      tracking: defaultTrackingForExerciseRef(item.exercise),
       plannedSets: [],
       performedSets: [],
     };

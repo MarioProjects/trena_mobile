@@ -3,6 +3,11 @@ import type { WorkoutTag } from './tags';
 export type MethodKey = 'bilbo' | 'wendler_531';
 export type MethodScope = 'exercise' | 'group';
 
+export type ExerciseTracking =
+  | { type: 'strength' }
+  | { type: 'interval_time'; defaultDurationSec?: number }
+  | { type: 'distance_time'; distanceUnit?: 'km' | 'm'; showPace?: boolean; defaultLapDistance?: number };
+
 export type LearnExerciseRef = {
   kind: 'learn';
   learnExerciseId: string;
@@ -62,10 +67,16 @@ export type PlannedSet = {
 
 export type PerformedSet = {
   id: string;
-  weightKg: number;
-  reps: number;
-  isAmrap?: boolean;
+  // Strength-style
+  weightKg?: number;
+  reps?: number;
   rir?: number;
+
+  // Timed / cardio-style
+  durationSec?: number;
+  distanceKm?: number;
+
+  isAmrap?: boolean;
   done?: boolean;
 };
 
@@ -86,6 +97,11 @@ export type SessionExercise = {
   id: string;
   exercise: ExerciseRef;
   source: SessionExerciseSource;
+  /**
+   * Determines how to log this exercise in a session UI.
+   * If omitted, assume strength-style logging.
+   */
+  tracking?: ExerciseTracking;
   plannedSets: PlannedSet[];
   performedSets: PerformedSet[];
   notes?: string;

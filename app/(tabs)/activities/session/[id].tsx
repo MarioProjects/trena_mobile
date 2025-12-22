@@ -8,71 +8,73 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
+import { DurationWheelModal } from '@/components/DurationWheelModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
 import {
-    AppleIcon,
-    BackpackIcon,
-    BallIcon,
-    BatteryIcon,
-    BicycleIcon,
-    BrainIcon,
-    BugIcon,
-    CalendarIcon,
-    CarIcon,
-    CheckIcon,
-    ChessIcon,
-    DragHandleIcon,
-    DropIcon,
-    DumbbellIcon,
-    DuplicateIcon,
-    EditIcon,
-    FireIcon,
-    FloppyIcon,
-    HappyIcon,
-    HourglassIcon,
-    LeafIcon,
-    LegIcon,
-    MoreHorizIcon,
-    MountainIcon,
-    MuscleIcon,
-    NeutralIcon,
-    NotebookIcon,
-    PinIcon,
-    PizzaIcon,
-    RainIcon,
-    RollerskateIcon,
-    SadIcon,
-    ShoeIcon,
-    SkippingRopeIcon,
-    SkipStatusIcon,
-    SnowIcon,
-    StarIcon,
-    StickyNoteIcon,
-    TagIcon,
-    TrashIcon,
-    VideoIcon,
-    XIcon,
-    YogaIcon,
+  AppleIcon,
+  BackpackIcon,
+  BallIcon,
+  BatteryIcon,
+  BicycleIcon,
+  BrainIcon,
+  BugIcon,
+  CalendarIcon,
+  CarIcon,
+  CheckIcon,
+  ChessIcon,
+  DragHandleIcon,
+  DropIcon,
+  DumbbellIcon,
+  DuplicateIcon,
+  EditIcon,
+  FireIcon,
+  FloppyIcon,
+  HappyIcon,
+  HourglassIcon,
+  LeafIcon,
+  LegIcon,
+  MoreHorizIcon,
+  MountainIcon,
+  MuscleIcon,
+  NeutralIcon,
+  NotebookIcon,
+  PinIcon,
+  PizzaIcon,
+  RainIcon,
+  RollerskateIcon,
+  SadIcon,
+  ShoeIcon,
+  SkippingRopeIcon,
+  SkipStatusIcon,
+  SnowIcon,
+  StarIcon,
+  StickyNoteIcon,
+  TagIcon,
+  TrashIcon,
+  VideoIcon,
+  XIcon,
+  YogaIcon,
 } from '@/components/icons';
+import { defaultTrackingForExerciseRef } from '@/lib/workouts/exercise-tracking';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import {
-    buildSessionExerciseFromMethodSelection,
-    deleteSession,
-    finishSessionAndAdvanceMethods,
-    getSession,
-    updateSessionSnapshot,
-    updateSessionTags,
-    updateSessionTimes,
-    updateSessionTitle,
+  buildSessionExerciseFromMethodSelection,
+  deleteSession,
+  finishSessionAndAdvanceMethods,
+  getSession,
+  updateSessionSnapshot,
+  updateSessionTags,
+  updateSessionTimes,
+  updateSessionTitle,
 } from '@/lib/workouts/repo';
 import { MAX_WORKOUT_TAGS, sortWorkoutTags, WORKOUT_TAGS, type WorkoutTag } from '@/lib/workouts/tags';
 import type {
-    ExerciseRef,
-    PerformedSet,
-    PlannedSet,
-    SessionExercise,
-    WorkoutSessionRow,
-    WorkoutSessionSnapshotV1,
+  ExerciseRef,
+  PerformedSet,
+  PlannedSet,
+  SessionExercise,
+  WorkoutSessionRow,
+  WorkoutSessionSnapshotV1,
 } from '@/lib/workouts/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -178,10 +180,75 @@ function ensureSnapshot(x: any): WorkoutSessionSnapshotV1 {
 }
 
 function numOrEmpty(x: string) {
-  const cleaned = x.replace(/[^0-9.]/g, '');
+  // Allow decimals and tolerate comma as decimal separator.
+  const normalized = x.trim().replace(',', '.');
+  let cleaned = normalized.replace(/[^0-9.]/g, '');
+  // Keep only the first dot if user typed multiple.
+  const firstDot = cleaned.indexOf('.');
+  if (firstDot !== -1) {
+    cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+  }
   if (!cleaned) return undefined;
   const n = parseFloat(cleaned);
   return Number.isNaN(n) ? undefined : n;
+}
+
+function parsePositiveNumberDraft(raw: string) {
+  const t = raw.trim();
+  if (!t) return undefined;
+  // Allow comma decimals while typing.
+  let normalized = t.replace(',', '.');
+  // Allow starting with "." by treating it as "0."
+  if (normalized.startsWith('.')) normalized = `0${normalized}`;
+  const n = numOrEmpty(normalized);
+  if (n === undefined) return undefined;
+  return n > 0 ? n : undefined;
+}
+
+function durationToText(sec: number | undefined) {
+  if (!sec || !Number.isFinite(sec) || sec <= 0) return '';
+  const total = Math.round(sec);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}:${pad2(m)}:${pad2(s)}`;
+  return `${m}:${pad2(s)}`;
+}
+
+function parseDurationToSec(raw: string) {
+  const t = raw.trim();
+  if (!t) return undefined;
+  // Accept hh:mm:ss, mm:ss, or ss
+  if (t.includes(':')) {
+    const parts = t.split(':').map((x) => x.trim());
+    if (parts.length === 2) {
+      const [mm, ss] = parts;
+      const m = numOrEmpty(mm ?? '');
+      const s = numOrEmpty(ss ?? '');
+      if (m === undefined || s === undefined) return undefined;
+      return Math.max(0, Math.round(m * 60 + s));
+    }
+    if (parts.length === 3) {
+      const [hh, mm, ss] = parts;
+      const h = numOrEmpty(hh ?? '');
+      const m = numOrEmpty(mm ?? '');
+      const s = numOrEmpty(ss ?? '');
+      if (h === undefined || m === undefined || s === undefined) return undefined;
+      return Math.max(0, Math.round(h * 3600 + m * 60 + s));
+    }
+    return undefined;
+  }
+  const s = numOrEmpty(t);
+  if (s === undefined) return undefined;
+  return Math.max(0, Math.round(s));
+}
+
+function paceText(durationSec: number | undefined, distanceKm: number | undefined) {
+  if (!durationSec || !distanceKm || distanceKm <= 0) return '';
+  const pace = durationSec / distanceKm; // sec/km
+  const m = Math.floor(pace / 60);
+  const s = Math.round(pace % 60);
+  return `${m}:${pad2(s)}/km`;
 }
 
 const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // treat as "scheduled" if > now + 15m
@@ -208,6 +275,8 @@ export default function SessionScreen() {
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [titleDraft, setTitleDraft] = React.useState('');
   const [isSavingTitle, setIsSavingTitle] = React.useState(false);
+  const [distanceDraftBySetId, setDistanceDraftBySetId] = React.useState<Record<string, string>>({});
+  const [durationPicker, setDurationPicker] = React.useState<null | { exerciseId: string; setIdx: number; seconds: number }>(null);
   // Removed explicit reorderMode state
   const heightsRef = React.useRef<Record<string, number>>({});
   const positionsRef = React.useRef<string[]>([]);
@@ -515,6 +584,7 @@ export default function SessionScreen() {
     updateExercise(editingExerciseId, (ex) => ({
       ...ex,
       exercise: ref,
+      tracking: ex.plannedSets?.length ? ex.tracking : defaultTrackingForExerciseRef(ref),
     }));
     setEditingExerciseId(null);
     showToast('Exercise updated');
@@ -609,12 +679,35 @@ export default function SessionScreen() {
 
   const addFreeSet = (exerciseId: string) => {
     updateExercise(exerciseId, (ex) => {
+      const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
       const prev = ex.performedSets?.[ex.performedSets.length - 1];
-      const nextSet: PerformedSet = prev
-        ? { id: makeLocalId('set'), weightKg: prev.weightKg, reps: prev.reps, rir: prev.rir, done: false }
-        : { id: makeLocalId('set'), weightKg: 0, reps: 0 };
+      let nextSet: PerformedSet;
+      if (tracking.type === 'interval_time') {
+        const prevDur = prev?.durationSec;
+        nextSet = {
+          id: makeLocalId('set'),
+          // Don't auto-fill defaults; leave blank unless copying previous.
+          durationSec: typeof prevDur === 'number' ? prevDur : 0,
+          done: false,
+        };
+      } else if (tracking.type === 'distance_time') {
+        const prevDist = prev?.distanceKm;
+        const prevDur = prev?.durationSec;
+        nextSet = {
+          id: makeLocalId('set'),
+          // Don't auto-fill defaults; leave blank unless copying previous.
+          distanceKm: typeof prevDist === 'number' ? prevDist : 0,
+          durationSec: typeof prevDur === 'number' ? prevDur : 0,
+          done: false,
+        };
+      } else {
+        nextSet = prev
+          ? { id: makeLocalId('set'), weightKg: prev.weightKg ?? 0, reps: prev.reps ?? 0, rir: prev.rir, done: false }
+          : { id: makeLocalId('set'), weightKg: 0, reps: 0 };
+      }
       return {
         ...ex,
+        tracking,
         performedSets: [...(ex.performedSets ?? []), nextSet],
       };
     });
@@ -632,6 +725,7 @@ export default function SessionScreen() {
               id: makeLocalId('sx'),
               exercise,
               source: { type: 'free' },
+              tracking: defaultTrackingForExerciseRef(exercise),
               plannedSets: [],
               performedSets: [],
             },
@@ -1212,82 +1306,253 @@ export default function SessionScreen() {
                         </View>
                       ) : (
                         <View style={{ gap: 10 }}>
-                          {(ex.performedSets ?? []).map((s, idx) => (
-                            <View key={s.id} style={styles.freeSetRow}>
-                              <Pressable
-                                accessibilityRole="button"
-                                onLongPress={() =>
-                                  Alert.alert('Set options', `Set ${idx + 1}`, [
-                                    { text: 'Cancel', style: 'cancel' },
-                                    {
-                                      text: s.done ? 'Mark not done' : 'Mark done',
-                                      onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
-                                    },
-                                    {
-                                      text: 'Remove set',
-                                      style: 'destructive',
-                                      onPress: () => removeFreeSet(ex.id, idx),
-                                    },
-                                  ])
-                                }
-                                style={styles.freeSetIndex}
-                              >
-                                <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
-                              </Pressable>
-                              <TextInput
-                                value={s.reps ? String(s.reps) : ''}
-                                onChangeText={(t) => {
-                                  const n = numOrEmpty(t);
-                                  setFreeSetValue(ex.id, idx, { reps: n ?? 0 });
-                                }}
-                                placeholder="reps"
-                                placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                keyboardType="numeric"
-                                style={styles.freeInput}
-                              />
-                              <Text style={styles.times}>x</Text>
-                              <TextInput
-                                value={s.weightKg ? String(s.weightKg) : ''}
-                                onChangeText={(t) => {
-                                  const n = numOrEmpty(t);
-                                  setFreeSetValue(ex.id, idx, { weightKg: n ?? 0 });
-                                }}
-                                placeholder="kg"
-                                placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                keyboardType="numeric"
-                                style={styles.freeInput}
-                              />
-                              <TextInput
-                                value={getRirText(s)}
-                                onChangeText={(t) => {
-                                  const n = numOrEmpty(t);
-                                  setFreeSetValue(ex.id, idx, { rir: n });
-                                }}
-                                placeholder="RIR"
-                                placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                keyboardType="numeric"
-                                style={styles.rirInput}
-                              />
-                              <Pressable
-                                accessibilityRole="button"
-                                onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
-                                style={({ pressed }) => [
-                                  styles.donePill,
-                                  s.done ? styles.donePillOn : styles.donePillOff,
-                                  pressed && { opacity: 0.85 },
-                                ]}
-                              >
-                                {s.done ? <CheckIcon size={18} color="#000" /> : <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />}
-                              </Pressable>
-                            </View>
-                          ))}
+                          {(() => {
+                            const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
+                            if (tracking.type === 'interval_time') {
+                              return (ex.performedSets ?? []).map((s, idx) => (
+                                <View key={s.id} style={styles.freeSetRow}>
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onLongPress={() =>
+                                      Alert.alert('Set options', `Interval ${idx + 1}`, [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                          text: s.done ? 'Mark not done' : 'Mark done',
+                                          onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                        },
+                                        {
+                                          text: 'Remove interval',
+                                          style: 'destructive',
+                                          onPress: () => removeFreeSet(ex.id, idx),
+                                        },
+                                      ])
+                                    }
+                                    style={styles.freeSetIndex}
+                                  >
+                                    <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
+                                  </Pressable>
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => setDurationPicker({ exerciseId: ex.id, setIdx: idx, seconds: s.durationSec ?? 0 })}
+                                    style={({ pressed }) => [
+                                      styles.freeInput,
+                                      { flex: 2.4, justifyContent: 'center' },
+                                      pressed && { opacity: 0.85 },
+                                    ]}
+                                  >
+                                    <Text
+                                      style={{
+                                        fontFamily: Fonts.medium,
+                                        textAlign: 'center',
+                                        color: durationToText(s.durationSec) ? TrenaColors.text : 'rgba(236, 235, 228, 0.5)',
+                                      }}
+                                    >
+                                      {durationToText(s.durationSec) || '00:00'}
+                                    </Text>
+                                  </Pressable>
+                                  <Text style={[styles.meta, { flex: 1 }]} numberOfLines={1}>
+                                    time
+                                  </Text>
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                    style={({ pressed }) => [
+                                      styles.donePill,
+                                      s.done ? styles.donePillOn : styles.donePillOff,
+                                      pressed && { opacity: 0.85 },
+                                    ]}
+                                  >
+                                    {s.done ? (
+                                      <CheckIcon size={18} color="#000" />
+                                    ) : (
+                                      <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+                                    )}
+                                  </Pressable>
+                                </View>
+                              ));
+                            }
+
+                            if (tracking.type === 'distance_time') {
+                              return (ex.performedSets ?? []).map((s, idx) => (
+                                <View key={s.id} style={styles.freeSetRow}>
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onLongPress={() =>
+                                      Alert.alert('Set options', `Lap ${idx + 1}`, [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                          text: s.done ? 'Mark not done' : 'Mark done',
+                                          onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                        },
+                                        {
+                                          text: 'Remove lap',
+                                          style: 'destructive',
+                                          onPress: () => removeFreeSet(ex.id, idx),
+                                        },
+                                      ])
+                                    }
+                                    style={styles.freeSetIndex}
+                                  >
+                                    <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
+                                  </Pressable>
+
+                                  <TextInput
+                                    value={
+                                      distanceDraftBySetId[s.id] ??
+                                      (typeof s.distanceKm === 'number' && s.distanceKm > 0 ? String(s.distanceKm) : '')
+                                    }
+                                    onChangeText={(t) => {
+                                      setDistanceDraftBySetId((cur) => ({ ...cur, [s.id]: t }));
+                                      setFreeSetValue(ex.id, idx, { distanceKm: parsePositiveNumberDraft(t) });
+                                    }}
+                                    onBlur={() => {
+                                      setDistanceDraftBySetId((cur) => {
+                                        if (!(s.id in cur)) return cur;
+                                        const next = { ...cur };
+                                        delete next[s.id];
+                                        return next;
+                                      });
+                                    }}
+                                    placeholder="km"
+                                    placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                    keyboardType="decimal-pad"
+                                    style={[styles.freeInput, { flex: 1.5 }]}
+                                  />
+                                  <Text style={[styles.meta, { width: 20 }]} numberOfLines={1}>
+                                    km
+                                  </Text>
+
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => setDurationPicker({ exerciseId: ex.id, setIdx: idx, seconds: s.durationSec ?? 0 })}
+                                    style={({ pressed }) => [
+                                      styles.freeInput,
+                                      { flex: 3.5, justifyContent: 'center' },
+                                      pressed && { opacity: 0.85 },
+                                    ]}
+                                  >
+                                    <Text
+                                      style={{
+                                        fontFamily: Fonts.medium,
+                                        textAlign: 'center',
+                                        color: durationToText(s.durationSec) ? TrenaColors.text : 'rgba(236, 235, 228, 0.5)',
+                                      }}
+                                    >
+                                      {durationToText(s.durationSec) || '00:00'}
+                                    </Text>
+                                  </Pressable>
+
+                                  <Text style={[styles.meta, { width: 44, textAlign: 'left' }]} numberOfLines={1}>
+                                    {paceText(s.durationSec, s.distanceKm) || 'pace'}
+                                  </Text>
+
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                    style={({ pressed }) => [
+                                      styles.donePill,
+                                      s.done ? styles.donePillOn : styles.donePillOff,
+                                      pressed && { opacity: 0.85 },
+                                    ]}
+                                  >
+                                    {s.done ? (
+                                      <CheckIcon size={18} color="#000" />
+                                    ) : (
+                                      <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+                                    )}
+                                  </Pressable>
+                                </View>
+                              ));
+                            }
+
+                            // strength default
+                            return (ex.performedSets ?? []).map((s, idx) => (
+                              <View key={s.id} style={styles.freeSetRow}>
+                                <Pressable
+                                  accessibilityRole="button"
+                                  onLongPress={() =>
+                                    Alert.alert('Set options', `Set ${idx + 1}`, [
+                                      { text: 'Cancel', style: 'cancel' },
+                                      {
+                                        text: s.done ? 'Mark not done' : 'Mark done',
+                                        onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                      },
+                                      {
+                                        text: 'Remove set',
+                                        style: 'destructive',
+                                        onPress: () => removeFreeSet(ex.id, idx),
+                                      },
+                                    ])
+                                  }
+                                  style={styles.freeSetIndex}
+                                >
+                                  <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
+                                </Pressable>
+                                <TextInput
+                                  value={s.reps ? String(s.reps) : ''}
+                                  onChangeText={(t) => {
+                                    const n = numOrEmpty(t);
+                                    setFreeSetValue(ex.id, idx, { reps: n ?? 0 });
+                                  }}
+                                  placeholder="reps"
+                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  keyboardType="numeric"
+                                  style={styles.freeInput}
+                                />
+                                <Text style={styles.times}>x</Text>
+                                <TextInput
+                                  value={s.weightKg ? String(s.weightKg) : ''}
+                                  onChangeText={(t) => {
+                                    const n = numOrEmpty(t);
+                                    setFreeSetValue(ex.id, idx, { weightKg: n ?? 0 });
+                                  }}
+                                  placeholder="kg"
+                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  keyboardType="numeric"
+                                  style={styles.freeInput}
+                                />
+                                <TextInput
+                                  value={getRirText(s)}
+                                  onChangeText={(t) => {
+                                    const n = numOrEmpty(t);
+                                    setFreeSetValue(ex.id, idx, { rir: n });
+                                  }}
+                                  placeholder="RIR"
+                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  keyboardType="numeric"
+                                  style={styles.rirInput}
+                                />
+                                <Pressable
+                                  accessibilityRole="button"
+                                  onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                  style={({ pressed }) => [
+                                    styles.donePill,
+                                    s.done ? styles.donePillOn : styles.donePillOff,
+                                    pressed && { opacity: 0.85 },
+                                  ]}
+                                >
+                                  {s.done ? (
+                                    <CheckIcon size={18} color="#000" />
+                                  ) : (
+                                    <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+                                  )}
+                                </Pressable>
+                              </View>
+                            ));
+                          })()}
 
                           <Pressable
                             accessibilityRole="button"
                             onPress={() => addFreeSet(ex.id)}
                             style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
                           >
-                            <Text style={styles.secondaryButtonText}>Add set</Text>
+                            <Text style={styles.secondaryButtonText}>
+                              {(ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise)).type === 'interval_time'
+                                ? 'Add interval'
+                                : (ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise)).type === 'distance_time'
+                                  ? 'Add lap'
+                                  : 'Add set'}
+                            </Text>
                           </Pressable>
                         </View>
                       )}
@@ -1412,6 +1677,18 @@ export default function SessionScreen() {
         title="Add exercise"
         confirmLabel="Add"
         onRequestCreateMethod={onRequestCreateMethod}
+      />
+
+      <DurationWheelModal
+        visible={!!durationPicker}
+        title="Duration"
+        initialSeconds={durationPicker?.seconds ?? 0}
+        onCancel={() => setDurationPicker(null)}
+        onConfirm={(seconds) => {
+          if (!durationPicker) return;
+          setFreeSetValue(durationPicker.exerciseId, durationPicker.setIdx, { durationSec: seconds });
+          setDurationPicker(null);
+        }}
       />
     </SafeAreaView>
   );

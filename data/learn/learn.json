@@ -391,5 +391,466 @@
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/watch?v=placeholder_bench",
     "isFavorite": false
+  },
+  {
+    "id": "exercise-step-ups",
+    "name": "Step Ups",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Single-Leg Strength",
+    "description": "A unilateral leg exercise that builds quads and glutes while improving balance.",
+    "long_description": "Step onto a stable box/bench with one foot, drive through the whole foot to stand tall, then control the descent back to the floor. Can be done bodyweight or loaded with dumbbells for progressive overload.",
+    "equipment": [
+      "Box/Bench"
+    ],
+    "dos": [
+      "Do keep your torso tall and core braced.",
+      "Do drive through your whole foot and control the lowering."
+    ],
+    "donts": [
+      "Don't push off aggressively with the back leg.",
+      "Don't use a box height that forces your pelvis to tilt or your knee to cave in."
+    ],
+    "tags": [
+      "Legs",
+      "Unilateral",
+      "Glutes",
+      "Quads"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_step_ups",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-jump-rope",
+    "name": "Jump Rope",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Conditioning",
+    "description": "A simple, scalable cardio drill that improves coordination and footwork.",
+    "long_description": "Using a jump rope, perform small, rhythmic hops while maintaining an upright posture. Keep the jumps low, land softly, and turn the rope with the wrists rather than the arms. Excellent for warm-ups, intervals, and general conditioning.",
+    "equipment": [
+      "Jump Rope"
+    ],
+    "dos": [
+      "Do keep your jumps low and land softly on the midfoot.",
+      "Do rotate the rope with your wrists to stay efficient."
+    ],
+    "donts": [
+      "Don't stomp or jump excessively high.",
+      "Don't let your shoulders shrug up; stay relaxed."
+    ],
+    "tags": [
+      "Cardio",
+      "Warm-up",
+      "Coordination"
+    ],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_jump_rope",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-running",
+    "name": "Running",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Cardiovascular Fitness",
+    "description": "A foundational cardio activity for endurance, health, and conditioning.",
+    "long_description": "Run at an easy steady pace for aerobic base, or use intervals for conditioning. Maintain a tall posture, slight forward lean, and quick light steps. Progress volume gradually to reduce injury risk.",
+    "equipment": [
+      "Shoes"
+    ],
+    "dos": [
+      "Do build volume gradually (10% rule as a guideline).",
+      "Do keep a cadence that feels quick and light."
+    ],
+    "donts": [
+      "Don't increase intensity and volume at the same time.",
+      "Don't ignore persistent pain; adjust and recover."
+    ],
+    "tags": [
+      "Cardio",
+      "Endurance",
+      "Conditioning"
+    ],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "km",
+      "showPace": true
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_running",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-low-bar-squat",
+    "name": "Low Bar Squat",
+    "type": "exercise",
+    "level": "Intermediate+",
+    "days_per_week": "N/A",
+    "goal": "Strength (Posterior Emphasis)",
+    "description": "A squat variation with the bar lower on the back to leverage the hips and posterior chain.",
+    "long_description": "With the bar placed across the rear delts (below the traps), the lifter uses a slightly more forward torso angle and hip drive. Often allows heavier loads and is common in powerlifting. Maintain a rigid brace and consistent bar path over midfoot.",
+    "equipment": [
+      "Barbell",
+      "Rack"
+    ],
+    "dos": [
+      "Do create a stable shelf on the rear delts and keep wrists neutral.",
+      "Do brace hard and keep the bar over midfoot."
+    ],
+    "donts": [
+      "Don't let the bar roll up your back as you stand.",
+      "Don't lose upper-back tightness; it collapses the squat."
+    ],
+    "tags": [
+      "Compound",
+      "Squat",
+      "Legs",
+      "Powerlifting"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_low_bar_squat",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-high-bar-squat",
+    "name": "High Bar Squat",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Leg Strength (Quad Emphasis)",
+    "description": "A squat variation with the bar on the upper traps, typically more upright and quad-focused.",
+    "long_description": "With the bar resting higher on the traps, the lifter generally maintains a more upright torso and allows the knees to travel forward more, increasing quad involvement. Keep the bar path vertical over midfoot and control depth with a strong brace.",
+    "equipment": [
+      "Barbell",
+      "Rack"
+    ],
+    "dos": [
+      "Do keep your chest up and ribs down with a strong brace.",
+      "Do let knees track over toes and keep heels grounded."
+    ],
+    "donts": [
+      "Don't relax at the bottom; stay tight.",
+      "Don't shift to the toes; keep pressure balanced over midfoot."
+    ],
+    "tags": [
+      "Compound",
+      "Squat",
+      "Legs",
+      "Quads"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_high_bar_squat",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-barbell-overhead-press",
+    "name": "Barbell Overhead Press",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Shoulder Strength",
+    "description": "A standing press that builds shoulders, triceps, and total-body tension.",
+    "long_description": "Press a barbell from the front rack position overhead to a locked-out finish with the biceps near the ears. Use glutes and abs to create a stable base. The bar should travel close to the face with a slight head 'through' at the top.",
+    "equipment": [
+      "Barbell",
+      "Rack"
+    ],
+    "dos": [
+      "Do squeeze glutes and brace your abs to avoid over-arching.",
+      "Do keep the bar path close and finish with a stacked lockout."
+    ],
+    "donts": [
+      "Don't turn it into a push press unless intended.",
+      "Don't flare ribs up and hyperextend your lower back."
+    ],
+    "tags": [
+      "Compound",
+      "Push",
+      "Shoulders",
+      "Triceps"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_barbell_ohp",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-dumbbell-overhead-press",
+    "name": "Dumbbell Overhead Press",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Shoulder Hypertrophy",
+    "description": "An overhead press using dumbbells for a larger range of motion and unilateral control.",
+    "long_description": "Press two dumbbells overhead from shoulder height to a stable lockout. Dumbbells allow natural wrist and elbow paths and can be done seated or standing. Control the lowering phase and avoid bouncing.",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "dos": [
+      "Do control the eccentric and keep forearms vertical.",
+      "Do keep your core braced and avoid leaning back."
+    ],
+    "donts": [
+      "Don't let dumbbells drift too far forward; keep them stacked.",
+      "Don't slam them together overhead."
+    ],
+    "tags": [
+      "Push",
+      "Shoulders",
+      "Dumbbells",
+      "Hypertrophy"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_db_ohp",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-dumbbell-biceps-curl",
+    "name": "Dumbbell Biceps Curl",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Biceps Hypertrophy",
+    "description": "A classic isolation movement for the biceps using dumbbells.",
+    "long_description": "Curl the dumbbells from arms-extended to shoulder height while keeping elbows close to the torso. Use a controlled tempo and avoid swinging. Can be done alternating or both arms together.",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "dos": [
+      "Do keep elbows pinned and move only at the elbow joint.",
+      "Do control the lowering and fully extend between reps."
+    ],
+    "donts": [
+      "Don't swing your torso to cheat the weight up.",
+      "Don't let wrists collapse; keep them neutral."
+    ],
+    "tags": [
+      "Arms",
+      "Biceps",
+      "Isolation",
+      "Dumbbells"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_db_curl",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hammer-curl",
+    "name": "Hammer Curl",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Biceps & Forearms",
+    "description": "A neutral-grip curl that emphasizes brachialis and forearms.",
+    "long_description": "Hold dumbbells with palms facing each other and curl without supinating. Keep elbows close and avoid shoulder swing. Great accessory for elbow health and grip/forearm development.",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "dos": [
+      "Do keep a neutral wrist and steady elbow position.",
+      "Do control both the lift and the lowering."
+    ],
+    "donts": [
+      "Don't turn it into a front raise; avoid shoulder flexion.",
+      "Don't let the dumbbells drift behind you."
+    ],
+    "tags": [
+      "Arms",
+      "Biceps",
+      "Forearms",
+      "Isolation"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_hammer_curl",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-barbell-biceps-curl",
+    "name": "Barbell Biceps Curl",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Biceps Strength",
+    "description": "A curl with a straight bar that allows heavier loading than dumbbells.",
+    "long_description": "Using a supinated grip on a barbell, curl the weight up while keeping elbows close and shoulders down. Maintain a tight core and avoid swinging. The barbell provides a fixed hand position and stable loading.",
+    "equipment": [
+      "Barbell"
+    ],
+    "dos": [
+      "Do keep your ribs down and glutes tight to prevent swing.",
+      "Do use a full range of motion with controlled tempo."
+    ],
+    "donts": [
+      "Don't lean back to 'hip thrust' the bar up.",
+      "Don't shrug shoulders forward at the top."
+    ],
+    "tags": [
+      "Arms",
+      "Biceps",
+      "Isolation",
+      "Barbell"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_barbell_curl",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-pull-ups",
+    "name": "Pull-ups",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Back Strength",
+    "description": "A bodyweight vertical pull focusing on lats, upper back, and biceps.",
+    "long_description": "Hang from a pull-up bar with a pronated grip, then pull your chest toward the bar by driving elbows down and back. Control the descent to a full hang. Use assistance or bands if needed to maintain quality reps.",
+    "equipment": [
+      "Pull-up Bar"
+    ],
+    "dos": [
+      "Do start each rep from a controlled hang and engage the lats.",
+      "Do think 'elbows to pockets' to avoid overusing the arms."
+    ],
+    "donts": [
+      "Don't kip or swing unless you're doing a specific kipping style.",
+      "Don't crane your neck; keep it neutral."
+    ],
+    "tags": [
+      "Pull",
+      "Back",
+      "Bodyweight",
+      "Compound"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_pullups",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-dips",
+    "name": "Dips",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Chest & Triceps",
+    "description": "A bodyweight pressing movement that builds triceps and chest.",
+    "long_description": "Support yourself on parallel bars, lower under control until shoulders are comfortably below elbows (as mobility allows), then press back up to lockout. A slight forward lean increases chest involvement; a more upright torso shifts emphasis to triceps.",
+    "equipment": [
+      "Dip Bars"
+    ],
+    "dos": [
+      "Do keep shoulders down and stable and use a controlled range.",
+      "Do lock out with control at the top."
+    ],
+    "donts": [
+      "Don't dive-bomb into the bottom position.",
+      "Don't force depth past a comfortable shoulder range."
+    ],
+    "tags": [
+      "Push",
+      "Bodyweight",
+      "Chest",
+      "Triceps"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_dips",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-push-ups",
+    "name": "Push-ups",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Upper Body Endurance",
+    "description": "A foundational bodyweight push exercise for chest, shoulders, and triceps.",
+    "long_description": "From a plank position with hands under shoulders, lower the chest toward the floor while keeping body rigid, then press back up. Variations (incline, decline, weighted) adjust difficulty. Great for volume and technique practice.",
+    "equipment": [
+      "Bodyweight"
+    ],
+    "dos": [
+      "Do keep a straight line from head to heels and brace your core.",
+      "Do use a full range of motion with controlled tempo."
+    ],
+    "donts": [
+      "Don't let hips sag or pike up.",
+      "Don't flare elbows excessively; keep a comfortable angle."
+    ],
+    "tags": [
+      "Push",
+      "Bodyweight",
+      "Chest",
+      "Triceps"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_pushups",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-bulgarian-split-squat",
+    "name": "Bulgarian Split Squat",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Leg Hypertrophy",
+    "description": "A challenging unilateral squat variation that targets quads and glutes.",
+    "long_description": "With the rear foot elevated on a bench/box, lower the hips down and slightly back by bending the front knee and hip, then drive up through the front foot. Great for building single-leg strength and addressing left/right imbalances.",
+    "equipment": [
+      "Bench",
+      "Bodyweight"
+    ],
+    "dos": [
+      "Do keep your front foot planted and knee tracking over toes.",
+      "Do control depth and keep your torso stable."
+    ],
+    "donts": [
+      "Don't bounce off the bottom.",
+      "Don't let the front heel lift off the ground."
+    ],
+    "tags": [
+      "Legs",
+      "Unilateral",
+      "Glutes",
+      "Quads"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_bulgarian_split_squat",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-barbell-row",
+    "name": "Barbell Row",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Upper Back Strength",
+    "description": "A compound horizontal pull that builds lats, upper back, and grip.",
+    "long_description": "Hinge at the hips with a flat back, then row the barbell toward the lower ribs/upper abdomen. Control the eccentric and keep the torso angle consistent. Great balance to pressing volume.",
+    "equipment": [
+      "Barbell",
+      "Plates"
+    ],
+    "dos": [
+      "Do keep your back flat and brace your core.",
+      "Do pull elbows back and squeeze the upper back."
+    ],
+    "donts": [
+      "Don't use excessive body English to move the load.",
+      "Don't round the lower back during the hinge."
+    ],
+    "tags": [
+      "Pull",
+      "Back",
+      "Compound",
+      "Barbell"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_barbell_row",
+    "isFavorite": false
   }
 ]
