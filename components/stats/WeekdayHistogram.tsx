@@ -122,30 +122,6 @@ export function WeekdayHistogram(props: WeekdayHistogramProps) {
             {/* subtle glow under the line */}
             <Path d={linePath} stroke="rgba(163, 220, 64, 0.18)" strokeWidth={6} fill="none" />
             <Path d={linePath} stroke={lineColor} strokeWidth={2.5} fill="none" />
-
-            {typeof highlightIndex === 'number' && highlightIndex >= 0 && highlightIndex < linePoints.length ? (
-              <>
-                {/* outer ring */}
-                <Rect
-                  x={linePoints[highlightIndex]!.x - 6}
-                  y={linePoints[highlightIndex]!.y - 6}
-                  width={12}
-                  height={12}
-                  rx={6}
-                  fill={TrenaColors.text}
-                  opacity={0.95}
-                />
-                {/* inner dot */}
-                <Rect
-                  x={linePoints[highlightIndex]!.x - 3}
-                  y={linePoints[highlightIndex]!.y - 3}
-                  width={6}
-                  height={6}
-                  rx={3}
-                  fill={TrenaColors.secondary}
-                />
-              </>
-            ) : null}
           </>
         ) : null}
 

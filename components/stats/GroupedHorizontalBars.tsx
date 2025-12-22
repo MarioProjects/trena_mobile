@@ -139,7 +139,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
         {/* Max label */}
         <SvgText
           x={pad.l + innerW}
-          y={pad.t + 12}
+          y={pad.t + innerH - 8}
           fill="rgba(236, 235, 228, 0.45)"
           fontSize={11}
           fontFamily={Fonts.medium}

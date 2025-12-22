@@ -173,6 +173,60 @@ function getDone(x: PerformedSet | undefined) {
   return x?.done ?? false;
 }
 
+/**
+ * Returns true if the set should be auto-completed based on the transition.
+ * "One time" means we only trigger it if the set was previously incomplete
+ * and the user just provided a value that makes it complete.
+ */
+function shouldAutoComplete(
+  oldSet: PerformedSet | undefined,
+  newSet: PerformedSet,
+  trackingType: string,
+  isBilbo: boolean
+): boolean {
+  if (newSet.done) return false;
+
+  const oldReps = oldSet?.reps ?? 0;
+  const newReps = newSet.reps ?? 0;
+  const oldWeight = oldSet?.weightKg ?? 0;
+  const newWeight = newSet.weightKg ?? 0;
+  const oldDur = oldSet?.durationSec ?? 0;
+  const newDur = newSet.durationSec ?? 0;
+  const oldDist = oldSet?.distanceKm ?? 0;
+  const newDist = newSet.distanceKm ?? 0;
+  const oldRir = oldSet?.rir;
+  const newRir = newSet.rir;
+
+  const rirJustFilled = newRir !== undefined && oldRir === undefined;
+
+  if (isBilbo) {
+    // Bilbo: weight is session-fixed, only reps matter.
+    return (newReps > 0 && oldReps === 0) || rirJustFilled;
+  }
+
+  if (trackingType === 'strength') {
+    // Strength: both reps and weight must be > 0.
+    // Trigger if both are now > 0 and at least one just changed from 0 or RIR was just added.
+    const isComplete = newReps > 0 && newWeight > 0;
+    const justFilled = (newReps > 0 && oldReps === 0) || (newWeight > 0 && oldWeight === 0) || rirJustFilled;
+    return isComplete && justFilled;
+  }
+
+  if (trackingType === 'interval_time') {
+    // Interval: only duration matters.
+    return (newDur > 0 && oldDur === 0) || rirJustFilled;
+  }
+
+  if (trackingType === 'distance_time') {
+    // Distance: both distance and duration must be > 0.
+    const isComplete = newDist > 0 && newDur > 0;
+    const justFilled = (newDist > 0 && oldDist === 0) || (newDur > 0 && oldDur === 0) || rirJustFilled;
+    return isComplete && justFilled;
+  }
+
+  return false;
+}
+
 function ensureSnapshot(x: any): WorkoutSessionSnapshotV1 {
   if (!x || typeof x !== 'object') return { version: 1, exercises: [] };
   if (!Array.isArray(x.exercises)) return { ...x, exercises: [] };
@@ -625,15 +679,28 @@ export default function SessionScreen() {
     const safeReps = reps ?? 0;
     updateExercise(exerciseId, (ex) => {
       const existing = (ex.performedSets ?? []).find((s) => s.id === plannedSet.id);
+      const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
+      const isBilbo = isBilboExercise(ex);
+
       if (existing) {
+        const nextSet = { ...existing, reps: safeReps };
+        if (shouldAutoComplete(existing, nextSet, tracking.type, isBilbo)) {
+          nextSet.done = true;
+        }
         return {
           ...ex,
-          performedSets: (ex.performedSets ?? []).map((s) => (s.id === plannedSet.id ? { ...s, reps: safeReps } : s)),
+          performedSets: (ex.performedSets ?? []).map((s) => (s.id === plannedSet.id ? nextSet : s)),
         };
       }
+
+      const nextSet: PerformedSet = { id: plannedSet.id, reps: safeReps, weightKg: plannedSet.weightKg, done: false };
+      if (shouldAutoComplete(undefined, nextSet, tracking.type, isBilbo)) {
+        nextSet.done = true;
+      }
+
       return {
         ...ex,
-        performedSets: [...(ex.performedSets ?? []), { id: plannedSet.id, reps: safeReps, weightKg: plannedSet.weightKg, done: false }],
+        performedSets: [...(ex.performedSets ?? []), nextSet],
       };
     });
   };
@@ -645,18 +712,34 @@ export default function SessionScreen() {
   ) => {
     updateExercise(exerciseId, (ex) => {
       const existing = (ex.performedSets ?? []).find((s) => s.id === plannedSet.id);
+      const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
+      const isBilbo = isBilboExercise(ex);
+
       if (existing) {
+        const nextSet = { ...existing, ...patch };
+        if (!('done' in patch) && shouldAutoComplete(existing, nextSet, tracking.type, isBilbo)) {
+          nextSet.done = true;
+        }
         return {
           ...ex,
-          performedSets: (ex.performedSets ?? []).map((s) => (s.id === plannedSet.id ? { ...s, ...patch } : s)),
+          performedSets: (ex.performedSets ?? []).map((s) => (s.id === plannedSet.id ? nextSet : s)),
         };
       }
+
+      const nextSet: PerformedSet = {
+        id: plannedSet.id,
+        reps: 0,
+        weightKg: plannedSet.weightKg,
+        done: false,
+        ...patch,
+      };
+      if (!('done' in patch) && shouldAutoComplete(undefined, nextSet, tracking.type, isBilbo)) {
+        nextSet.done = true;
+      }
+
       return {
         ...ex,
-        performedSets: [
-          ...(ex.performedSets ?? []),
-          { id: plannedSet.id, reps: 0, weightKg: plannedSet.weightKg, done: false, ...patch },
-        ],
+        performedSets: [...(ex.performedSets ?? []), nextSet],
       };
     });
   };
@@ -665,7 +748,20 @@ export default function SessionScreen() {
     updateExercise(exerciseId, (ex) => {
       const sets = [...(ex.performedSets ?? [])];
       if (setIndex < 0 || setIndex >= sets.length) return ex;
-      sets[setIndex] = { ...sets[setIndex], ...patch };
+
+      const oldSet = sets[setIndex];
+      const nextSet = { ...oldSet, ...patch };
+
+      // Auto-complete if not a manual 'done' toggle
+      if (!('done' in patch)) {
+        const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
+        const isBilbo = isBilboExercise(ex);
+        if (shouldAutoComplete(oldSet, nextSet, tracking.type, isBilbo)) {
+          nextSet.done = true;
+        }
+      }
+
+      sets[setIndex] = nextSet;
       return { ...ex, performedSets: sets };
     });
   };
@@ -2555,3 +2651,4 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
 });
+
