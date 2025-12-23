@@ -107,14 +107,14 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,
-    // Dark overlay (increase value for darker)
-    backgroundColor: 'rgba(0, 0, 0, 0.86)',
+    // Dark overlay (increase alpha for darker). Keep subtle so the video stays visible.
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   desaturateOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,
-    // Semi-transparent gray to wash out colors and reduce saturation
-    backgroundColor: 'rgba(20, 20, 20, 0.65)',
+    // Semi-transparent gray to slightly wash out colors (lower alpha = more vivid)
+    backgroundColor: 'rgba(20, 20, 20, 0.3)',
   },
   loadingSplash: {
     ...StyleSheet.absoluteFillObject,
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
   },
   tagline: {
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: TrenaColors.text,
     fontSize: 16,
     lineHeight: 22,
     fontFamily: Fonts.semiBold,
