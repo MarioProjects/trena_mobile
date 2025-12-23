@@ -1,10 +1,11 @@
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
 import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
+import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
 import { bilboCyclesSeries, countCompletedSessions, countCompletedSessionsThisWeek, weekdayHistogram } from '@/lib/workouts/stats';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function StatsScreen() {
@@ -113,10 +114,7 @@ export default function StatsScreen() {
         <Text style={styles.title}>Workout Stats</Text>
 
         {loading ? (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator color={TrenaColors.primary} />
-            <Text style={styles.body}>Loading your stats…</Text>
-          </View>
+          <StatsSkeleton />
         ) : error ? (
           <View style={styles.notice}>
             <Text style={styles.noticeTitle}>Couldn’t load stats</Text>
