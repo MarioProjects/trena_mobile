@@ -809,35 +809,29 @@ export default function SessionScreen() {
     });
   };
 
-  const onConfirmAdd = (selection: AddExerciseSelection) => {
-    setSnapshot((cur) => {
-      const exercise = selection.exercise;
-      if (!selection.method) {
-        return {
-          ...cur,
-          exercises: [
-            ...cur.exercises,
-            {
-              id: makeLocalId('sx'),
-              exercise,
-              source: { type: 'free' },
-              tracking: defaultTrackingForExerciseRef(exercise),
-              plannedSets: [],
-              performedSets: [],
-            },
-          ],
-        };
-      }
+  const onConfirmAdd = async (selection: AddExerciseSelection) => {
+    const exercise = selection.exercise;
 
-      const sx = buildSessionExerciseFromMethodSelection({
+    let sx: SessionExercise;
+    if (!selection.method) {
+      sx = {
+        id: makeLocalId('sx'),
+        exercise,
+        source: { type: 'free' },
+        tracking: defaultTrackingForExerciseRef(exercise),
+        plannedSets: [],
+        performedSets: [],
+      };
+    } else {
+      sx = await buildSessionExerciseFromMethodSelection({
         exercise,
         methodInstanceId: selection.method.methodInstanceId,
         methodInstance: selection.method.methodInstance,
         binding: selection.method.binding,
       });
+    }
 
-      return { ...cur, exercises: [...cur.exercises, sx] };
-    });
+    setSnapshot((cur) => ({ ...cur, exercises: [...cur.exercises, sx] }));
     setAddOpen(false);
   };
 

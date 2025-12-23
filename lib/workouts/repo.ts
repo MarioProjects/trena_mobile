@@ -343,21 +343,81 @@ async function fetchMethodInstancesByIds(ids: string[]) {
   return map;
 }
 
+/**
+ * Determine the "latest" state for a method instance by looking at the history of completed sessions.
+ * If no completed sessions are found, falls back to the state in the method_instances table.
+ */
+async function getLatestStateForMethodInstance(args: {
+  methodInstanceId: string;
+  methodKey: MethodKey;
+  config: unknown;
+  currentState: unknown;
+}) {
+  const { data, error } = await supabase
+    .from('workout_sessions')
+    .select('snapshot')
+    .not('ended_at', 'is', null)
+    .contains('snapshot', { exercises: [{ source: { methodInstanceId: args.methodInstanceId } }] })
+    .order('ended_at', { ascending: false })
+    .limit(1);
+
+  if (error || !data || data.length === 0) {
+    return args.currentState;
+  }
+
+  const lastSession = data[0];
+  const lastSnapshot = lastSession.snapshot as WorkoutSessionSnapshotV1;
+  if (!lastSnapshot || !Array.isArray(lastSnapshot.exercises)) {
+    return args.currentState;
+  }
+
+  // Aggregate performed sets for this method in that session (in case it appears multiple times)
+  const matchingExercises = lastSnapshot.exercises.filter(
+    (ex) => ex.source.type === 'method' && ex.source.methodInstanceId === args.methodInstanceId
+  ) as Array<SessionExercise & { source: Extract<SessionExercise['source'], { type: 'method' }> }>;
+
+  if (matchingExercises.length === 0) {
+    return args.currentState;
+  }
+
+  // Use the state-at-start from the first matching exercise, 
+  // but use CURRENT config to determine the next state (so latest rules apply).
+  const first = matchingExercises[0];
+  const mergedPerformedSets = matchingExercises.flatMap((ex) => ex.performedSets ?? []);
+
+  const { nextState, completed } = applyMethodResult({
+    methodKey: args.methodKey,
+    methodConfig: args.config, // Use current config
+    methodState: first.source.methodStateAtStart,
+    binding: first.source.binding,
+    performedSets: mergedPerformedSets,
+  });
+
+  return completed ? nextState : first.source.methodStateAtStart;
+}
+
 export async function getMethodInstancesByIds(ids: string[]) {
   return await fetchMethodInstancesByIds(ids);
 }
 
-export function buildSessionExerciseFromMethodSelection(args: {
+export async function buildSessionExerciseFromMethodSelection(args: {
   exercise: ExerciseRef;
   methodInstanceId: string;
   methodInstance: MethodInstanceRow;
   binding: MethodBinding;
-}): SessionExercise {
+}): Promise<SessionExercise> {
+  const latestState = await getLatestStateForMethodInstance({
+    methodInstanceId: args.methodInstanceId,
+    methodKey: args.methodInstance.method_key,
+    config: args.methodInstance.config,
+    currentState: args.methodInstance.state,
+  });
+
   const { plannedSets, coercedConfig, coercedState } = generatePlannedSets({
     methodKey: args.methodInstance.method_key,
     binding: args.binding,
     methodConfig: args.methodInstance.config ?? {},
-    methodState: args.methodInstance.state ?? {},
+    methodState: latestState ?? {},
   });
 
   return {
@@ -376,10 +436,10 @@ export function buildSessionExerciseFromMethodSelection(args: {
   };
 }
 
-function buildSessionExerciseFromTemplateItem(args: {
+async function buildSessionExerciseFromTemplateItem(args: {
   item: WorkoutTemplateItem;
   methodInstance?: MethodInstanceRow;
-}): SessionExercise {
+}): Promise<SessionExercise> {
   const { item, methodInstance } = args;
 
   if (item.type === 'free') {
@@ -398,11 +458,18 @@ function buildSessionExerciseFromTemplateItem(args: {
   const methodConfig = mi?.config ?? {};
   const methodState = mi?.state ?? {};
 
+  const latestState = await getLatestStateForMethodInstance({
+    methodInstanceId: item.methodInstanceId,
+    methodKey,
+    config: methodConfig,
+    currentState: methodState,
+  });
+
   const { plannedSets, coercedConfig, coercedState } = generatePlannedSets({
     methodKey,
     binding: item.binding,
     methodConfig,
-    methodState,
+    methodState: latestState,
   });
 
   return {
@@ -436,11 +503,13 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
   const methodIds = items.filter((x) => x.type === 'method').map((x) => (x as any).methodInstanceId as string);
   const miMap = await fetchMethodInstancesByIds(methodIds);
 
-  const exercises = items.map((item) =>
-    buildSessionExerciseFromTemplateItem({
-      item,
-      methodInstance: item.type === 'method' ? miMap.get(item.methodInstanceId) : undefined,
-    }),
+  const exercises = await Promise.all(
+    items.map((item) =>
+      buildSessionExerciseFromTemplateItem({
+        item,
+        methodInstance: item.type === 'method' ? miMap.get(item.methodInstanceId) : undefined,
+      })
+    )
   );
 
   const snapshot: WorkoutSessionSnapshotV1 = { version: 1, exercises };
