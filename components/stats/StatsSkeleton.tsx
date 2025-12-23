@@ -75,11 +75,6 @@ export function StatsSkeleton() {
         <SkeletonBlock opacity={opacity} width="55%" height={16} radius={8} />
         <SkeletonBlock opacity={opacity} width="70%" height={12} radius={6} style={{ marginTop: 2 }} />
         <SkeletonBlock opacity={opacity} width="100%" height={170} radius={14} style={{ marginTop: 8 }} />
-        <View style={styles.weekdayChipsRow}>
-          {Array.from({ length: 7 }).map((_, i) => (
-            <SkeletonBlock key={i} opacity={opacity} width={42} height={12} radius={6} />
-          ))}
-        </View>
       </View>
 
       {/* Bilbo */}
@@ -123,12 +118,6 @@ const styles = StyleSheet.create({
     gap: 10,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(236, 235, 228, 0.12)',
-  },
-  weekdayChipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 2,
   },
   pillsRow: {
     flexDirection: 'row',

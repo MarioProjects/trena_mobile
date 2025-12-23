@@ -151,14 +151,6 @@ export default function StatsScreen() {
                   highlightIndex={todayIdx}
                 />
               ) : null}
-
-              <View style={styles.weekdayCountsRow}>
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => (
-                  <Text key={d} style={styles.weekdayCount}>
-                    {d} {weekday.counts[i] ?? 0}
-                  </Text>
-                ))}
-              </View>
             </View>
 
             <View style={styles.sectionCard}>
@@ -371,17 +363,6 @@ const styles = StyleSheet.create({
   legendHint: {
     marginLeft: 'auto',
     color: 'rgba(236, 235, 228, 0.45)',
-    fontFamily: Fonts.medium,
-    fontSize: 12,
-  },
-  weekdayCountsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 2,
-  },
-  weekdayCount: {
-    color: 'rgba(236, 235, 228, 0.6)',
     fontFamily: Fonts.medium,
     fontSize: 12,
   },
