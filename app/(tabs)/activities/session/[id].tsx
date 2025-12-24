@@ -1742,10 +1742,7 @@ export default function SessionScreen() {
                   onPress={() => {
                     setMenuExerciseId(null);
                     if (menuExerciseInfoRoute) {
-                      router.push({
-                        pathname: menuExerciseInfoRoute as any,
-                        params: { returnTo: `/activities/session/${sessionId}` }
-                      });
+                      router.push(menuExerciseInfoRoute as any);
                     }
                   }}
                 >

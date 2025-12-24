@@ -2,15 +2,15 @@ import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect } from 'react';
-import { BackHandler, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ChevronLeftIcon, MethodsIcon } from '@/components/icons';
+import { ChevronLeftIcon, ExercisesIcon } from '@/components/icons';
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
 import { Image } from 'expo-image';
-import { Redirect, router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 
 const placeholderImage = require('@/assets/images/mock.webp');
 const localLearnImages: Record<string, number> = {
@@ -32,17 +32,8 @@ function getPlayableVideoSource(videoUrl: string | undefined) {
   const looksLikeYoutube =
     lower.includes('youtube.com/watch') || lower.includes('youtu.be/') || lower.includes('youtube.com/shorts');
   if (looksLikeYoutube) return undefined;
-  // expo-video expects a direct media URL (mp4 / m3u8 / etc)
   if (lower.startsWith('http://') || lower.startsWith('https://')) return { uri: url };
   return undefined;
-}
-
-function formatDaysPerWeekMeta(daysPerWeek: string | undefined): string | null {
-  const raw = daysPerWeek?.trim();
-  if (!raw) return null;
-  const lower = raw.toLowerCase();
-  if (lower === 'n/a' || lower === 'na' || lower === 'none' || lower === '-' || lower === '—') return null;
-  return `${raw} days/week`;
 }
 
 function Pill({ label }: { label: string }) {
@@ -51,6 +42,14 @@ function Pill({ label }: { label: string }) {
       <Text style={styles.pillText}>{label}</Text>
     </View>
   );
+}
+
+function trackingLabel(item: LearnItem): string {
+  const t = (item as any)?.tracking?.type as string | undefined;
+  if (!t || t === 'strength') return 'Tracking: reps + weight';
+  if (t === 'interval_time') return 'Tracking: timed intervals';
+  if (t === 'distance_time') return 'Tracking: distance + time (pace)';
+  return 'Tracking: —';
 }
 
 function SectionTitle({ children }: { children: string }) {
@@ -135,9 +134,8 @@ function VideoBlock({ item }: { item: LearnItem }) {
   );
 }
 
-export default function MethodDetailScreen() {
-  const { id, returnTo } = useLocalSearchParams<{ id?: string; returnTo?: string }>();
-  const navigation = useNavigation();
+export default function ExerciseDetailScreen() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
   const targetId = typeof id === 'string' ? id : undefined;
   const { height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -152,43 +150,9 @@ export default function MethodDetailScreen() {
     return <Redirect href="/learn" />;
   }
 
-  if (item.type !== 'method') {
-    return <Redirect href={{ pathname: `/learn/${item.type}/${item.id}` as any, params: { returnTo } }} />;
+  if (item.type !== 'exercise') {
+    return <Redirect href={`/learn/${item.type}/${item.id}`} />;
   }
-
-  // Handle system back (Android hardware back and iOS swipe back)
-  useEffect(() => {
-    if (!returnTo) return;
-
-    // For Android hardware back
-    const onBackPress = () => {
-      router.replace(returnTo as any);
-      return true;
-    };
-    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-    // For iOS swipe back and other navigation removals
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      // If we are already going to the returnTo path, don't intercept
-      if (e.data.action.type === 'REPLACE' || e.data.action.type === 'NAVIGATE') return;
-
-      e.preventDefault();
-      router.replace(returnTo as any);
-    });
-
-    return () => {
-      subscription.remove();
-      unsubscribe();
-    };
-  }, [returnTo, navigation]);
-
-  const handleBack = () => {
-    if (returnTo) {
-      router.replace(returnTo as any);
-    } else {
-      router.back();
-    }
-  };
 
   return (
     <View style={styles.safe}>
@@ -198,7 +162,7 @@ export default function MethodDetailScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back"
-            onPress={handleBack}
+            onPress={() => router.back()}
             hitSlop={16}
             style={({ pressed }) => [
               styles.heroBack,
@@ -217,12 +181,10 @@ export default function MethodDetailScreen() {
             <Text style={styles.title} numberOfLines={1}>
               {item.name}
             </Text>
-            <MethodsIcon size={22} color={TrenaColors.primary} />
+            <ExercisesIcon size={22} color={TrenaColors.primary} />
           </View>
           <Text style={styles.meta}>
-            {[item.level || '—', formatDaysPerWeekMeta(item.days_per_week), item.goal || '—']
-              .filter((x): x is string => Boolean(x))
-              .join(' • ')}
+            {item.level || '—'} • {item.goal || '—'}
           </Text>
           <Text style={styles.lede}>{item.description}</Text>
 
@@ -230,6 +192,11 @@ export default function MethodDetailScreen() {
             {(item.tags || []).slice(0, 8).map((t) => (
               <Pill key={t} label={t} />
             ))}
+          </View>
+
+          <View style={styles.section}>
+            <SectionTitle>Tracking</SectionTitle>
+            <Text style={styles.body}>{trackingLabel(item)}</Text>
           </View>
 
           <View style={styles.section}>
@@ -243,12 +210,12 @@ export default function MethodDetailScreen() {
           </View>
 
           <View style={styles.section}>
-            <SectionTitle>Do</SectionTitle>
+            <SectionTitle>Cues (Do)</SectionTitle>
             <Bullets items={item.dos || []} />
           </View>
 
           <View style={styles.section}>
-            <SectionTitle>Don&apos;t</SectionTitle>
+            <SectionTitle>Common mistakes (Don&apos;t)</SectionTitle>
             <Bullets items={item.donts || []} />
           </View>
         </View>
@@ -287,7 +254,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   sheet: {
-    // Pull the content up over the video, with rounded corners like a "sheet".
     marginTop: -22,
     paddingTop: 18,
     paddingHorizontal: 20,
@@ -302,12 +268,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  meta: {
-    fontFamily: Fonts.medium,
-    fontSize: 13,
-    lineHeight: 18,
-    color: 'rgba(236, 235, 228, 0.75)',
-  },
   title: {
     fontFamily: Fonts.extraBold,
     fontSize: 28,
@@ -316,6 +276,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
     flexShrink: 1,
     minWidth: 0,
+  },
+  meta: {
+    fontFamily: Fonts.medium,
+    fontSize: 13,
+    lineHeight: 18,
+    color: 'rgba(236, 235, 228, 0.75)',
   },
   lede: {
     fontFamily: Fonts.regular,
@@ -343,7 +309,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     paddingHorizontal: 14,
     paddingTop: 14,
-    // Keep overlay text visible above the curved "sheet" overlap.
     paddingBottom: 44,
     justifyContent: 'flex-end',
     gap: 2,
@@ -423,4 +388,3 @@ const styles = StyleSheet.create({
     color: 'rgba(236, 235, 228, 0.85)',
   },
 });
-
