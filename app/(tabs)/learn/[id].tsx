@@ -16,7 +16,7 @@ export default function LearnItemRedirectScreen() {
 
   const targetHref = React.useMemo(() => {
     if (!item || !targetId) return null;
-    return `/learn/${item.type}/${targetId}` as any;
+    return `/learn/${item.type}/${targetId}` as const;
   }, [item, targetId]);
 
   // Keep rendering a styled background while we navigate.

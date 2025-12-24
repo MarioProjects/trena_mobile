@@ -1,7 +1,7 @@
 import { ActivitiesIcon, EnergyIcon, LearnIcon, ProfileIcon, TodayIcon } from '@/components/icons';
 import { TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, router, Tabs } from 'expo-router';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -72,6 +72,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <LearnIcon color={color} size={typeof size === 'number' ? size : 24} />
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            // When the Learn tab is pressed, force it to navigate to the index route.
+            // This prevents the "sticky" exercise detail screen issue.
+            router.replace('/learn');
+          },
         }}
       />
       <Tabs.Screen

@@ -1,16 +1,62 @@
-import { Stack } from 'expo-router';
+import { ChevronLeftIcon } from '@/components/icons';
+import { Fonts, TrenaColors } from '@/constants/theme';
+import { Stack, router } from 'expo-router';
 import React from 'react';
-import { TrenaColors } from '@/constants/theme';
+import { Pressable, StyleSheet } from 'react-native';
 
-export default function LearnTabsLayout() {
+export default function LearnLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
         contentStyle: { backgroundColor: TrenaColors.background },
+        headerStyle: { backgroundColor: TrenaColors.background },
+        headerTintColor: TrenaColors.text,
+        headerTitleStyle: { fontFamily: Fonts.bold },
+        headerShadowVisible: false,
+        // We'll render our own chevron (like get-started), so hide the default back.
+        headerBackVisible: false,
+        headerLeft: () => (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={() => router.back()}
+            hitSlop={16}
+            style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+          >
+            <ChevronLeftIcon size={34} color={TrenaColors.primary} strokeWidth={2} />
+          </Pressable>
+        ),
       }}
     >
-      <Stack.Screen name="index" />
+      {/* The Learn home screen already renders its own large title */}
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+
+      {/* Redirect-only route (no UI/header) */}
+      <Stack.Screen name="[id]" options={{ headerShown: false }} />
+
+      {/* Detail routes */}
+      <Stack.Screen
+        name="method/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="exercise/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
+
+const styles = StyleSheet.create({
+  backButton: {
+    padding: 8,
+  },
+  backButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
+  },
+});
