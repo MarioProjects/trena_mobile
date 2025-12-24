@@ -1,10 +1,12 @@
 import { ChevronLeftIcon } from '@/components/icons';
 import { Fonts, TrenaColors } from '@/constants/theme';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 export default function LearnLayout() {
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+
   return (
     <Stack
       screenOptions={{
@@ -19,7 +21,13 @@ export default function LearnLayout() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back"
-            onPress={() => router.back()}
+            onPress={() => {
+              if (returnTo) {
+                router.replace(returnTo as any);
+              } else {
+                router.back();
+              }
+            }}
             hitSlop={16}
             style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
           >

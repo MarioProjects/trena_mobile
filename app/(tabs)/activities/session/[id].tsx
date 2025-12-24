@@ -31,6 +31,7 @@ import {
   FloppyIcon,
   HappyIcon,
   HourglassIcon,
+  InfoIcon,
   LeafIcon,
   LegIcon,
   MoreHorizIcon,
@@ -361,6 +362,19 @@ export default function SessionScreen() {
   // Exercise options menu state
   const [menuExerciseId, setMenuExerciseId] = React.useState<string | null>(null);
   const menuExercise = snapshot.exercises.find((e) => e.id === menuExerciseId);
+
+  const menuExerciseInfoRoute = React.useMemo(() => {
+    if (!menuExercise) return null;
+    if (menuExercise.source.type === 'method') {
+      const { methodKey } = menuExercise.source;
+      if (methodKey === 'bilbo') return `/learn/method/bilbo-method` as const;
+      if (methodKey === 'wendler_531') return `/learn/method/wendler-531` as const;
+    }
+    if (menuExercise.exercise.kind === 'learn') {
+      return `/learn/exercise/${menuExercise.exercise.learnExerciseId}` as const;
+    }
+    return null;
+  }, [menuExercise]);
 
   const didHydrateRef = React.useRef(false);
   const lastSavedJsonRef = React.useRef<string>('');
@@ -1719,6 +1733,28 @@ export default function SessionScreen() {
             <Text style={styles.menuTitle} numberOfLines={1}>
               {menuExercise ? formatExerciseName(menuExercise.exercise) : 'Exercise'}
             </Text>
+
+            {menuExerciseInfoRoute && (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+                  onPress={() => {
+                    setMenuExerciseId(null);
+                    if (menuExerciseInfoRoute) {
+                      router.push({
+                        pathname: menuExerciseInfoRoute as any,
+                        params: { returnTo: `/activities/session/${sessionId}` }
+                      });
+                    }
+                  }}
+                >
+                  <InfoIcon size={20} color={TrenaColors.text} />
+                  <Text style={styles.menuItemText}>Exercise Information</Text>
+                </Pressable>
+                <View style={styles.menuSeparator} />
+              </>
+            )}
 
             <Pressable
               accessibilityRole="button"

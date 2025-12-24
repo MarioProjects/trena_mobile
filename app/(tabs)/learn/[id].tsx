@@ -6,7 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LearnItemRedirectScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, returnTo } = useLocalSearchParams<{ id?: string; returnTo?: string }>();
   const targetId = typeof id === 'string' ? id : undefined;
 
   const item = React.useMemo(() => {
@@ -16,8 +16,12 @@ export default function LearnItemRedirectScreen() {
 
   const targetHref = React.useMemo(() => {
     if (!item || !targetId) return null;
-    return `/learn/${item.type}/${targetId}` as const;
-  }, [item, targetId]);
+    const base = `/learn/${item.type}/${targetId}`;
+    if (returnTo) {
+      return `${base}?returnTo=${encodeURIComponent(returnTo)}` as any;
+    }
+    return base as any;
+  }, [item, targetId, returnTo]);
 
   // Keep rendering a styled background while we navigate.
   // `Redirect` can briefly render nothing, which may show a white frame.

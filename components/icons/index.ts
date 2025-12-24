@@ -11,6 +11,7 @@ export { ExercisesIcon } from './ExercisesIcon';
 export { FacebookIcon } from './FacebookIcon';
 export { FloppyIcon } from './FloppyIcon';
 export { GoogleIcon } from './GoogleIcon';
+export { InfoIcon } from './InfoIcon';
 export { LearnIcon } from './LearnIcon';
 export { MethodsIcon } from './MethodsIcon';
 export { MoreHorizIcon } from './MoreHorizIcon';

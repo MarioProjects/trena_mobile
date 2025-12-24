@@ -303,36 +303,6 @@
     "isFavorite": false
   },
   {
-    "id": "exercise-squat",
-    "name": "Barbell Squat",
-    "type": "exercise",
-    "level": "All levels",
-    "days_per_week": "N/A",
-    "goal": "Leg Strength",
-    "description": "The king of lower body exercises. Targets quads, glutes, and core.",
-    "long_description": "A compound movement where the weight is placed on the upper back/traps. The athlete squats down until the hip crease is below the knee (parallel) and returns to standing.",
-    "equipment": [
-      "Barbell",
-      "Rack"
-    ],
-    "dos": [
-      "Do keep your chest up and core braced.",
-      "Do drive your knees out to track over your toes."
-    ],
-    "donts": [
-      "Don't let your knees cave inward.",
-      "Don't lift your heels off the ground."
-    ],
-    "tags": [
-      "Compound",
-      "Legs",
-      "Big 3"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_squat",
-    "isFavorite": false
-  },
-  {
     "id": "exercise-deadlift",
     "name": "Deadlift",
     "type": "exercise",

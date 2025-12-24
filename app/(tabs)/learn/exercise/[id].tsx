@@ -2,7 +2,7 @@ import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { BackHandler, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChevronLeftIcon, ExercisesIcon } from '@/components/icons';
@@ -10,7 +10,7 @@ import { Fonts, TrenaColors } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
 import { Image } from 'expo-image';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams, useNavigation } from 'expo-router';
 
 const placeholderImage = require('@/assets/images/mock.webp');
 const localLearnImages: Record<string, number> = {
@@ -135,7 +135,8 @@ function VideoBlock({ item }: { item: LearnItem }) {
 }
 
 export default function ExerciseDetailScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, returnTo } = useLocalSearchParams<{ id?: string; returnTo?: string }>();
+  const navigation = useNavigation();
   const targetId = typeof id === 'string' ? id : undefined;
   const { height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -151,8 +152,42 @@ export default function ExerciseDetailScreen() {
   }
 
   if (item.type !== 'exercise') {
-    return <Redirect href={`/learn/${item.type}/${item.id}`} />;
+    return <Redirect href={{ pathname: `/learn/${item.type}/${item.id}` as any, params: { returnTo } }} />;
   }
+
+  // Handle system back (Android hardware back and iOS swipe back)
+  useEffect(() => {
+    if (!returnTo) return;
+
+    // For Android hardware back
+    const onBackPress = () => {
+      router.replace(returnTo as any);
+      return true;
+    };
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    // For iOS swipe back and other navigation removals
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // If we are already going to the returnTo path, don't intercept
+      if (e.data.action.type === 'REPLACE' || e.data.action.type === 'NAVIGATE') return;
+
+      e.preventDefault();
+      router.replace(returnTo as any);
+    });
+
+    return () => {
+      subscription.remove();
+      unsubscribe();
+    };
+  }, [returnTo, navigation]);
+
+  const handleBack = () => {
+    if (returnTo) {
+      router.replace(returnTo as any);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <View style={styles.safe}>
@@ -162,7 +197,7 @@ export default function ExerciseDetailScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back"
-            onPress={() => router.back()}
+            onPress={handleBack}
             hitSlop={16}
             style={({ pressed }) => [
               styles.heroBack,
