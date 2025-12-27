@@ -22,10 +22,11 @@ export type GroupedHorizontalBarsProps = {
   maxValue?: number;
   showGrid?: boolean;
   xTickCount?: number;
+  referenceValue?: number;
 };
 
 export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
-  const { width, height, yLabels, series, maxValue, showGrid = true, xTickCount = 4 } = props;
+  const { width, height, yLabels, series, maxValue, showGrid = true, xTickCount = 4, referenceValue } = props;
 
   const pad = { l: 40, r: 10, t: 10, b: 26 };
   const innerW = Math.max(0, width - pad.l - pad.r);
@@ -36,13 +37,13 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
   const gapY = 6;
 
   const computedMax = useMemo(() => {
-    if (isFiniteNumber(maxValue) && maxValue > 0) return maxValue;
-    let m = 0;
+    let m = isFiniteNumber(maxValue) && maxValue > 0 ? maxValue : 0;
     for (const s of series) {
       for (const v of s.values) if (isFiniteNumber(v) && v > m) m = v;
     }
+    if (isFiniteNumber(referenceValue)) m = Math.max(m, referenceValue);
     return Math.max(1, m);
-  }, [maxValue, series]);
+  }, [maxValue, series, referenceValue]);
 
   const perRow = Math.max(1, series.length);
   const barGap = 4;
@@ -135,6 +136,19 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
             );
           });
         })}
+
+        {/* Reference Line */}
+        {isFiniteNumber(referenceValue) && referenceValue > 0 && (
+          <Line
+            x1={pad.l + innerW * (referenceValue / computedMax)}
+            x2={pad.l + innerW * (referenceValue / computedMax)}
+            y1={pad.t}
+            y2={pad.t + innerH}
+            stroke={TrenaColors.accentRed}
+            strokeWidth={1.5}
+            strokeDasharray="4, 4"
+          />
+        )}
 
         {/* Max label */}
         <SvgText

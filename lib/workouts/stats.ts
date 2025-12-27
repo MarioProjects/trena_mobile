@@ -72,6 +72,100 @@ export function formatExerciseName(ref: ExerciseRef): string {
   return ref.name;
 }
 
+export function getExerciseKey(ref: ExerciseRef): string {
+  if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
+  return `free:${ref.name}`;
+}
+
+/**
+ * Epley formula for 1RM: w * (1 + r / 30)
+ */
+export function estimate1RM(weightKg: number, reps: number): number {
+  if (reps <= 0) return 0;
+  if (reps === 1) return weightKg;
+  return weightKg * (1 + reps / 30);
+}
+
+export type ExerciseSessionStat = {
+  sessionId: string;
+  date: string;
+  bestEstimated1RM: number;
+  maxWeight: number;
+  maxReps: number;
+};
+
+export type ExerciseStats = {
+  exerciseKey: string;
+  exerciseName: string;
+  lastDone: string;
+  bestEstimated1RM: number;
+  history: ExerciseSessionStat[];
+};
+
+export function computeExerciseStats(args: { sessions: WorkoutSessionRow[] }): ExerciseStats[] {
+  const completed = args.sessions
+    .filter((s) => Boolean(s.ended_at))
+    .slice()
+    .sort((a, b) => new Date(a.ended_at ?? 0).getTime() - new Date(b.ended_at ?? 0).getTime());
+
+  const statsMap = new Map<string, ExerciseStats>();
+
+  for (const s of completed) {
+    const endedAt = s.ended_at!;
+    const exercises = s.snapshot?.exercises ?? [];
+
+    for (const ex of exercises) {
+      const key = getExerciseKey(ex.exercise);
+      const name = formatExerciseName(ex.exercise);
+
+      let sessionBest1RM = 0;
+      let sessionMaxWeight = 0;
+      let sessionMaxReps = 0;
+
+      const performed = ex.performedSets ?? [];
+      for (const set of performed) {
+        if (set.weightKg != null && set.reps != null && set.reps > 0) {
+          const rm = estimate1RM(set.weightKg, set.reps);
+          if (rm > sessionBest1RM) sessionBest1RM = rm;
+          if (set.weightKg > sessionMaxWeight) sessionMaxWeight = set.weightKg;
+          if (set.reps > sessionMaxReps) sessionMaxReps = set.reps;
+        }
+      }
+
+      if (sessionBest1RM === 0) continue;
+
+      let stat = statsMap.get(key);
+      if (!stat) {
+        stat = {
+          exerciseKey: key,
+          exerciseName: name,
+          lastDone: endedAt,
+          bestEstimated1RM: sessionBest1RM,
+          history: [],
+        };
+        statsMap.set(key, stat);
+      }
+
+      stat.lastDone = endedAt;
+      if (sessionBest1RM > stat.bestEstimated1RM) {
+        stat.bestEstimated1RM = sessionBest1RM;
+      }
+
+      stat.history.push({
+        sessionId: s.id,
+        date: endedAt,
+        bestEstimated1RM: sessionBest1RM,
+        maxWeight: sessionMaxWeight,
+        maxReps: sessionMaxReps,
+      });
+    }
+  }
+
+  return Array.from(statsMap.values()).sort((a, b) => 
+    new Date(b.lastDone).getTime() - new Date(a.lastDone).getTime()
+  );
+}
+
 function isBilboExercise(ex: SessionExercise): ex is SessionExercise & {
   source: Extract<SessionExercise['source'], { type: 'method'; methodKey: 'bilbo' }>;
 } {
@@ -104,6 +198,7 @@ export type BilboInstanceSeries = {
   cycles: BilboCycle[];
   maxSessionIndexInCycle: number;
   maxReps: number;
+  resetAtReps?: number;
 };
 
 type BilboInstanceAcc = {
@@ -114,6 +209,7 @@ type BilboInstanceAcc = {
   maxSessionIndexInCycle: number;
   maxReps: number;
   exerciseName?: string;
+  resetAtReps?: number;
 };
 
 function shouldStartNewBilboCycle(args: { config: BilboConfig; stateAtStart: BilboState; acc: BilboInstanceAcc }): boolean {
@@ -160,10 +256,12 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
           maxSessionIndexInCycle: 0,
           maxReps: 0,
           exerciseName: config.exercise ? formatExerciseName(config.exercise) : undefined,
+          resetAtReps: config.resetAtReps,
         } satisfies BilboInstanceAcc);
 
       if (!byInstance.has(methodInstanceId)) byInstance.set(methodInstanceId, acc);
       if (!acc.exerciseName && config.exercise) acc.exerciseName = formatExerciseName(config.exercise);
+      if (!acc.resetAtReps) acc.resetAtReps = config.resetAtReps;
 
       const startNew = shouldStartNewBilboCycle({ config, stateAtStart, acc });
       if (startNew) {
@@ -202,6 +300,7 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
     cycles: acc.cycles,
     maxSessionIndexInCycle: acc.maxSessionIndexInCycle,
     maxReps: acc.maxReps,
+    resetAtReps: acc.resetAtReps,
   }));
 }
 

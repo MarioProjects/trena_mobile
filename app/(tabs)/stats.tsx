@@ -1,9 +1,10 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { ExerciseProgressChart } from '@/components/stats/ExerciseProgressChart';
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
-import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
 import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
+import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
+import { Fonts, TrenaColors } from '@/constants/theme';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
-import { bilboCyclesSeries, countCompletedSessions, countCompletedSessionsThisWeek, weekdayHistogram } from '@/lib/workouts/stats';
+import { bilboCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, weekdayHistogram } from '@/lib/workouts/stats';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +18,9 @@ export default function StatsScreen() {
   const [methodNameById, setMethodNameById] = useState<Record<string, string>>({});
   const bilboSeries = useMemo(() => bilboCyclesSeries({ sessions: sessions as any }), [sessions]);
   const [selectedBilboMethodId, setSelectedBilboMethodId] = useState<string | null>(null);
+
+  const exerciseStats = useMemo(() => computeExerciseStats({ sessions: sessions as any }), [sessions]);
+  const [selectedExerciseKey, setSelectedExerciseKey] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +80,11 @@ export default function StatsScreen() {
     [bilboSeries, selectedBilboMethodId],
   );
 
+  const selectedExercise = useMemo(
+    () => exerciseStats.find((s) => s.exerciseKey === selectedExerciseKey) ?? null,
+    [exerciseStats, selectedExerciseKey],
+  );
+
   const bilboChartModel = useMemo(() => {
     if (!selectedBilbo) return null;
     const maxN = Math.max(1, selectedBilbo.maxSessionIndexInCycle);
@@ -107,6 +116,17 @@ export default function StatsScreen() {
   const histH = 170;
   const bilboH = bilboChartModel ? Math.min(520, 60 + bilboChartModel.yLabels.length * 40) : 240;
   const todayIdx = (new Date().getDay() + 6) % 7; // monday-first 0..6
+
+  function formatDateRelative(iso: string) {
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -154,6 +174,89 @@ export default function StatsScreen() {
             </View>
 
             <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Exercise Progress</Text>
+              <Text style={styles.sectionBody}>Estimated 1RM (Epley formula) and history. Click on an exercise to view details.</Text>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
+                {exerciseStats.map((s) => {
+                  const selected = s.exerciseKey === selectedExerciseKey;
+                  return (
+                    <Pressable
+                      key={s.exerciseKey}
+                      onPress={() => setSelectedExerciseKey(selected ? null : s.exerciseKey)}
+                      style={({ pressed }) => [
+                        styles.pill,
+                        selected && styles.pillSelected,
+                        pressed && { opacity: 0.9 },
+                      ]}
+                    >
+                      <Text style={[styles.pillText, selected && styles.pillTextSelected]} numberOfLines={1}>
+                        {s.exerciseName}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              {selectedExercise ? (
+                <View style={styles.exerciseDetail}>
+                  <View style={styles.detailRow}>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Best 1RM</Text>
+                      <Text style={styles.detailValue}>
+                        {selectedExercise.bestEstimated1RM.toFixed(1)} <Text style={styles.unit}>kg</Text>
+                      </Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Last Done</Text>
+                      <Text style={styles.detailValue}>{formatDateRelative(selectedExercise.lastDone)}</Text>
+                    </View>
+                  </View>
+
+                  {chartW > 0 && selectedExercise.history.length >= 2 ? (
+                    <View style={styles.chartContainer}>
+                      <Text style={styles.chartTitle}>Estimated 1RM Progress (kg)</Text>
+                      <ExerciseProgressChart
+                        width={chartW}
+                        height={180}
+                        data={selectedExercise.history.map((h) => ({
+                          date: h.date,
+                          value: h.bestEstimated1RM,
+                        }))}
+                      />
+                    </View>
+                  ) : selectedExercise.history.length < 2 ? (
+                    <View style={styles.chartPlaceholder}>
+                      <Text style={styles.chartPlaceholderText}>
+                        Perform this exercise in more sessions to see progress
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              ) : exerciseStats.length > 0 ? (
+                <View style={styles.exerciseList}>
+                  {exerciseStats.slice(0, 6).map((s) => (
+                    <Pressable
+                      key={s.exerciseKey}
+                      style={styles.exerciseRow}
+                      onPress={() => setSelectedExerciseKey(s.exerciseKey)}
+                    >
+                      <Text style={styles.exerciseRowName} numberOfLines={1}>
+                        {s.exerciseName}
+                      </Text>
+                      <View style={styles.exerciseRowRight}>
+                        <Text style={styles.exerciseRowValue}>{s.bestEstimated1RM.toFixed(1)}kg</Text>
+                        <Text style={styles.exerciseRowDate}>{formatDateRelative(s.lastDone)}</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.body}>No exercise data found.</Text>
+              )}
+            </View>
+
+            <View style={styles.sectionCard}>
               <Text style={styles.sectionTitle}>Bilbo</Text>
               <Text style={styles.sectionBody}>Reps (x) by session index within cycle (y)</Text>
 
@@ -193,6 +296,15 @@ export default function StatsScreen() {
                             <Text style={styles.legendText}>{s.label ?? s.key}</Text>
                           </View>
                         ))}
+                        {selectedBilbo?.resetAtReps && (
+                          <View style={styles.legendItem}>
+                            <View style={styles.legendDashContainer}>
+                              <View style={styles.legendDash} />
+                              <View style={styles.legendDash} />
+                            </View>
+                            <Text style={[styles.legendText, { color: TrenaColors.accentRed }]}>RESET</Text>
+                          </View>
+                        )}
                         <Text style={styles.legendHint}>last 4 cycles</Text>
                       </View>
 
@@ -205,6 +317,7 @@ export default function StatsScreen() {
                             series={bilboChartModel.series}
                             maxValue={bilboChartModel.maxValue}
                             xTickCount={4}
+                            referenceValue={selectedBilbo?.resetAtReps}
                           />
                         </ScrollView>
                       </View>
@@ -355,6 +468,17 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 999,
   },
+  legendDashContainer: {
+    flexDirection: 'row',
+    gap: 2,
+    alignItems: 'center',
+  },
+  legendDash: {
+    width: 5,
+    height: 2,
+    backgroundColor: TrenaColors.accentRed,
+    borderRadius: 1,
+  },
   legendText: {
     color: 'rgba(236, 235, 228, 0.75)',
     fontFamily: Fonts.semiBold,
@@ -365,5 +489,96 @@ const styles = StyleSheet.create({
     color: 'rgba(236, 235, 228, 0.45)',
     fontFamily: Fonts.medium,
     fontSize: 12,
+  },
+  exerciseList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  exerciseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderRadius: 12,
+  },
+  exerciseRowName: {
+    color: TrenaColors.text,
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    flex: 1,
+    marginRight: 12,
+  },
+  exerciseRowRight: {
+    alignItems: 'flex-end',
+  },
+  exerciseRowValue: {
+    color: TrenaColors.primary,
+    fontFamily: Fonts.black,
+    fontSize: 16,
+  },
+  exerciseRowDate: {
+    color: 'rgba(236, 235, 228, 0.4)',
+    fontFamily: Fonts.medium,
+    fontSize: 11,
+  },
+  exerciseDetail: {
+    marginTop: 4,
+    gap: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  detailItem: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: 'rgba(236, 235, 228, 0.05)',
+    borderRadius: 14,
+    gap: 4,
+  },
+  detailLabel: {
+    color: 'rgba(236, 235, 228, 0.5)',
+    fontFamily: Fonts.bold,
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  detailValue: {
+    color: TrenaColors.text,
+    fontFamily: Fonts.black,
+    fontSize: 20,
+  },
+  unit: {
+    fontSize: 14,
+    color: 'rgba(236, 235, 228, 0.6)',
+  },
+  chartContainer: {
+    marginTop: 8,
+    gap: 12,
+  },
+  chartTitle: {
+    color: 'rgba(236, 235, 228, 0.6)',
+    fontFamily: Fonts.bold,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  chartPlaceholder: {
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(236, 235, 228, 0.03)',
+    borderRadius: 14,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 235, 228, 0.1)',
+  },
+  chartPlaceholderText: {
+    color: 'rgba(236, 235, 228, 0.4)',
+    fontFamily: Fonts.medium,
+    fontSize: 13,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
 });
