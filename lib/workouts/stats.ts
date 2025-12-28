@@ -182,8 +182,10 @@ function getBilboReps(ex: SessionExercise): number | null {
 
 export type BilboCycleSession = {
   sessionId: string;
+  startedAt?: string;
   endedAt: string;
   reps: number;
+  weightKg?: number;
   sessionIndexInCycle: number;
 };
 
@@ -210,29 +212,71 @@ type BilboInstanceAcc = {
   maxReps: number;
   exerciseName?: string;
   resetAtReps?: number;
+  lastWeightKg?: number;
+  lastReps?: number;
 };
 
-function shouldStartNewBilboCycle(args: { config: BilboConfig; stateAtStart: BilboState; acc: BilboInstanceAcc }): boolean {
-  // Heuristic: Bilbo resets by setting currentWeight back to startWeight for the *next* session.
-  // If we see the state at the start equals startWeight, that's the first session of a cycle.
-  if (args.stateAtStart.currentWeightKg !== args.config.startWeightKg) return false;
-  // If there is no current cycle, this is definitely a new one.
+function getBilboWeightKg(ex: SessionExercise): number | null {
+  // Prefer planned weight (what the system prescribed for that Bilbo session).
+  const plannedTop = ex.plannedSets?.find((s) => s.id === 'bilbo-top-set') ?? ex.plannedSets?.[0];
+  if (plannedTop && isFiniteNumber((plannedTop as any).weightKg)) return (plannedTop as any).weightKg as number;
+
+  // Fallback to performed weight (what ended up being logged).
+  const performedTop = (ex.performedSets ?? []).find((s) => s.id === 'bilbo-top-set') ?? (ex.performedSets ?? [])[0];
+  if (performedTop && isFiniteNumber((performedTop as any).weightKg)) return (performedTop as any).weightKg as number;
+
+  return null;
+}
+
+function shouldStartNewBilboCycle(args: {
+  config: BilboConfig;
+  stateAtStart: BilboState;
+  reps: number;
+  weightKg: number | null;
+  acc: BilboInstanceAcc;
+}): boolean {
+  // First seen session always starts a cycle.
   if (!args.acc.curCycle) return true;
-  // Otherwise, treat it as a new cycle boundary.
-  return true;
+
+  // Primary signal: weight drops (Bilbo reset) => new cycle.
+  // This avoids false "new cycles" when `methodStateAtStart` is missing/invalid (it coerces to `startWeightKg`).
+  const lastW = args.acc.lastWeightKg;
+  const w = args.weightKg ?? args.stateAtStart.currentWeightKg;
+  if (isFiniteNumber(lastW) && isFiniteNumber(w)) {
+    // Tolerate tiny float/serialization noise.
+    const EPS = 1e-9;
+    if (w < lastW - EPS) return true;
+  }
+
+  // Secondary signal: if the previous session hit the reset threshold, the next one starts a new cycle.
+  // (Matches `bilboApplyResult`: reps <= resetAtReps => next weight = startWeightKg)
+  const resetAt = args.acc.resetAtReps ?? args.config.resetAtReps;
+  const lastReps = args.acc.lastReps;
+  if (isFiniteNumber(resetAt) && isFiniteNumber(lastReps) && lastReps <= resetAt) return true;
+
+  return false;
 }
 
 /**
- * Build Bilbo cycle series for charts.\n+ *\n+ * Sorting: sessions are processed by `ended_at` ascending (completed workouts only).\n+ * Cycle boundaries: determined via `methodStateAtStart.currentWeightKg === config.startWeightKg`.\n+ */
+ * Build Bilbo cycle series for charts.
+ *
+ * Sorting: sessions are processed by `ended_at` ascending (completed workouts only).
+ * Cycle boundaries: primarily when the session weight drops (reset), with a fallback to the reset-reps rule.
+ */
 export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): BilboInstanceSeries[] {
   const completed = args.sessions
     .filter((s) => Boolean(s.ended_at))
     .slice()
-    .sort((a, b) => new Date(a.ended_at ?? 0).getTime() - new Date(b.ended_at ?? 0).getTime());
+    .sort((a, b) => {
+      const aIso = a.started_at ?? a.ended_at ?? 0;
+      const bIso = b.started_at ?? b.ended_at ?? 0;
+      return new Date(aIso).getTime() - new Date(bIso).getTime();
+    });
 
   const byInstance = new Map<string, BilboInstanceAcc>();
 
   for (const s of completed) {
+    const startedAt = s.started_at ?? undefined;
     const endedAt = s.ended_at!;
     const exercises = s.snapshot?.exercises ?? [];
 
@@ -245,6 +289,7 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
       const methodInstanceId = ex.source.methodInstanceId;
       const config = coerceBilboConfig(ex.source.methodConfig) as BilboConfig;
       const stateAtStart = coerceBilboState(ex.source.methodStateAtStart, config) as BilboState;
+      const weightKg = getBilboWeightKg(ex);
 
       const acc: BilboInstanceAcc =
         byInstance.get(methodInstanceId) ??
@@ -257,13 +302,15 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
           maxReps: 0,
           exerciseName: config.exercise ? formatExerciseName(config.exercise) : undefined,
           resetAtReps: config.resetAtReps,
+          lastWeightKg: undefined,
+          lastReps: undefined,
         } satisfies BilboInstanceAcc);
 
       if (!byInstance.has(methodInstanceId)) byInstance.set(methodInstanceId, acc);
       if (!acc.exerciseName && config.exercise) acc.exerciseName = formatExerciseName(config.exercise);
       if (!acc.resetAtReps) acc.resetAtReps = config.resetAtReps;
 
-      const startNew = shouldStartNewBilboCycle({ config, stateAtStart, acc });
+      const startNew = shouldStartNewBilboCycle({ config, stateAtStart, reps, weightKg, acc });
       if (startNew) {
         acc.curCycleIndex += 1;
         acc.curSessionIndex = 0;
@@ -284,13 +331,19 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
       acc.curSessionIndex += 1;
       acc.curCycle.sessions.push({
         sessionId: s.id,
+        startedAt,
         endedAt,
         reps,
+        weightKg: weightKg ?? undefined,
         sessionIndexInCycle: acc.curSessionIndex,
       });
 
       acc.maxSessionIndexInCycle = Math.max(acc.maxSessionIndexInCycle, acc.curSessionIndex);
       acc.maxReps = Math.max(acc.maxReps, reps);
+
+      // Track last observed data for boundary detection.
+      if (weightKg != null) acc.lastWeightKg = weightKg;
+      acc.lastReps = reps;
     }
   }
 

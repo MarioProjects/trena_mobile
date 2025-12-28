@@ -582,6 +582,69 @@
     "isFavorite": false
   },
   {
+    "id": "exercise-military-press-barbell",
+    "name": "Military Press — Barbell",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Shoulder Strength",
+    "description": "A strict barbell overhead press performed with feet close together, emphasizing shoulder strength and core stability.",
+    "long_description": "Standard military press is done with heels touching. This narrow base forces more core engagement and eliminates leg drive. Keep the bar path vertical and finish with biceps by ears.",
+    "equipment": [
+      "Barbell",
+      "Plates",
+      "Rack"
+    ],
+    "dos": [
+      "Do keep your heels close together.",
+      "Do squeeze your glutes and abs hard."
+    ],
+    "donts": [
+      "Don't use any leg drive.",
+      "Don't arch your back excessively."
+    ],
+    "tags": [
+      "Compound",
+      "Push",
+      "Shoulders",
+      "Core",
+      "Barbell"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_military_press_bb",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-military-press-dumbbell",
+    "name": "Military Press — Dumbbells",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Shoulder Strength & Stability",
+    "description": "A strict dumbbell overhead press using a narrow stance to challenge balance and shoulder control.",
+    "long_description": "Perform a standing dumbbell press with feet close together. Using dumbbells requires more stabilization than a barbell and helps identify strength imbalances between sides.",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "dos": [
+      "Do maintain a narrow stance.",
+      "Do control the dumbbells throughout the full range of motion."
+    ],
+    "donts": [
+      "Don't allow the dumbbells to drift away from your body.",
+      "Don't use leg drive."
+    ],
+    "tags": [
+      "Push",
+      "Shoulders",
+      "Dumbbells",
+      "Stability"
+    ],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_military_press_db",
+    "isFavorite": false
+  },
+  {
     "id": "exercise-dumbbell-biceps-curl",
     "name": "Dumbbell Biceps Curl",
     "type": "exercise",

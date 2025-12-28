@@ -230,7 +230,7 @@ export async function listCompletedSessionsForStats(args?: { max?: number; pageS
       .from('workout_sessions')
       .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
       .not('ended_at', 'is', null)
-      .order('ended_at', { ascending: false })
+      .order('started_at', { ascending: false })
       .range(from, to);
     if (error) throw error;
     out.push(...(data ?? []));

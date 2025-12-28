@@ -924,8 +924,20 @@ export default function SessionScreen() {
     candidate.setMilliseconds(0);
 
     const nextStarted = candidate.toISOString();
-    const endedAt = row?.ended_at ? new Date(row.ended_at) : null;
-    const nextEnded = endedAt && endedAt.getTime() < candidate.getTime() ? candidate.toISOString() : undefined;
+    const prevStarted = row?.started_at ? new Date(row.started_at) : null;
+    const prevEnded = row?.ended_at ? new Date(row.ended_at) : null;
+
+    // If this workout is already completed, keep `ended_at` aligned when the user edits the date/time.
+    // We preserve the original duration when possible.
+    let nextEnded: string | undefined = undefined;
+    if (prevEnded && !Number.isNaN(prevEnded.getTime())) {
+      const prevStartMs = prevStarted && !Number.isNaN(prevStarted.getTime()) ? prevStarted.getTime() : prevEnded.getTime();
+      const durationMs = Math.max(0, prevEnded.getTime() - prevStartMs);
+      const nextEndDate = new Date(candidate.getTime() + durationMs);
+      nextEndDate.setSeconds(0);
+      nextEndDate.setMilliseconds(0);
+      nextEnded = nextEndDate.toISOString();
+    }
 
     setIsUpdatingTime(true);
     try {
