@@ -77,21 +77,21 @@ export default function CreateWendler531MethodScreen() {
           <View style={styles.grid2}>
             <View style={{ gap: 8, flex: 1 }}>
               <Text style={styles.mutedLabel}>Squat</Text>
-              <TextInput value={tmSquat} onChangeText={setTmSquat} keyboardType="numeric" style={styles.input} />
+              <TextInput value={tmSquat} onChangeText={setTmSquat} keyboardType="decimal-pad" style={styles.input} />
             </View>
             <View style={{ gap: 8, flex: 1 }}>
               <Text style={styles.mutedLabel}>Bench</Text>
-              <TextInput value={tmBench} onChangeText={setTmBench} keyboardType="numeric" style={styles.input} />
+              <TextInput value={tmBench} onChangeText={setTmBench} keyboardType="decimal-pad" style={styles.input} />
             </View>
           </View>
           <View style={styles.grid2}>
             <View style={{ gap: 8, flex: 1 }}>
               <Text style={styles.mutedLabel}>Deadlift</Text>
-              <TextInput value={tmDead} onChangeText={setTmDead} keyboardType="numeric" style={styles.input} />
+              <TextInput value={tmDead} onChangeText={setTmDead} keyboardType="decimal-pad" style={styles.input} />
             </View>
             <View style={{ gap: 8, flex: 1 }}>
               <Text style={styles.mutedLabel}>Press</Text>
-              <TextInput value={tmPress} onChangeText={setTmPress} keyboardType="numeric" style={styles.input} />
+              <TextInput value={tmPress} onChangeText={setTmPress} keyboardType="decimal-pad" style={styles.input} />
             </View>
           </View>
 

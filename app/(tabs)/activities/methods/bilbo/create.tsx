@@ -75,11 +75,11 @@ export default function CreateBilboMethodScreen() {
           <View style={styles.grid2}>
             <View style={{ gap: 8, flex: 1 }}>
               <Text style={styles.label}>Start (kg)</Text>
-              <TextInput value={start} onChangeText={setStart} keyboardType="numeric" style={styles.input} />
+              <TextInput value={start} onChangeText={setStart} keyboardType="decimal-pad" style={styles.input} />
             </View>
             <View style={{ gap: 8, flex: 1 }}>
               <Text style={styles.label}>Increment (kg)</Text>
-              <TextInput value={inc} onChangeText={setInc} keyboardType="numeric" style={styles.input} />
+              <TextInput value={inc} onChangeText={setInc} keyboardType="decimal-pad" style={styles.input} />
             </View>
           </View>
 

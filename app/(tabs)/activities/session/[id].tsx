@@ -331,6 +331,9 @@ export default function SessionScreen() {
   const [titleDraft, setTitleDraft] = React.useState('');
   const [isSavingTitle, setIsSavingTitle] = React.useState(false);
   const [distanceDraftBySetId, setDistanceDraftBySetId] = React.useState<Record<string, string>>({});
+  const [weightDraftBySetId, setWeightDraftBySetId] = React.useState<Record<string, string>>({});
+  const [repsDraftBySetId, setRepsDraftBySetId] = React.useState<Record<string, string>>({});
+  const [rirDraftBySetId, setRirDraftBySetId] = React.useState<Record<string, string>>({});
   const [durationPicker, setDurationPicker] = React.useState<null | { exerciseId: string; setIdx: number; seconds: number }>(null);
   // Removed explicit reorderMode state
   const heightsRef = React.useRef<Record<string, number>>({});
@@ -1324,8 +1327,22 @@ export default function SessionScreen() {
 
                                   <View style={styles.setRow}>
                                     <TextInput
-                                      value={repsText}
-                                      onChangeText={(t) => setPlannedReps(ex.id, ps, t)}
+                                      value={
+                                        repsDraftBySetId[ps.id] ??
+                                        (cur && typeof cur.reps === 'number' && cur.reps > 0 ? String(cur.reps) : '')
+                                      }
+                                      onChangeText={(t) => {
+                                        setRepsDraftBySetId((cur) => ({ ...cur, [ps.id]: t }));
+                                        setPlannedReps(ex.id, ps, t);
+                                      }}
+                                      onBlur={() => {
+                                        setRepsDraftBySetId((cur) => {
+                                          if (!(ps.id in cur)) return cur;
+                                          const next = { ...cur };
+                                          delete next[ps.id];
+                                          return next;
+                                        });
+                                      }}
                                       placeholder="reps"
                                       placeholderTextColor="rgba(236, 235, 228, 0.5)"
                                       keyboardType="numeric"
@@ -1372,8 +1389,22 @@ export default function SessionScreen() {
                                 </Pressable>
                                 <>
                                   <TextInput
-                                    value={repsText}
-                                    onChangeText={(t) => setPlannedReps(ex.id, ps, t)}
+                                    value={
+                                      repsDraftBySetId[ps.id] ??
+                                      (cur && typeof cur.reps === 'number' && cur.reps > 0 ? String(cur.reps) : '')
+                                    }
+                                    onChangeText={(t) => {
+                                      setRepsDraftBySetId((cur) => ({ ...cur, [ps.id]: t }));
+                                      setPlannedReps(ex.id, ps, t);
+                                    }}
+                                    onBlur={() => {
+                                      setRepsDraftBySetId((cur) => {
+                                        if (!(ps.id in cur)) return cur;
+                                        const next = { ...cur };
+                                        delete next[ps.id];
+                                        return next;
+                                      });
+                                    }}
                                     placeholder="reps"
                                     placeholderTextColor="rgba(236, 235, 228, 0.5)"
                                     keyboardType="numeric"
@@ -1383,14 +1414,26 @@ export default function SessionScreen() {
                                   <Text style={styles.setWeight}>{`${ps.weightKg} kg`}</Text>
                                 </>
                                 <TextInput
-                                  value={getRirText(cur)}
+                                  value={
+                                    rirDraftBySetId[ps.id] ??
+                                    getRirText(cur)
+                                  }
                                   onChangeText={(t) => {
+                                    setRirDraftBySetId((cur) => ({ ...cur, [ps.id]: t }));
                                     const n = numOrEmpty(t);
                                     setPlannedMeta(ex.id, ps, { rir: n });
                                   }}
+                                  onBlur={() => {
+                                    setRirDraftBySetId((cur) => {
+                                      if (!(ps.id in cur)) return cur;
+                                      const next = { ...cur };
+                                      delete next[ps.id];
+                                      return next;
+                                    });
+                                  }}
                                   placeholder="RIR"
                                   placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                  keyboardType="numeric"
+                                  keyboardType="decimal-pad"
                                   style={styles.rirInput}
                                 />
                                 <Pressable
@@ -1593,10 +1636,22 @@ export default function SessionScreen() {
                                   <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
                                 </Pressable>
                                 <TextInput
-                                  value={s.reps ? String(s.reps) : ''}
+                                  value={
+                                    repsDraftBySetId[s.id] ??
+                                    (s.reps ? String(s.reps) : '')
+                                  }
                                   onChangeText={(t) => {
+                                    setRepsDraftBySetId((cur) => ({ ...cur, [s.id]: t }));
                                     const n = numOrEmpty(t);
                                     setFreeSetValue(ex.id, idx, { reps: n ?? 0 });
+                                  }}
+                                  onBlur={() => {
+                                    setRepsDraftBySetId((cur) => {
+                                      if (!(s.id in cur)) return cur;
+                                      const next = { ...cur };
+                                      delete next[s.id];
+                                      return next;
+                                    });
                                   }}
                                   placeholder="reps"
                                   placeholderTextColor="rgba(236, 235, 228, 0.5)"
@@ -1605,25 +1660,49 @@ export default function SessionScreen() {
                                 />
                                 <Text style={styles.times}>x</Text>
                                 <TextInput
-                                  value={s.weightKg ? String(s.weightKg) : ''}
+                                  value={
+                                    weightDraftBySetId[s.id] ??
+                                    (s.weightKg ? String(s.weightKg) : '')
+                                  }
                                   onChangeText={(t) => {
+                                    setWeightDraftBySetId((cur) => ({ ...cur, [s.id]: t }));
                                     const n = numOrEmpty(t);
                                     setFreeSetValue(ex.id, idx, { weightKg: n ?? 0 });
                                   }}
+                                  onBlur={() => {
+                                    setWeightDraftBySetId((cur) => {
+                                      if (!(s.id in cur)) return cur;
+                                      const next = { ...cur };
+                                      delete next[s.id];
+                                      return next;
+                                    });
+                                  }}
                                   placeholder="kg"
                                   placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                  keyboardType="numeric"
+                                  keyboardType="decimal-pad"
                                   style={styles.freeInput}
                                 />
                                 <TextInput
-                                  value={getRirText(s)}
+                                  value={
+                                    rirDraftBySetId[s.id] ??
+                                    getRirText(s)
+                                  }
                                   onChangeText={(t) => {
+                                    setRirDraftBySetId((cur) => ({ ...cur, [s.id]: t }));
                                     const n = numOrEmpty(t);
                                     setFreeSetValue(ex.id, idx, { rir: n });
                                   }}
+                                  onBlur={() => {
+                                    setRirDraftBySetId((cur) => {
+                                      if (!(s.id in cur)) return cur;
+                                      const next = { ...cur };
+                                      delete next[s.id];
+                                      return next;
+                                    });
+                                  }}
                                   placeholder="RIR"
                                   placeholderTextColor="rgba(236, 235, 228, 0.5)"
-                                  keyboardType="numeric"
+                                  keyboardType="decimal-pad"
                                   style={styles.rirInput}
                                 />
                                 <Pressable
