@@ -121,7 +121,7 @@ export function AddExerciseModal({
 }: {
   open: boolean;
   onClose: () => void;
-  onConfirm: (selection: AddExerciseSelection) => void;
+  onConfirm: (selections: AddExerciseSelection[]) => void;
   title?: string;
   confirmLabel?: string;
   onRequestCreateMethod?: (key: MethodKey) => void;
@@ -134,7 +134,7 @@ export function AddExerciseModal({
   const [methods, setMethods] = React.useState<MethodInstanceRow[]>([]);
   const [isLoadingMethods, setIsLoadingMethods] = React.useState(false);
 
-  const [selectedExercise, setSelectedExercise] = React.useState<ExerciseRef | null>(null);
+  const [selectedSelections, setSelectedSelections] = React.useState<AddExerciseSelection[]>([]);
 
   const [methodChoice, setMethodChoice] = React.useState<MethodKey | null>(null);
   const [selectedMethodInstanceId, setSelectedMethodInstanceId] = React.useState<string | null>(null);
@@ -146,7 +146,7 @@ export function AddExerciseModal({
     if (!open) return;
     const d = getAddExerciseDraft();
     setTerm('');
-    setSelectedExercise(d?.selectedExercise ?? null);
+    setSelectedSelections(d?.selectedExercise ? [{ exercise: d.selectedExercise, method: null }] : []);
     setMethodChoice(d?.methodChoice ?? null);
     setSelectedMethodInstanceId(d?.selectedMethodInstanceId ?? null);
     setWendlerLift(d?.wendlerLift ?? 'bench');
@@ -186,13 +186,27 @@ export function AddExerciseModal({
       setMethodChoice(row.method_key);
       setSelectedMethodInstanceId(row.id);
       setAwaitingCreatedMethodKey(null);
+
+      // Auto-add the newly created method instance to selections
+      const binding: MethodBinding =
+        row.method_key === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
+      const ex = inferExerciseFromMethod({
+        methodKey: row.method_key,
+        methodInstance: row,
+        binding,
+        fallbackExercise: null,
+      });
+      if (ex) {
+        const sel: AddExerciseSelection = { exercise: ex, method: { methodInstanceId: row.id, binding, methodInstance: row } };
+        setSelectedSelections((cur) => [...cur, sel]);
+      }
     });
     return () => {
       // `subscribeMethodInstanceCreated` currently returns a function that may return a boolean;
       // React effect cleanups must return void.
       unsub();
     };
-  }, [awaitingCreatedMethodKey, open]);
+  }, [awaitingCreatedMethodKey, open, wendlerLift]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -204,7 +218,21 @@ export function AddExerciseModal({
     setMethodChoice(row.method_key);
     setSelectedMethodInstanceId(row.id);
     setAwaitingCreatedMethodKey(null);
-  }, [awaitingCreatedMethodKey, open]);
+
+    // Auto-add the newly created method instance to selections
+    const binding: MethodBinding =
+      row.method_key === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
+    const ex = inferExerciseFromMethod({
+      methodKey: row.method_key,
+      methodInstance: row,
+      binding,
+      fallbackExercise: null,
+    });
+    if (ex) {
+      const sel: AddExerciseSelection = { exercise: ex, method: { methodInstanceId: row.id, binding, methodInstance: row } };
+      setSelectedSelections((cur) => [...cur, sel]);
+    }
+  }, [awaitingCreatedMethodKey, open, wendlerLift]);
 
   const filteredLearn = React.useMemo(() => {
     const t = normalize(term);
@@ -227,52 +255,97 @@ export function AddExerciseModal({
   const wendlers = React.useMemo(() => methods.filter((m) => m.method_key === 'wendler_531'), [methods]);
 
   const suggestedBilbos = React.useMemo(() => {
-    if (!selectedExercise) return bilbos;
-    const matching = bilbos.filter((m) => matchesBilboExercise(m, selectedExercise));
-    const rest = bilbos.filter((m) => !matchesBilboExercise(m, selectedExercise));
+    // If we have selections, try to suggest based on the last one
+    const lastEx = selectedSelections.length > 0 ? selectedSelections[selectedSelections.length - 1].exercise : null;
+    if (!lastEx) return bilbos;
+    const matching = bilbos.filter((m) => matchesBilboExercise(m, lastEx));
+    const rest = bilbos.filter((m) => !matchesBilboExercise(m, lastEx));
     return [...matching, ...rest];
-  }, [bilbos, selectedExercise]);
+  }, [bilbos, selectedSelections]);
 
   const selectedMethodInstance = React.useMemo(
     () => (selectedMethodInstanceId ? methods.find((m) => m.id === selectedMethodInstanceId) ?? null : null),
     [methods, selectedMethodInstanceId],
   );
 
-  const effectiveExercise = React.useMemo(() => {
-    if (!methodChoice) return selectedExercise;
-    if (!selectedMethodInstance) return null;
-    const binding: MethodBinding =
-      methodChoice === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
-    return inferExerciseFromMethod({
-      methodKey: methodChoice,
-      methodInstance: selectedMethodInstance,
-      binding,
-      fallbackExercise: selectedExercise,
-    });
-  }, [methodChoice, selectedExercise, selectedMethodInstance, wendlerLift]);
-
-  const canConfirm =
-    !methodChoice
-      ? !!selectedExercise
-      : !!selectedMethodInstanceId && !!selectedMethodInstance && !!effectiveExercise;
+  const canConfirm = selectedSelections.length > 0;
 
   const handleClose = () => {
     clearAddExerciseDraft();
     onClose();
   };
 
+  const isSelected = (ref: ExerciseRef) => {
+    return selectedSelections.some((s) => {
+      if (s.method) return false; // Only check free exercises
+      if (s.exercise.kind !== ref.kind) return false;
+      if (s.exercise.kind === 'free') return s.exercise.name === (ref as any).name;
+      return s.exercise.learnExerciseId === (ref as any).learnExerciseId;
+    });
+  };
+
+  const isMethodSelected = (miId: string, binding?: MethodBinding) => {
+    return selectedSelections.some((s) => {
+      if (!s.method) return false;
+      if (s.method.methodInstanceId !== miId) return false;
+      if (!binding) return true;
+      if (s.method.binding.methodKey !== binding.methodKey) return false;
+      if (s.method.binding.methodKey === 'wendler_531' && (s.method.binding as any).lift !== (binding as any).lift) return false;
+      return true;
+    });
+  };
+
   const onSelectExercise = (ref: ExerciseRef) => {
-    setSelectedExercise(ref);
-    // Mutual exclusivity: selecting an exercise clears progression selection.
-    setMethodChoice(null);
-    setSelectedMethodInstanceId(null);
+    setSelectedSelections((cur) => {
+      const idx = cur.findIndex((s) => {
+        if (s.method) return false;
+        if (s.exercise.kind !== ref.kind) return false;
+        if (s.exercise.kind === 'free') return s.exercise.name === (ref as any).name;
+        return s.exercise.learnExerciseId === (ref as any).learnExerciseId;
+      });
+      if (idx >= 0) {
+        return cur.filter((_, i) => i !== idx);
+      }
+      return [...cur, { exercise: ref, method: null }];
+    });
+  };
+
+  const onSelectMethod = (mi: MethodInstanceRow) => {
+    const binding: MethodBinding =
+      mi.method_key === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
+
+    setSelectedSelections((cur) => {
+      const idx = cur.findIndex((s) => {
+        if (!s.method) return false;
+        if (s.method.methodInstanceId !== mi.id) return false;
+        if (s.method.binding.methodKey !== binding.methodKey) return false;
+        if (s.method.binding.methodKey === 'wendler_531' && (s.method.binding as any).lift !== (binding as any).lift) return false;
+        return true;
+      });
+
+      if (idx >= 0) {
+        return cur.filter((_, i) => i !== idx);
+      }
+
+      const ex = inferExerciseFromMethod({
+        methodKey: mi.method_key,
+        methodInstance: mi,
+        binding,
+        fallbackExercise: null,
+      });
+
+      if (!ex) return cur;
+      return [...cur, { exercise: ex, method: { methodInstanceId: mi.id, binding, methodInstance: mi } }];
+    });
   };
 
   const onCreateMethod = (key: MethodKey) => {
     setAwaitingCreatedMethodKey(key);
+    // Draft only supports one exercise for now, we'll just store the last one if any
+    const lastEx = selectedSelections.length > 0 ? selectedSelections[selectedSelections.length - 1].exercise : null;
     setAddExerciseDraft({
       shouldReopen: true,
-      selectedExercise,
+      selectedExercise: lastEx,
       methodChoice: key,
       selectedMethodInstanceId,
       wendlerLift,
@@ -285,9 +358,10 @@ export function AddExerciseModal({
   const onEditMethod = (methodInstanceId: string) => {
     const mi = methods.find((m) => m.id === methodInstanceId);
     if (!mi) return;
+    const lastEx = selectedSelections.length > 0 ? selectedSelections[selectedSelections.length - 1].exercise : null;
     setAddExerciseDraft({
       shouldReopen: true,
-      selectedExercise,
+      selectedExercise: lastEx,
       methodChoice: mi.method_key,
       selectedMethodInstanceId: methodInstanceId,
       wendlerLift,
@@ -298,21 +372,8 @@ export function AddExerciseModal({
   };
 
   const confirm = () => {
-    if (!methodChoice) {
-      if (!selectedExercise) return;
-      onConfirm({ exercise: selectedExercise, method: null });
-      clearAddExerciseDraft();
-      return;
-    }
-    if (!selectedMethodInstanceId) return;
-    const binding: MethodBinding =
-      methodChoice === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
-
-    const methodInstance = selectedMethodInstance;
-    if (!methodInstance) return;
-    const ex = effectiveExercise;
-    if (!ex) return;
-    onConfirm({ exercise: ex, method: { methodInstanceId: selectedMethodInstanceId, binding, methodInstance } });
+    if (selectedSelections.length === 0) return;
+    onConfirm(selectedSelections);
     clearAddExerciseDraft();
   };
 
@@ -349,7 +410,6 @@ export function AddExerciseModal({
                     styles={styles}
                     colors={colors}
                     onPress={() => {
-                      setSelectedExercise(null);
                       setMethodChoice('bilbo');
                       setSelectedMethodInstanceId(null);
                     }}
@@ -360,7 +420,6 @@ export function AddExerciseModal({
                     styles={styles}
                     colors={colors}
                     onPress={() => {
-                      setSelectedExercise(null);
                       setMethodChoice('wendler_531');
                       setSelectedMethodInstanceId(null);
                     }}
@@ -390,14 +449,11 @@ export function AddExerciseModal({
                           <Pill
                             key={m.id}
                             label={m.name}
-                            selected={selectedMethodInstanceId === m.id}
-                            onEdit={selectedMethodInstanceId === m.id ? () => onEditMethod(m.id) : undefined}
+                            selected={isMethodSelected(m.id)}
+                            onEdit={isMethodSelected(m.id) ? () => onEditMethod(m.id) : undefined}
                             styles={styles}
                             colors={colors}
-                            onPress={() => {
-                              setSelectedExercise(null);
-                              setSelectedMethodInstanceId(m.id);
-                            }}
+                            onPress={() => onSelectMethod(m)}
                           />
                         ))}
                       </ScrollView>
@@ -427,7 +483,6 @@ export function AddExerciseModal({
                             styles={styles}
                             colors={colors}
                             onPress={() => {
-                              setSelectedExercise(null);
                               setSelectedMethodInstanceId(m.id);
                             }}
                           />
@@ -439,16 +494,23 @@ export function AddExerciseModal({
                       <View style={{ gap: 8 }}>
                         <Text style={styles.muted}>Main lift</Text>
                         <View style={styles.pillsRow}>
-                          {(['squat', 'bench', 'deadlift', 'press'] as WendlerLiftKey[]).map((k) => (
-                            <Pill
-                              key={k}
-                              label={k}
-                              selected={wendlerLift === k}
-                              styles={styles}
-                              colors={colors}
-                              onPress={() => setWendlerLift(k)}
-                            />
-                          ))}
+                          {(['squat', 'bench', 'deadlift', 'press'] as WendlerLiftKey[]).map((k) => {
+                            const binding: MethodBinding = { methodKey: 'wendler_531', lift: k };
+                            return (
+                              <Pill
+                                key={k}
+                                label={k}
+                                selected={isMethodSelected(selectedMethodInstanceId, binding)}
+                                styles={styles}
+                                colors={colors}
+                                onPress={() => {
+                                  setWendlerLift(k);
+                                  const mi = wendlers.find((m) => m.id === selectedMethodInstanceId);
+                                  if (mi) onSelectMethod(mi);
+                                }}
+                              />
+                            );
+                          })}
                         </View>
                       </View>
                     ) : (
@@ -483,12 +545,13 @@ export function AddExerciseModal({
               <View style={{ gap: 10 }}>
                 <Text style={styles.subHeader}>Custom</Text>
                 {filteredCustom.map((name) => {
-                  const selected = selectedExercise?.kind === 'free' && selectedExercise.name === name;
+                  const ref: ExerciseRef = { kind: 'free', name };
+                  const selected = isSelected(ref);
                   return (
                     <Pressable
                       key={name}
                       style={[styles.row, selected && styles.rowSelected]}
-                      onPress={() => onSelectExercise({ kind: 'free', name })}
+                      onPress={() => onSelectExercise(ref)}
                     >
                       <View style={[styles.iconBox, selected && styles.iconBoxSelected]} />
                       <Text
@@ -507,12 +570,13 @@ export function AddExerciseModal({
               <View style={{ gap: 10 }}>
                 <Text style={styles.subHeader}>Library</Text>
                 {filteredLearn.map((ex) => {
-                  const selected = selectedExercise?.kind === 'learn' && selectedExercise.learnExerciseId === ex.id;
+                  const ref: ExerciseRef = { kind: 'learn', learnExerciseId: ex.id };
+                  const selected = isSelected(ref);
                   return (
                     <Pressable
                       key={ex.id}
                       style={[styles.row, selected && styles.rowSelected]}
-                      onPress={() => onSelectExercise({ kind: 'learn', learnExerciseId: ex.id })}
+                      onPress={() => onSelectExercise(ref)}
                     >
                       <View style={[styles.iconBox, selected && styles.iconBoxSelected]}>
                         <Text style={[styles.iconText, selected && styles.iconTextSelected]}>{ex.name.slice(0, 1)}</Text>
@@ -535,19 +599,26 @@ export function AddExerciseModal({
 
         <View style={styles.footer}>
           <View style={{ flex: 1, minWidth: 0 }}>
+            {selectedSelections.length > 1 && (
+              <View style={styles.supersetBadge}>
+                <Text style={styles.supersetText}>SUPERSET</Text>
+              </View>
+            )}
             <Text style={styles.footerTitle} numberOfLines={1}>
-              {effectiveExercise ? labelForExercise(effectiveExercise) : 'Select an exercise or progression'}
+              {selectedSelections.length === 0
+                ? 'Select an exercise or progression'
+                : selectedSelections.length === 1
+                ? labelForExercise(selectedSelections[0].exercise)
+                : `${selectedSelections.length} exercises selected`}
             </Text>
             <Text style={styles.footerMeta} numberOfLines={1}>
-              {!methodChoice
+              {selectedSelections.length === 0
                 ? 'Free logging'
-                : methodChoice === 'bilbo'
-                  ? selectedMethodInstanceId
-                    ? 'Bilbo attached'
-                    : 'Pick a Bilbo progression'
-                  : selectedMethodInstanceId
-                    ? `5/3/1 • ${wendlerLift}`
-                    : 'Pick a 5/3/1 progression'}
+                : selectedSelections.length === 1
+                ? selectedSelections[0].method
+                  ? `${selectedSelections[0].method.methodInstance.method_key} attached`
+                  : 'Free logging'
+                : 'Will be added as a Superset'}
             </Text>
           </View>
 
@@ -560,7 +631,9 @@ export function AddExerciseModal({
               (!canConfirm || pressed) && { opacity: canConfirm ? 0.95 : 0.5, transform: pressed ? [{ scale: 0.99 }] : undefined },
             ]}
           >
-            <Text style={styles.primaryButtonText}>{confirmLabel}</Text>
+            <Text style={styles.primaryButtonText}>
+              {selectedSelections.length > 1 ? `Add ${selectedSelections.length}` : confirmLabel}
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -679,5 +752,18 @@ const createStyles = (colors: {
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
   primaryButtonText: { color: colors.onPrimary, fontSize: 15, fontFamily: Fonts.extraBold },
+  supersetBadge: {
+    backgroundColor: colors.tertiary,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 2,
+  },
+  supersetText: {
+    color: colors.onTertiary,
+    fontSize: 10,
+    fontFamily: Fonts.extraBold,
+  },
 });
 

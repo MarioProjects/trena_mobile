@@ -1,5 +1,5 @@
 import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
-import { DuplicateIcon, EditIcon, MoreHorizIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { DuplicateIcon, EditIcon, EnergyIcon, MoreHorizIcon, PlusIcon, TrashIcon } from '@/components/icons';
 import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -97,23 +97,47 @@ export default function TemplatesScreen() {
     else router.push('/activities/methods/wendler_531/create' as any);
   };
 
-  const onConfirmAdd = (selection: AddExerciseSelection) => {
-    const exercise = selection.exercise;
-    if (!selection.method) {
-      setItems((cur) => [...cur, { id: makeLocalId('tpl_item'), type: 'free', exercise }]);
-      setAddOpen(false);
-      return;
+  const groupedItems = React.useMemo(() => {
+    const groups: { supersetId?: string; items: WorkoutTemplateItem[] }[] = [];
+    let lastSid: string | undefined = undefined;
+    let currentGroup: WorkoutTemplateItem[] = [];
+
+    items.forEach((it) => {
+      if (it.supersetId && it.supersetId === lastSid) {
+        currentGroup.push(it);
+      } else {
+        if (currentGroup.length > 0) {
+          groups.push({ supersetId: lastSid, items: currentGroup });
+        }
+        lastSid = it.supersetId;
+        currentGroup = [it];
+      }
+    });
+    if (currentGroup.length > 0) {
+      groups.push({ supersetId: lastSid, items: currentGroup });
     }
-    setItems((cur) => [
-      ...cur,
-      {
+    return groups;
+  }, [items]);
+
+  const onConfirmAdd = (selections: AddExerciseSelection[]) => {
+    const supersetId = selections.length > 1 ? makeLocalId('ss') : undefined;
+
+    const newItems: WorkoutTemplateItem[] = selections.map((sel) => {
+      const exercise = sel.exercise;
+      if (!sel.method) {
+        return { id: makeLocalId('tpl_item'), type: 'free', exercise, supersetId };
+      }
+      return {
         id: makeLocalId('tpl_item'),
         type: 'method',
         exercise,
-        methodInstanceId: selection.method.methodInstanceId,
-        binding: selection.method.binding,
-      },
-    ]);
+        methodInstanceId: sel.method.methodInstanceId,
+        binding: sel.method.binding,
+        supersetId,
+      };
+    });
+
+    setItems((cur) => [...cur, ...newItems]);
     setAddOpen(false);
   };
 
@@ -225,35 +249,61 @@ export default function TemplatesScreen() {
               <Text style={styles.label}>Items</Text>
               {items.length === 0 ? <Text style={styles.body}>No items yet.</Text> : null}
               <View style={{ gap: 10 }}>
-                {items.map((it, idx) => (
-                  <View key={it.id} style={styles.itemRow}>
-                    <View style={{ flex: 1, gap: 4 }}>
-                      <Text style={styles.itemTitle} numberOfLines={1}>
-                        {`${idx + 1}. ${
-                          it.type === 'method' && it.binding.methodKey === 'bilbo'
-                            ? `Bilbo - ${coerceExerciseName(it.exercise)}`
-                            : coerceExerciseName(it.exercise)
-                        }`}
-                      </Text>
-                      <Text style={styles.itemMeta}>
-                        {it.type === 'free'
-                          ? 'Free'
-                          : it.binding.methodKey === 'bilbo'
-                            ? 'Bilbo'
-                            : `5/3/1 • ${(it.binding as any).lift}`}
-                      </Text>
+                {groupedItems.map((group, gIdx) => {
+                  const isSuperset = group.items.length > 1;
+                  return (
+                    <View key={group.supersetId || group.items[0].id} style={isSuperset ? styles.supersetContainer : undefined}>
+                      {isSuperset && (
+                        <View style={styles.supersetHeader}>
+                          <EnergyIcon size={12} color={colors.tertiary} />
+                          <Text style={styles.supersetTitle}>SUPERSET</Text>
+                        </View>
+                      )}
+                      <View style={isSuperset ? styles.supersetInner : undefined}>
+                        {group.items.map((it, idx) => {
+                          const globalIdx = items.findIndex((i) => i.id === it.id);
+                          return (
+                            <View
+                              key={it.id}
+                              style={[
+                                styles.itemRow,
+                                isSuperset && styles.supersetItemRow,
+                                isSuperset && idx === 0 && styles.supersetItemRowFirst,
+                                isSuperset && idx === group.items.length - 1 && styles.supersetItemRowLast,
+                              ]}
+                            >
+                              <View style={{ flex: 1, gap: 4 }}>
+                                <Text style={styles.itemTitle} numberOfLines={1}>
+                                  {`${globalIdx + 1}. ${
+                                    it.type === 'method' && it.binding.methodKey === 'bilbo'
+                                      ? `Bilbo - ${coerceExerciseName(it.exercise)}`
+                                      : coerceExerciseName(it.exercise)
+                                  }`}
+                                </Text>
+                                <Text style={styles.itemMeta}>
+                                  {it.type === 'free'
+                                    ? 'Free'
+                                    : it.binding.methodKey === 'bilbo'
+                                      ? 'Bilbo'
+                                      : `5/3/1 • ${(it.binding as any).lift}`}
+                                </Text>
+                              </View>
+                              <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel="Remove item"
+                                onPress={() => removeItem(it.id)}
+                                hitSlop={10}
+                                style={({ pressed }) => [styles.trashButton, pressed && styles.pressed]}
+                              >
+                                <TrashIcon size={20} color={colors.accentRed} />
+                              </Pressable>
+                            </View>
+                          );
+                        })}
+                      </View>
                     </View>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Remove item"
-                      onPress={() => removeItem(it.id)}
-                      hitSlop={10}
-                      style={({ pressed }) => [styles.trashButton, pressed && styles.pressed]}
-                    >
-                      <TrashIcon size={20} color={colors.accentRed} />
-                    </Pressable>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             </View>
 
@@ -505,6 +555,41 @@ const createStyles = (colors: {
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   itemTitle: { fontFamily: Fonts.bold, fontSize: 14, lineHeight: 18, color: colors.text },
   itemMeta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: rgba(colors.text, 0.75) },
+  supersetContainer: {
+    gap: 4,
+  },
+  supersetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingLeft: 4,
+  },
+  supersetTitle: {
+    fontFamily: Fonts.extraBold,
+    fontSize: 10,
+    color: colors.tertiary,
+    letterSpacing: 0.5,
+  },
+  supersetInner: {
+    gap: 2,
+    borderLeftWidth: 2,
+    borderLeftColor: rgba(colors.tertiary, 0.3),
+    marginLeft: 6,
+    paddingLeft: 10,
+  },
+  supersetItemRow: {
+    borderWidth: 0,
+    backgroundColor: rgba(colors.text, 0.03),
+    borderRadius: 8,
+  },
+  supersetItemRowFirst: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  supersetItemRowLast: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
   // used both for template card delete and item remove
   trashButton: { paddingLeft: 2, paddingVertical: 2 },
   secondaryButton: {

@@ -36,6 +36,7 @@ export type WorkoutTemplateItem =
     id: string;
     type: 'free';
     exercise: ExerciseRef;
+    supersetId?: string;
     note?: string;
   }
   | {
@@ -44,6 +45,7 @@ export type WorkoutTemplateItem =
     exercise: ExerciseRef;
     methodInstanceId: string;
     binding: MethodBinding;
+    supersetId?: string;
     note?: string;
   };
 
@@ -97,6 +99,7 @@ export type SessionExercise = {
   id: string;
   exercise: ExerciseRef;
   source: SessionExerciseSource;
+  supersetId?: string;
   /**
    * Determines how to log this exercise in a session UI.
    * If omitted, assume strength-style logging.

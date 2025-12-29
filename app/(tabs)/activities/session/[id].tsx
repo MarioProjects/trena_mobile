@@ -28,6 +28,7 @@ import {
   DumbbellIcon,
   DuplicateIcon,
   EditIcon,
+  EnergyIcon,
   FireIcon,
   FloppyIcon,
   HappyIcon,
@@ -829,29 +830,57 @@ export default function SessionScreen() {
     });
   };
 
-  const onConfirmAdd = async (selection: AddExerciseSelection) => {
-    const exercise = selection.exercise;
+  const groupedExercises = React.useMemo(() => {
+    const groups: { supersetId?: string; exercises: SessionExercise[] }[] = [];
+    let lastSid: string | undefined = undefined;
+    let currentGroup: SessionExercise[] = [];
 
-    let sx: SessionExercise;
-    if (!selection.method) {
-      sx = {
-        id: makeLocalId('sx'),
-        exercise,
-        source: { type: 'free' },
-        tracking: defaultTrackingForExerciseRef(exercise),
-        plannedSets: [],
-        performedSets: [],
-      };
-    } else {
-      sx = await buildSessionExerciseFromMethodSelection({
-        exercise,
-        methodInstanceId: selection.method.methodInstanceId,
-        methodInstance: selection.method.methodInstance,
-        binding: selection.method.binding,
-      });
+    snapshot.exercises.forEach((ex) => {
+      if (ex.supersetId && ex.supersetId === lastSid) {
+        currentGroup.push(ex);
+      } else {
+        if (currentGroup.length > 0) {
+          groups.push({ supersetId: lastSid, exercises: currentGroup });
+        }
+        lastSid = ex.supersetId;
+        currentGroup = [ex];
+      }
+    });
+    if (currentGroup.length > 0) {
+      groups.push({ supersetId: lastSid, exercises: currentGroup });
     }
+    return groups;
+  }, [snapshot.exercises]);
 
-    setSnapshot((cur) => ({ ...cur, exercises: [...cur.exercises, sx] }));
+  const onConfirmAdd = async (selections: AddExerciseSelection[]) => {
+    const supersetId = selections.length > 1 ? makeLocalId('ss') : undefined;
+
+    const newExercises: SessionExercise[] = await Promise.all(
+      selections.map(async (sel) => {
+        const exercise = sel.exercise;
+        let sx: SessionExercise;
+        if (!sel.method) {
+          sx = {
+            id: makeLocalId('sx'),
+            exercise,
+            source: { type: 'free' },
+            tracking: defaultTrackingForExerciseRef(exercise),
+            plannedSets: [],
+            performedSets: [],
+          };
+        } else {
+          sx = await buildSessionExerciseFromMethodSelection({
+            exercise,
+            methodInstanceId: sel.method.methodInstanceId,
+            methodInstance: sel.method.methodInstance,
+            binding: sel.method.binding,
+          });
+        }
+        return { ...sx, supersetId };
+      })
+    );
+
+    setSnapshot((cur) => ({ ...cur, exercises: [...cur.exercises, ...newExercises] }));
     setAddOpen(false);
   };
 
@@ -1258,8 +1287,21 @@ export default function SessionScreen() {
           {snapshot.exercises.length === 0 ? <Text style={styles.body}>No exercises yet.</Text> : null}
 
           <View style={styles.list}>
-            {snapshot.exercises.map((ex) => {
-              const bilbo = isBilboExercise(ex);
+            {groupedExercises.map((group, gIdx) => {
+              const isSuperset = group.exercises.length > 1;
+
+              return (
+                <View key={group.supersetId || group.exercises[0].id} style={isSuperset ? styles.supersetContainer : undefined}>
+                  {isSuperset && (
+                    <View style={styles.supersetHeader}>
+                      <EnergyIcon size={12} color={colors.tertiary} />
+                      <Text style={styles.supersetTitle}>SUPERSET</Text>
+                    </View>
+                  )}
+
+                  <View style={isSuperset ? styles.supersetInner : undefined}>
+                    {group.exercises.map((ex, exIdx) => {
+                      const bilbo = isBilboExercise(ex);
               const baseName = formatExerciseName(ex.exercise);
               const name = bilbo ? `Bilbo - ${baseName}` : baseName;
 
@@ -1288,7 +1330,12 @@ export default function SessionScreen() {
                   {(gesture) => (
                     <View
                       key={ex.id}
-                      style={styles.exerciseCard}
+                      style={[
+                        styles.exerciseCard,
+                        isSuperset && styles.supersetExerciseCard,
+                        isSuperset && exIdx === 0 && styles.supersetExerciseCardFirst,
+                        isSuperset && exIdx === group.exercises.length - 1 && styles.supersetExerciseCardLast,
+                      ]}
                       onLayout={(e) => onLayout(e.nativeEvent.layout.height)}
                     >
                       <View style={styles.exerciseHeader}>
@@ -1784,6 +1831,10 @@ export default function SessionScreen() {
                     </View>
                   )}
                 </DraggableExercise>
+              );
+            })}
+                  </View>
+                </View>
               );
             })}
           </View>
@@ -2517,6 +2568,41 @@ StyleSheet.create({
   exerciseTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: colors.text, flex: 1 },
   exerciseMoreButton: {
     padding: 4,
+  },
+  supersetContainer: {
+    gap: 4,
+  },
+  supersetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingLeft: 4,
+  },
+  supersetTitle: {
+    fontFamily: Fonts.extraBold,
+    fontSize: 10,
+    color: colors.tertiary,
+    letterSpacing: 0.5,
+  },
+  supersetInner: {
+    gap: 2,
+    borderLeftWidth: 2,
+    borderLeftColor: rgba(colors.tertiary, 0.3),
+    marginLeft: 6,
+    paddingLeft: 10,
+  },
+  supersetExerciseCard: {
+    borderWidth: 0,
+    backgroundColor: rgba(colors.text, 0.03),
+    borderRadius: 8,
+  },
+  supersetExerciseCardFirst: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  supersetExerciseCardLast: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   modalBackdrop: {
     flex: 1,

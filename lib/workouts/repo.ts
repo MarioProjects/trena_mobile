@@ -54,16 +54,17 @@ function coerceTemplateItem(x: unknown): WorkoutTemplateItem | null {
   const type = obj.type;
   const exercise = coerceExerciseRef(obj.exercise);
   const note = typeof obj.note === 'string' ? obj.note : undefined;
+  const supersetId = typeof obj.supersetId === 'string' ? obj.supersetId : undefined;
 
   if (type === 'free') {
-    return { id, type: 'free', exercise, note };
+    return { id, type: 'free', exercise, note, supersetId };
   }
 
   if (type === 'method') {
     const methodInstanceId = typeof obj.methodInstanceId === 'string' ? obj.methodInstanceId : '';
     const binding = obj.binding as MethodBinding | undefined;
     if (!methodInstanceId || !binding || !binding.methodKey) return null;
-    return { id, type: 'method', exercise, methodInstanceId, binding, note };
+    return { id, type: 'method', exercise, methodInstanceId, binding, note, supersetId };
   }
 
   return null;
@@ -450,6 +451,7 @@ async function buildSessionExerciseFromTemplateItem(args: {
       tracking: defaultTrackingForExerciseRef(item.exercise),
       plannedSets: [],
       performedSets: [],
+      supersetId: item.supersetId,
     };
   }
 
@@ -485,6 +487,7 @@ async function buildSessionExerciseFromTemplateItem(args: {
     },
     plannedSets,
     performedSets: [],
+    supersetId: item.supersetId,
   };
 }
 
