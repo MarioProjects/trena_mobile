@@ -1393,7 +1393,7 @@ export default function SessionScreen() {
 
                       {ex.plannedSets.length > 0 ? (
                         <View style={{ gap: 8 }}>
-                          {ex.loggingMode === 'compact' ? (
+                          {ex.loggingMode === 'compact' && ex.source.type !== 'method' ? (
                             <View style={styles.compactRow}>
                               <TextInput
                                 value={compactRepsDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.reps ? String(ex.performedSets[0].reps) : '')}
@@ -1765,7 +1765,7 @@ export default function SessionScreen() {
                             }
 
                             // strength default
-                            if (ex.loggingMode === 'compact') {
+                            if (ex.loggingMode === 'compact' && ex.source.type !== 'method') {
                               return (
                                 <View key="compact" style={styles.compactRow}>
                                   <TextInput
@@ -2053,27 +2053,31 @@ export default function SessionScreen() {
               </>
             )}
 
-            <Pressable
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
-              onPress={() => {
-                if (menuExerciseId) {
-                  toggleLoggingMode(menuExerciseId);
-                  setMenuExerciseId(null);
-                }
-              }}
-            >
-              {menuExercise?.loggingMode === 'compact' ? (
-                <ExpandIcon size={20} color={colors.text} />
-              ) : (
-                <ShrinkIcon size={20} color={colors.text} />
-              )}
-              <Text style={styles.menuItemText}>
-                {menuExercise?.loggingMode === 'compact' ? 'Expanded Mode' : 'Compact Mode'}
-              </Text>
-            </Pressable>
+            {menuExercise?.source.type !== 'method' && (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+                  onPress={() => {
+                    if (menuExerciseId) {
+                      toggleLoggingMode(menuExerciseId);
+                      setMenuExerciseId(null);
+                    }
+                  }}
+                >
+                  {menuExercise?.loggingMode === 'compact' ? (
+                    <ExpandIcon size={20} color={colors.text} />
+                  ) : (
+                    <ShrinkIcon size={20} color={colors.text} />
+                  )}
+                  <Text style={styles.menuItemText}>
+                    {menuExercise?.loggingMode === 'compact' ? 'Expanded Mode' : 'Compact Mode'}
+                  </Text>
+                </Pressable>
 
-            <View style={styles.menuSeparator} />
+                <View style={styles.menuSeparator} />
+              </>
+            )}
 
             <Pressable
               accessibilityRole="button"
