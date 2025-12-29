@@ -7,11 +7,11 @@ export type TrenaThemeMode = 'dark' | 'light';
 
 export const TrenaDarkColors = {
   background: 'rgb(26, 26, 26)',
-  surface: 'rgb(197, 195, 184)',
+  surface: 'rgb(42, 42, 42)',
   primary: 'rgb(163, 220, 64)',
   secondary: 'rgb(91, 79, 243)',
   text: 'rgb(236, 235, 228)',
-  onSurface: 'rgb(20, 20, 17)',
+  onSurface: 'rgb(236, 235, 228)',
   onPrimary: 'rgb(20, 20, 17)',
   onSecondary: 'rgb(236, 235, 228)',
   onTertiary: 'rgb(20, 20, 17)',

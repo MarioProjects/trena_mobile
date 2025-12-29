@@ -1,5 +1,6 @@
 import { TrashIcon } from '@/components/icons';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba, TrenaColors } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -16,7 +17,7 @@ function numOr(x: string, fallback: number) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function Pill({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+function Pill({ label, selected, onPress, styles }: { label: string; selected: boolean; onPress: () => void; styles: any }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -33,6 +34,8 @@ function Pill({ label, selected, onPress }: { label: string; selected: boolean; 
 }
 
 export default function ProgramsScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { editId, returnTo } = useLocalSearchParams<{ editId?: string; returnTo?: string }>();
   const editIdParam = typeof editId === 'string' ? editId : null;
   const shouldReturnToSelector = returnTo === 'selector' && !!editIdParam;
@@ -302,8 +305,8 @@ export default function ProgramsScreen() {
 
             {!editingId ? (
               <View style={styles.pillsRow}>
-                <Pill label="Bilbo" selected={kind === 'bilbo'} onPress={() => setKind('bilbo')} />
-                <Pill label="5/3/1" selected={kind === 'wendler_531'} onPress={() => setKind('wendler_531')} />
+                <Pill label="Bilbo" selected={kind === 'bilbo'} onPress={() => setKind('bilbo')} styles={styles} />
+                <Pill label="5/3/1" selected={kind === 'wendler_531'} onPress={() => setKind('wendler_531')} styles={styles} />
               </View>
             ) : null}
 
@@ -464,106 +467,107 @@ export default function ProgramsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: TrenaColors.background },
-  container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  title: { fontSize: 34, lineHeight: 40, fontFamily: Fonts.extraBold, color: TrenaColors.text, letterSpacing: -0.3 },
-  headerButton: {
-    borderRadius: 999,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-  },
-  headerButtonText: { fontFamily: Fonts.bold, fontSize: 13, color: 'rgba(236, 235, 228, 0.9)' },
-  section: { gap: 10, paddingTop: 4 },
-  sectionTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: TrenaColors.text },
-  body: { color: 'rgba(236, 235, 228, 0.8)', fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20 },
-  muted: { color: 'rgba(236, 235, 228, 0.7)', fontFamily: Fonts.regular, fontSize: 13, lineHeight: 18 },
-  label: { fontFamily: Fonts.bold, fontSize: 13, color: 'rgba(236, 235, 228, 0.9)' },
-  mutedLabel: { fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.7)' },
-  input: {
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    color: TrenaColors.text,
-    fontFamily: Fonts.medium,
-  },
-  pillsRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
-  pill: { borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1 },
-  pillSelected: { backgroundColor: TrenaColors.primary, borderColor: TrenaColors.primary },
-  pillUnselected: { backgroundColor: 'rgba(236, 235, 228, 0.04)', borderColor: 'rgba(236, 235, 228, 0.12)' },
-  pillText: { fontFamily: Fonts.semiBold, fontSize: 13, lineHeight: 16 },
-  pillTextSelected: { color: TrenaColors.background },
-  pillTextUnselected: { color: 'rgba(236, 235, 228, 0.9)' },
-  formCard: {
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    padding: 14,
-    borderRadius: 14,
-    gap: 12,
-  },
-  grid2: { flexDirection: 'row', gap: 10 },
-  primaryButton: {
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    backgroundColor: TrenaColors.primary,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.25)',
-  },
-  primaryButtonText: { color: '#000', fontSize: 16, fontFamily: Fonts.extraBold },
-  destructiveButton: {
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    backgroundColor: TrenaColors.accentRed,
-    borderWidth: 1,
-    borderColor: TrenaColors.accentRed,
-  },
-  destructiveButtonText: { color: TrenaColors.background, fontSize: 15, fontFamily: Fonts.extraBold },
-  pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
-  list: { gap: 12 },
-  card: {
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    padding: 12,
-    borderRadius: 14,
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  cardHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  cardTitleButton: { flex: 1, minWidth: 0 },
-  cardTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: TrenaColors.text },
-  cardMeta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: 'rgba(236, 235, 228, 0.75)' },
-  trashButton: { paddingLeft: 2, paddingVertical: 2 },
-  cardOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(20, 20, 17, 0.55)',
-    borderRadius: 14,
-  },
-  toast: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
-  },
-  toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: TrenaColors.text },
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+    title: { fontSize: 34, lineHeight: 40, fontFamily: Fonts.extraBold, color: colors.text, letterSpacing: -0.3 },
+    headerButton: {
+      borderRadius: 999,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: rgba(colors.text, 0.04),
+    },
+    headerButtonText: { fontFamily: Fonts.bold, fontSize: 13, color: rgba(colors.text, 0.9) },
+    section: { gap: 10, paddingTop: 4 },
+    sectionTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: colors.text },
+    body: { color: rgba(colors.text, 0.8), fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20 },
+    muted: { color: rgba(colors.text, 0.7), fontFamily: Fonts.regular, fontSize: 13, lineHeight: 18 },
+    label: { fontFamily: Fonts.bold, fontSize: 13, color: rgba(colors.text, 0.9) },
+    mutedLabel: { fontFamily: Fonts.medium, fontSize: 12, color: rgba(colors.text, 0.7) },
+    input: {
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: rgba(colors.text, 0.04),
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      color: colors.text,
+      fontFamily: Fonts.medium,
+    },
+    pillsRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
+    pill: { borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1 },
+    pillSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+    pillUnselected: { backgroundColor: rgba(colors.text, 0.04), borderColor: rgba(colors.text, 0.12) },
+    pillText: { fontFamily: Fonts.semiBold, fontSize: 13, lineHeight: 16 },
+    pillTextSelected: { color: colors.onPrimary },
+    pillTextUnselected: { color: rgba(colors.text, 0.9) },
+    formCard: {
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: rgba(colors.text, 0.04),
+      padding: 14,
+      borderRadius: 14,
+      gap: 12,
+    },
+    grid2: { flexDirection: 'row', gap: 10 },
+    primaryButton: {
+      borderRadius: 14,
+      paddingVertical: 14,
+      alignItems: 'center',
+      backgroundColor: colors.primary,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: 'rgba(0, 0, 0, 0.25)',
+    },
+    primaryButtonText: { color: colors.onPrimary, fontSize: 16, fontFamily: Fonts.extraBold },
+    destructiveButton: {
+      borderRadius: 14,
+      paddingVertical: 14,
+      alignItems: 'center',
+      backgroundColor: colors.accentRed,
+      borderWidth: 1,
+      borderColor: colors.accentRed,
+    },
+    destructiveButtonText: { color: colors.onPrimary, fontSize: 15, fontFamily: Fonts.extraBold },
+    pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
+    list: { gap: 12 },
+    card: {
+      position: 'relative',
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: rgba(colors.text, 0.04),
+      padding: 12,
+      borderRadius: 14,
+      flexDirection: 'row',
+      gap: 12,
+      alignItems: 'center',
+    },
+    cardHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+    cardTitleButton: { flex: 1, minWidth: 0 },
+    cardTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: colors.text },
+    cardMeta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: rgba(colors.text, 0.75) },
+    trashButton: { paddingLeft: 2, paddingVertical: 2 },
+    cardOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: rgba(colors.background, 0.55),
+      borderRadius: 14,
+    },
+    toast: {
+      position: 'absolute',
+      left: 16,
+      right: 16,
+      bottom: 16,
+      borderRadius: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: rgba(colors.text, 0.08),
+    },
+    toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: colors.text },
+  });

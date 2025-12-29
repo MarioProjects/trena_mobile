@@ -169,6 +169,8 @@ export default function ActivitiesIndexScreen() {
   const [isSavingRename, setIsSavingRename] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
 
+  const menuTarget = React.useMemo(() => (menuTargetId ? sessions.find((s) => s.id === menuTargetId) : null), [menuTargetId, sessions]);
+
   const hasLoaded = React.useRef(false);
 
   const load = React.useCallback(async (opts?: { silent?: boolean }) => {
@@ -389,6 +391,10 @@ export default function ActivitiesIndexScreen() {
       <Modal visible={!!menuTargetId} transparent animationType="fade" onRequestClose={() => setMenuTargetId(null)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setMenuTargetId(null)}>
           <View style={styles.menuSheet} onStartShouldSetResponder={() => true}>
+            <Text style={styles.menuTitle} numberOfLines={1}>
+              {menuTarget?.title ?? 'Workout'}
+            </Text>
+
             <Pressable
               accessibilityRole="button"
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
@@ -713,6 +719,14 @@ const createStyles = (colors: {
     paddingVertical: 10,
     paddingHorizontal: 16,
     paddingBottom: 16, // Safe area hint
+  },
+  menuTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 14,
+    color: rgba(colors.text, 0.6),
+    textAlign: 'center',
+    paddingVertical: 8,
+    marginBottom: 4,
   },
   menuItem: {
     flexDirection: 'row',
