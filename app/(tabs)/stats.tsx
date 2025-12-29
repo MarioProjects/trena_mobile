@@ -1,3 +1,4 @@
+import { ExercisePicker } from '@/components/ExercisePicker';
 import { ExerciseProgressChart } from '@/components/stats/ExerciseProgressChart';
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
 import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
@@ -5,7 +6,7 @@ import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
-import { bilboCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, weekdayHistogram } from '@/lib/workouts/stats';
+import { bilboCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, getExerciseKey, keyToRef, weekdayHistogram } from '@/lib/workouts/stats';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,6 +25,16 @@ export default function StatsScreen() {
 
   const exerciseStats = useMemo(() => computeExerciseStats({ sessions: sessions as any }), [sessions]);
   const [selectedExerciseKey, setSelectedExerciseKey] = useState<string | null>(null);
+
+  const recentExercises = useMemo(() => {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return exerciseStats.filter((s) => new Date(s.lastDone) >= sevenDaysAgo).slice(0, 6);
+  }, [exerciseStats]);
+
+  const allowedExercises = useMemo(() => {
+    return exerciseStats.map((s) => keyToRef(s.exerciseKey));
+  }, [exerciseStats]);
 
   useEffect(() => {
     let cancelled = false;
@@ -177,85 +188,91 @@ export default function StatsScreen() {
             </View>
 
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Exercise Progress</Text>
-              <Text style={styles.sectionBody}>Estimated 1RM (Epley formula) and history. Click on an exercise to view details.</Text>
+              <View style={styles.sectionHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sectionTitle}>Exercise Progress</Text>
+                  <Text style={styles.sectionBody}>Estimated 1RM (Epley formula) and history.</Text>
+                </View>
+                {selectedExerciseKey && (
+                  <Pressable 
+                    onPress={() => setSelectedExerciseKey(null)}
+                    style={({ pressed }) => [styles.clearButton, pressed && { opacity: 0.7 }]}
+                  >
+                    <Text style={styles.clearButtonText}>Clear</Text>
+                  </Pressable>
+                )}
+              </View>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-                {exerciseStats.map((s) => {
-                  const selected = s.exerciseKey === selectedExerciseKey;
-                  return (
-                    <Pressable
-                      key={s.exerciseKey}
-                      onPress={() => setSelectedExerciseKey(selected ? null : s.exerciseKey)}
-                      style={({ pressed }) => [
-                        styles.pill,
-                        selected && styles.pillSelected,
-                        pressed && { opacity: 0.9 },
-                      ]}
-                    >
-                      <Text style={[styles.pillText, selected && styles.pillTextSelected]} numberOfLines={1}>
-                        {s.exerciseName}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+              {exerciseStats.length > 0 ? (
+                <>
+                  <ExercisePicker
+                    value={selectedExerciseKey ? keyToRef(selectedExerciseKey) : null}
+                    onChange={(ref) => setSelectedExerciseKey(getExerciseKey(ref))}
+                    allowedExercises={allowedExercises}
+                  />
 
-              {selectedExercise ? (
-                <View style={styles.exerciseDetail}>
-                  <View style={styles.detailRow}>
-                    <View style={styles.detailItem}>
-                      <Text style={styles.detailLabel}>Best 1RM</Text>
-                      <Text style={styles.detailValue}>
-                        {selectedExercise.bestEstimated1RM.toFixed(1)} <Text style={styles.unit}>kg</Text>
-                      </Text>
-                    </View>
-                    <View style={styles.detailItem}>
-                      <Text style={styles.detailLabel}>Last Done</Text>
-                      <Text style={styles.detailValue}>{formatDateRelative(selectedExercise.lastDone)}</Text>
-                    </View>
-                  </View>
+                  {selectedExercise ? (
+                    <View style={styles.exerciseDetail}>
+                      <View style={styles.detailRow}>
+                        <View style={styles.detailItem}>
+                          <Text style={styles.detailLabel}>Best 1RM</Text>
+                          <Text style={styles.detailValue}>
+                            {selectedExercise.bestEstimated1RM.toFixed(1)} <Text style={styles.unit}>kg</Text>
+                          </Text>
+                        </View>
+                        <View style={styles.detailItem}>
+                          <Text style={styles.detailLabel}>Last Done</Text>
+                          <Text style={styles.detailValue}>{formatDateRelative(selectedExercise.lastDone)}</Text>
+                        </View>
+                      </View>
 
-                  {chartW > 0 && selectedExercise.history.length >= 2 ? (
-                    <View style={styles.chartContainer}>
-                      <Text style={styles.chartTitle}>Estimated 1RM Progress (kg)</Text>
-                      <ExerciseProgressChart
-                        width={chartW}
-                        height={180}
-                        data={selectedExercise.history.map((h) => ({
-                          date: h.date,
-                          value: h.bestEstimated1RM,
-                        }))}
-                      />
+                      {chartW > 0 && selectedExercise.history.length >= 2 ? (
+                        <View style={styles.chartContainer}>
+                          <Text style={styles.chartTitle}>Estimated 1RM Progress (kg)</Text>
+                          <ExerciseProgressChart
+                            width={chartW}
+                            height={180}
+                            data={selectedExercise.history.map((h) => ({
+                              date: h.date,
+                              value: h.bestEstimated1RM,
+                            }))}
+                          />
+                        </View>
+                      ) : selectedExercise.history.length < 2 ? (
+                        <View style={styles.chartPlaceholder}>
+                          <Text style={styles.chartPlaceholderText}>
+                            Perform this exercise in more sessions to see progress
+                          </Text>
+                        </View>
+                      ) : null}
                     </View>
-                  ) : selectedExercise.history.length < 2 ? (
-                    <View style={styles.chartPlaceholder}>
-                      <Text style={styles.chartPlaceholderText}>
-                        Perform this exercise in more sessions to see progress
-                      </Text>
+                  ) : recentExercises.length > 0 ? (
+                    <View style={styles.exerciseList}>
+                      <Text style={styles.recentTitle}>Recent Exercises</Text>
+                      {recentExercises.map((s) => (
+                        <Pressable
+                          key={s.exerciseKey}
+                          style={styles.exerciseRow}
+                          onPress={() => setSelectedExerciseKey(s.exerciseKey)}
+                        >
+                          <Text style={styles.exerciseRowName} numberOfLines={1}>
+                            {s.exerciseName}
+                          </Text>
+                          <View style={styles.exerciseRowRight}>
+                            <Text style={styles.exerciseRowValue}>{s.bestEstimated1RM.toFixed(1)}kg</Text>
+                            <Text style={styles.exerciseRowDate}>{formatDateRelative(s.lastDone)}</Text>
+                          </View>
+                        </Pressable>
+                      ))}
                     </View>
                   ) : null}
-                </View>
-              ) : exerciseStats.length > 0 ? (
-                <View style={styles.exerciseList}>
-                  {exerciseStats.slice(0, 6).map((s) => (
-                    <Pressable
-                      key={s.exerciseKey}
-                      style={styles.exerciseRow}
-                      onPress={() => setSelectedExerciseKey(s.exerciseKey)}
-                    >
-                      <Text style={styles.exerciseRowName} numberOfLines={1}>
-                        {s.exerciseName}
-                      </Text>
-                      <View style={styles.exerciseRowRight}>
-                        <Text style={styles.exerciseRowValue}>{s.bestEstimated1RM.toFixed(1)}kg</Text>
-                        <Text style={styles.exerciseRowDate}>{formatDateRelative(s.lastDone)}</Text>
-                      </View>
-                    </Pressable>
-                  ))}
-                </View>
+                </>
               ) : (
-                <Text style={styles.body}>No exercise data found.</Text>
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>
+                    No exercise data found. Complete some workouts with strength exercises to see your progress here.
+                  </Text>
+                </View>
               )}
             </View>
 
@@ -439,6 +456,31 @@ const createStyles = (colors: {
     lineHeight: 18,
     fontFamily: Fonts.regular,
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  clearButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: rgba(colors.text, 0.05),
+  },
+  clearButtonText: {
+    color: colors.primary,
+    fontFamily: Fonts.bold,
+    fontSize: 12,
+  },
+  recentTitle: {
+    color: rgba(colors.text, 0.4),
+    fontFamily: Fonts.bold,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 8,
+  },
   pillsRow: {
     gap: 10,
     paddingVertical: 2,
@@ -592,5 +634,18 @@ const createStyles = (colors: {
     fontSize: 13,
     textAlign: 'center',
     paddingHorizontal: 20,
+  },
+  emptyContainer: {
+    paddingVertical: 24,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    color: rgba(colors.text, 0.5),
+    fontFamily: Fonts.medium,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   });

@@ -15,11 +15,13 @@ export function ExercisePicker({
     onChange,
     initialOpen = false,
     onClose,
+    allowedExercises,
 }: {
     value: ExerciseRef | null;
     onChange: (v: ExerciseRef) => void;
     initialOpen?: boolean;
     onClose?: () => void;
+    allowedExercises?: ExerciseRef[];
 }) {
     const { colors } = useTrenaTheme();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -41,8 +43,21 @@ export function ExercisePicker({
 
     const normalize = (s: string) => s.toLowerCase().trim();
 
-    const filteredLearn = learnExercises.filter((x) => normalize(x.name).includes(normalize(term)));
-    const filteredCustom = customs.filter((x) => normalize(x).includes(normalize(term)));
+    const filteredLearn = learnExercises.filter((x) => {
+        const matchesTerm = normalize(x.name).includes(normalize(term));
+        if (!allowedExercises) return matchesTerm;
+        const isAllowed = allowedExercises.some(
+            (allowed) => allowed.kind === 'learn' && allowed.learnExerciseId === x.id
+        );
+        return matchesTerm && isAllowed;
+    });
+
+    const filteredCustom = customs.filter((x) => {
+        const matchesTerm = normalize(x).includes(normalize(term));
+        if (!allowedExercises) return matchesTerm;
+        const isAllowed = allowedExercises.some((allowed) => allowed.kind === 'free' && allowed.name === x);
+        return matchesTerm && isAllowed;
+    });
 
     const exactMatch =
         filteredLearn.some((x) => normalize(x.name) === normalize(term)) ||
@@ -96,7 +111,7 @@ export function ExercisePicker({
                     </View>
 
                     <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
-                        {term && !exactMatch ? (
+                        {term && !exactMatch && !allowedExercises ? (
                             <Pressable
                                 style={styles.row}
                                 onPress={() => onSelect({ kind: 'free', name: term.trim() })}
@@ -113,6 +128,10 @@ export function ExercisePicker({
 
                         {filteredLearn.length === 0 && filteredCustom.length === 0 && !term ? (
                             <Text style={styles.empty}>Start typing to search...</Text>
+                        ) : null}
+
+                        {term && filteredLearn.length === 0 && filteredCustom.length === 0 ? (
+                            <Text style={styles.empty}>No matching exercises found.</Text>
                         ) : null}
 
                         {filteredCustom.length > 0 && (

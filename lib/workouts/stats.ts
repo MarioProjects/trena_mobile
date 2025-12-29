@@ -77,6 +77,13 @@ export function getExerciseKey(ref: ExerciseRef): string {
   return `free:${ref.name}`;
 }
 
+export function keyToRef(key: string): ExerciseRef {
+  if (key.startsWith('learn:')) {
+    return { kind: 'learn', learnExerciseId: key.replace('learn:', '') };
+  }
+  return { kind: 'free', name: key.replace('free:', '') };
+}
+
 /**
  * Epley formula for 1RM: w * (1 + r / 30)
  */
@@ -106,12 +113,16 @@ export function computeExerciseStats(args: { sessions: WorkoutSessionRow[] }): E
   const completed = args.sessions
     .filter((s) => Boolean(s.ended_at))
     .slice()
-    .sort((a, b) => new Date(a.ended_at ?? 0).getTime() - new Date(b.ended_at ?? 0).getTime());
+    .sort((a, b) => {
+      const aIso = a.started_at ?? a.ended_at ?? 0;
+      const bIso = b.started_at ?? b.ended_at ?? 0;
+      return new Date(aIso).getTime() - new Date(bIso).getTime();
+    });
 
   const statsMap = new Map<string, ExerciseStats>();
 
   for (const s of completed) {
-    const endedAt = s.ended_at!;
+    const sessionDate = s.started_at ?? s.ended_at!;
     const exercises = s.snapshot?.exercises ?? [];
 
     for (const ex of exercises) {
@@ -139,21 +150,21 @@ export function computeExerciseStats(args: { sessions: WorkoutSessionRow[] }): E
         stat = {
           exerciseKey: key,
           exerciseName: name,
-          lastDone: endedAt,
+          lastDone: sessionDate,
           bestEstimated1RM: sessionBest1RM,
           history: [],
         };
         statsMap.set(key, stat);
       }
 
-      stat.lastDone = endedAt;
+      stat.lastDone = sessionDate;
       if (sessionBest1RM > stat.bestEstimated1RM) {
         stat.bestEstimated1RM = sessionBest1RM;
       }
 
       stat.history.push({
         sessionId: s.id,
-        date: endedAt,
+        date: sessionDate,
         bestEstimated1RM: sessionBest1RM,
         maxWeight: sessionMaxWeight,
         maxReps: sessionMaxReps,
