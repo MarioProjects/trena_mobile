@@ -1,4 +1,5 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import Svg, { Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
@@ -43,14 +44,15 @@ export type WeekdayHistogramProps = {
 };
 
 export function WeekdayHistogram(props: WeekdayHistogramProps) {
+  const { colors } = useTrenaTheme();
   const {
     width,
     height,
     counts,
     density,
     labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    barColor = TrenaColors.secondary,
-    lineColor = 'rgba(236, 235, 228, 0.9)',
+    barColor = colors.secondary,
+    lineColor = rgba(colors.text, 0.9),
     highlightIndex,
   } = props;
 
@@ -113,14 +115,14 @@ export function WeekdayHistogram(props: WeekdayHistogramProps) {
           x2={pad.l + innerW}
           y1={pad.t + innerH}
           y2={pad.t + innerH}
-          stroke="rgba(236, 235, 228, 0.12)"
+          stroke={rgba(colors.text, 0.12)}
           strokeWidth={1}
         />
 
         {linePath ? (
           <>
             {/* subtle glow under the line */}
-            <Path d={linePath} stroke="rgba(163, 220, 64, 0.18)" strokeWidth={6} fill="none" />
+            <Path d={linePath} stroke={rgba(colors.primary, 0.18)} strokeWidth={6} fill="none" />
             <Path d={linePath} stroke={lineColor} strokeWidth={2.5} fill="none" />
           </>
         ) : null}
@@ -133,7 +135,7 @@ export function WeekdayHistogram(props: WeekdayHistogramProps) {
               key={`lbl-${i}`}
               x={x}
               y={y}
-              fill="rgba(236, 235, 228, 0.7)"
+              fill={rgba(colors.text, 0.7)}
               fontSize={11}
               fontFamily={Fonts.medium}
               textAnchor="middle"

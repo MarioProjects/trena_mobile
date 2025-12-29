@@ -1,5 +1,6 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -7,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LearnItemRedirectScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const targetId = typeof id === 'string' ? id : undefined;
 
   const item = React.useMemo(() => {
@@ -29,7 +32,7 @@ export default function LearnItemRedirectScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.loading}>
-          <ActivityIndicator size="small" color={TrenaColors.primary} />
+          <ActivityIndicator size="small" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -54,55 +57,56 @@ export default function LearnItemRedirectScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: TrenaColors.background,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    justifyContent: 'center',
-  },
-  loading: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    padding: 16,
-    borderRadius: 16,
-    gap: 10,
-  },
-  title: {
-    fontFamily: Fonts.extraBold,
-    fontSize: 22,
-    lineHeight: 28,
-    color: TrenaColors.text,
-    letterSpacing: -0.2,
-  },
-  body: {
-    fontFamily: Fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
-    color: 'rgba(236, 235, 228, 0.8)',
-  },
-  button: {
-    marginTop: 6,
-    backgroundColor: TrenaColors.primary,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  buttonPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.995 }],
-  },
-  buttonText: {
-    color: TrenaColors.background,
-    fontFamily: Fonts.black,
-    fontSize: 14,
-    letterSpacing: 0.2,
-    textTransform: 'uppercase',
-  },
-});
+const createStyles = (colors: { background: string; primary: string; text: string; onPrimary: string }) =>
+  StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 20,
+      paddingVertical: 24,
+      justifyContent: 'center',
+    },
+    loading: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    card: {
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: rgba(colors.text, 0.04),
+      padding: 16,
+      borderRadius: 16,
+      gap: 10,
+    },
+    title: {
+      fontFamily: Fonts.extraBold,
+      fontSize: 22,
+      lineHeight: 28,
+      color: colors.text,
+      letterSpacing: -0.2,
+    },
+    body: {
+      fontFamily: Fonts.regular,
+      fontSize: 14,
+      lineHeight: 20,
+      color: rgba(colors.text, 0.8),
+    },
+    button: {
+      marginTop: 6,
+      backgroundColor: colors.primary,
+      borderRadius: 14,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    buttonPressed: {
+      opacity: 0.92,
+      transform: [{ scale: 0.995 }],
+    },
+    buttonText: {
+      color: colors.onPrimary,
+      fontFamily: Fonts.black,
+      fontSize: 14,
+      letterSpacing: 0.2,
+      textTransform: 'uppercase',
+    },
+  });

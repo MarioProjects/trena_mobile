@@ -1,6 +1,7 @@
 import { SearchIcon } from '@/components/icons';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { listDistinctFreeExercises } from '@/lib/workouts/repo';
 import type { ExerciseRef } from '@/lib/workouts/types';
 import React from 'react';
@@ -20,6 +21,9 @@ export function ExercisePicker({
     initialOpen?: boolean;
     onClose?: () => void;
 }) {
+    const { colors } = useTrenaTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
+
     const [open, setOpen] = React.useState(initialOpen);
     const [term, setTerm] = React.useState('');
     const [customs, setCustoms] = React.useState<string[]>([]);
@@ -80,10 +84,10 @@ export function ExercisePicker({
                     </View>
 
                     <View style={styles.searchRow}>
-                        <SearchIcon color="rgba(236, 235, 228, 0.5)" size={18} />
+                        <SearchIcon color={rgba(colors.text, 0.5)} size={18} />
                         <TextInput
                             placeholder="Search exercise..."
-                            placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                            placeholderTextColor={rgba(colors.text, 0.5)}
                             style={styles.input}
                             value={term}
                             onChangeText={setTerm}
@@ -97,8 +101,8 @@ export function ExercisePicker({
                                 style={styles.row}
                                 onPress={() => onSelect({ kind: 'free', name: term.trim() })}
                             >
-                                <View style={[styles.iconBox, { backgroundColor: TrenaColors.primary }]}>
-                                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>+</Text>
+                                <View style={[styles.iconBox, { backgroundColor: colors.primary }]}>
+                                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.onPrimary }}>+</Text>
                                 </View>
                                 <View>
                                     <Text style={styles.rowTitle}>Create "{term.trim()}"</Text>
@@ -155,11 +159,17 @@ export function ExercisePicker({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: {
+    background: string;
+    primary: string;
+    text: string;
+    onPrimary: string;
+}) =>
+StyleSheet.create({
     trigger: {
         borderWidth: 1,
-        borderColor: 'rgba(236, 235, 228, 0.12)',
-        backgroundColor: 'rgba(236, 235, 228, 0.04)',
+        borderColor: rgba(colors.text, 0.12),
+        backgroundColor: rgba(colors.text, 0.04),
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -167,14 +177,14 @@ const styles = StyleSheet.create({
     triggerText: {
         fontFamily: Fonts.medium,
         fontSize: 15,
-        color: TrenaColors.text,
+        color: colors.text,
     },
     placeholder: {
-        color: 'rgba(236, 235, 228, 0.5)',
+        color: rgba(colors.text, 0.5),
     },
     safe: {
         flex: 1,
-        backgroundColor: '#141411', // Dark background hardcoded or use theme if accessible
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -183,19 +193,19 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 14,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+        borderBottomColor: rgba(colors.text, 0.1),
     },
     title: {
         fontFamily: Fonts.bold,
         fontSize: 18,
-        color: '#ECEBE4',
+        color: colors.text,
     },
     closeBtn: {
         padding: 8,
     },
     closeText: {
         fontFamily: Fonts.bold,
-        color: TrenaColors.primary,
+        color: colors.primary,
         fontSize: 16,
     },
     searchRow: {
@@ -204,7 +214,7 @@ const styles = StyleSheet.create({
         margin: 16,
         paddingHorizontal: 12,
         paddingVertical: 10,
-        backgroundColor: 'rgba(236, 235, 228, 0.06)',
+        backgroundColor: rgba(colors.text, 0.06),
         borderRadius: 10,
         gap: 8,
     },
@@ -212,7 +222,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontFamily: Fonts.medium,
         fontSize: 16,
-        color: '#ECEBE4',
+        color: colors.text,
     },
     list: {
         paddingHorizontal: 16,
@@ -229,36 +239,36 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 8,
-        backgroundColor: 'rgba(236, 235, 228, 0.1)',
+        backgroundColor: rgba(colors.text, 0.1),
         alignItems: 'center',
         justifyContent: 'center',
     },
     iconText: {
         fontFamily: Fonts.bold,
-        color: 'rgba(236, 235, 228, 0.5)',
+        color: rgba(colors.text, 0.5),
         fontSize: 16,
     },
     rowTitle: {
         fontFamily: Fonts.semiBold,
         fontSize: 16,
-        color: '#ECEBE4',
+        color: colors.text,
     },
     rowMeta: {
         fontFamily: Fonts.regular,
         fontSize: 12,
-        color: 'rgba(236, 235, 228, 0.6)',
+        color: rgba(colors.text, 0.6),
     },
     sectionHeader: {
         fontFamily: Fonts.bold,
         fontSize: 14,
-        color: 'rgba(236, 235, 228, 0.4)',
+        color: rgba(colors.text, 0.4),
         textTransform: 'uppercase',
         marginTop: 8,
         marginBottom: 4,
     },
     empty: {
         textAlign: 'center',
-        color: 'rgba(236, 235, 228, 0.4)',
+        color: rgba(colors.text, 0.4),
         marginTop: 40,
         fontFamily: Fonts.medium,
         fontSize: 15,

@@ -6,9 +6,10 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChevronLeftIcon, ExercisesIcon } from '@/components/icons';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { Image } from 'expo-image';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 
@@ -36,7 +37,13 @@ function getPlayableVideoSource(videoUrl: string | undefined) {
   return undefined;
 }
 
+function useDetailStyles() {
+  const { colors } = useTrenaTheme();
+  return React.useMemo(() => createStyles(colors), [colors]);
+}
+
 function Pill({ label }: { label: string }) {
+  const styles = useDetailStyles();
   return (
     <View style={styles.pill}>
       <Text style={styles.pillText}>{label}</Text>
@@ -53,10 +60,12 @@ function trackingLabel(item: LearnItem): string {
 }
 
 function SectionTitle({ children }: { children: string }) {
+  const styles = useDetailStyles();
   return <Text style={styles.sectionTitle}>{children}</Text>;
 }
 
 function Bullets({ items }: { items: string[] }) {
+  const styles = useDetailStyles();
   if (!items?.length) return <Text style={styles.muted}>—</Text>;
   return (
     <View style={{ gap: 8 }}>
@@ -71,6 +80,7 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 function EmbeddableVideo({ uri }: { uri: string }) {
+  const styles = useDetailStyles();
   const { height: screenHeight } = useWindowDimensions();
   const videoHeight = Math.round(Math.min(Math.max(screenHeight * 0.35, 220), 460));
 
@@ -98,6 +108,7 @@ function EmbeddableVideo({ uri }: { uri: string }) {
 }
 
 function VideoBlock({ item }: { item: LearnItem }) {
+  const styles = useDetailStyles();
   const { height: screenHeight } = useWindowDimensions();
   const videoHeight = Math.round(Math.min(Math.max(screenHeight * 0.35, 220), 460));
   const source = getPlayableVideoSource(item.videoUrl);
@@ -135,6 +146,8 @@ function VideoBlock({ item }: { item: LearnItem }) {
 }
 
 export default function ExerciseDetailScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = useDetailStyles();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const targetId = typeof id === 'string' ? id : undefined;
   const { height: screenHeight } = useWindowDimensions();
@@ -171,7 +184,7 @@ export default function ExerciseDetailScreen() {
             ]}
           >
             <View style={styles.heroBackBg}>
-              <ChevronLeftIcon size={34} color={TrenaColors.primary} strokeWidth={2} />
+              <ChevronLeftIcon size={34} color={colors.primary} strokeWidth={2} />
             </View>
           </Pressable>
         </View>
@@ -181,7 +194,7 @@ export default function ExerciseDetailScreen() {
             <Text style={styles.title} numberOfLines={1}>
               {item.name}
             </Text>
-            <ExercisesIcon size={22} color={TrenaColors.primary} />
+            <ExercisesIcon size={22} color={colors.primary} />
           </View>
           <Text style={styles.meta}>
             {item.level || '—'} • {item.goal || '—'}
@@ -224,10 +237,11 @@ export default function ExerciseDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: { background: string; primary: string; text: string }) =>
+  StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: TrenaColors.background,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingBottom: 22,
@@ -259,7 +273,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 24,
     gap: 12,
-    backgroundColor: TrenaColors.background,
+    backgroundColor: colors.background,
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
   },
@@ -272,7 +286,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.extraBold,
     fontSize: 28,
     lineHeight: 34,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.3,
     flexShrink: 1,
     minWidth: 0,
@@ -281,13 +295,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
     fontSize: 13,
     lineHeight: 18,
-    color: 'rgba(236, 235, 228, 0.75)',
+    color: rgba(colors.text, 0.75),
   },
   lede: {
     fontFamily: Fonts.regular,
     fontSize: 15,
     lineHeight: 22,
-    color: 'rgba(236, 235, 228, 0.88)',
+    color: rgba(colors.text, 0.88),
   },
   videoWrap: {
     borderRadius: 0,
@@ -316,14 +330,14 @@ const styles = StyleSheet.create({
   videoOverlayTitle: {
     fontFamily: Fonts.black,
     fontSize: 14,
-    color: 'rgba(236, 235, 228, 0.95)',
+    color: rgba(colors.text, 0.95),
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
   videoOverlayBody: {
     fontFamily: Fonts.regular,
     fontSize: 13,
-    color: 'rgba(236, 235, 228, 0.8)',
+    color: rgba(colors.text, 0.8),
   },
   pillsRow: {
     flexDirection: 'row',
@@ -333,8 +347,8 @@ const styles = StyleSheet.create({
   },
   pill: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.14)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.14),
+    backgroundColor: rgba(colors.text, 0.04),
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
@@ -343,7 +357,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
     fontSize: 12,
     lineHeight: 14,
-    color: 'rgba(236, 235, 228, 0.8)',
+    color: rgba(colors.text, 0.8),
   },
   section: {
     gap: 10,
@@ -353,20 +367,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     fontSize: 15,
     lineHeight: 20,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.15,
   },
   body: {
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 21,
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: rgba(colors.text, 0.85),
   },
   muted: {
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 20,
-    color: 'rgba(236, 235, 228, 0.6)',
+    color: rgba(colors.text, 0.6),
   },
   bulletRow: {
     flexDirection: 'row',
@@ -378,13 +392,13 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 999,
     marginTop: 7,
-    backgroundColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
   },
   bulletText: {
     flex: 1,
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 21,
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: rgba(colors.text, 0.85),
   },
-});
+  });

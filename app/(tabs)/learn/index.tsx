@@ -1,7 +1,8 @@
 import { ExercisesIcon, MethodsIcon } from '@/components/icons';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import type { LearnItem } from '@/data/learn/types';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React from 'react';
@@ -78,11 +79,13 @@ function Pill({
   selected,
   onPress,
   left,
+  styles,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
   left?: React.ReactNode;
+  styles: ReturnType<typeof createStyles>;
 }) {
   return (
     <Pressable
@@ -102,7 +105,7 @@ function Pill({
   );
 }
 
-function Section({ title, items }: { title: string; items: LearnItem[] }) {
+function Section({ title, items, styles }: { title: string; items: LearnItem[]; styles: ReturnType<typeof createStyles> }) {
   if (items.length === 0) return null;
 
   return (
@@ -154,6 +157,8 @@ function Section({ title, items }: { title: string; items: LearnItem[] }) {
 }
 
 export default function LearnScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [primary, setPrimary] = React.useState<PrimaryFilter>('all');
   const [methodLevel, setMethodLevel] = React.useState<CanonicalLevel | null>(null);
   const [methodDays, setMethodDays] = React.useState<number | null>(null);
@@ -254,15 +259,16 @@ export default function LearnScreen() {
         </Text>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-          <Pill label="All" selected={primary === 'all'} onPress={() => setPrimary('all')} />
+          <Pill label="All" selected={primary === 'all'} onPress={() => setPrimary('all')} styles={styles} />
           <Pill
             label="Methods"
             selected={primary === 'method'}
             onPress={() => setPrimary('method')}
+            styles={styles}
             left={
               <MethodsIcon
                 size={18}
-                color={primary === 'method' ? TrenaColors.background : TrenaColors.primary}
+                color={primary === 'method' ? colors.onPrimary : colors.primary}
               />
             }
           />
@@ -270,10 +276,11 @@ export default function LearnScreen() {
             label="Exercises"
             selected={primary === 'exercise'}
             onPress={() => setPrimary('exercise')}
+            styles={styles}
             left={
               <ExercisesIcon
                 size={18}
-                color={primary === 'exercise' ? TrenaColors.background : TrenaColors.primary}
+                color={primary === 'exercise' ? colors.onPrimary : colors.primary}
               />
             }
           />
@@ -282,25 +289,27 @@ export default function LearnScreen() {
         {primary === 'method' ? (
           <View style={styles.filtersBlock}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-              <Pill label="All levels" selected={!methodLevel} onPress={() => setMethodLevel(null)} />
+              <Pill label="All levels" selected={!methodLevel} onPress={() => setMethodLevel(null)} styles={styles} />
               {methodLevelOptions.map((lvl) => (
                 <Pill
                   key={lvl}
                   label={lvl}
                   selected={methodLevel === lvl}
                   onPress={() => setMethodLevel((cur) => (cur === lvl ? null : lvl))}
+                  styles={styles}
                 />
               ))}
             </ScrollView>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-              <Pill label="Any schedule" selected={!methodDays} onPress={() => setMethodDays(null)} />
+              <Pill label="Any schedule" selected={!methodDays} onPress={() => setMethodDays(null)} styles={styles} />
               {methodDayOptions.map((n) => (
                 <Pill
                   key={n}
                   label={`${n} day${n === 1 ? '' : 's'}/week`}
                   selected={methodDays === n}
                   onPress={() => setMethodDays((cur) => (cur === n ? null : n))}
+                  styles={styles}
                 />
               ))}
             </ScrollView>
@@ -310,13 +319,14 @@ export default function LearnScreen() {
         {primary === 'exercise' ? (
           <View style={styles.filtersBlock}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-              <Pill label="All tags" selected={!exerciseTag} onPress={() => setExerciseTag(null)} />
+              <Pill label="All tags" selected={!exerciseTag} onPress={() => setExerciseTag(null)} styles={styles} />
               {exerciseTags.slice(0, 18).map((tag) => (
                 <Pill
                   key={tag}
                   label={tag}
                   selected={exerciseTag === tag}
                   onPress={() => setExerciseTag((cur) => (cur === tag ? null : tag))}
+                  styles={styles}
                 />
               ))}
             </ScrollView>
@@ -325,22 +335,23 @@ export default function LearnScreen() {
 
         {primary === 'all' ? (
           <>
-            <Section title="Methods" items={methods} />
-            <Section title="Exercises" items={exercises} />
+            <Section title="Methods" items={methods} styles={styles} />
+            <Section title="Exercises" items={exercises} styles={styles} />
           </>
         ) : null}
 
-        {primary === 'method' ? <Section title="Methods" items={filteredMethods} /> : null}
-        {primary === 'exercise' ? <Section title="Exercises" items={filteredExercises} /> : null}
+        {primary === 'method' ? <Section title="Methods" items={filteredMethods} styles={styles} /> : null}
+        {primary === 'exercise' ? <Section title="Exercises" items={filteredExercises} styles={styles} /> : null}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: { background: string; primary: string; text: string; onPrimary: string }) =>
+  StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: TrenaColors.background,
+    backgroundColor: colors.background,
   },
   container: {
     paddingHorizontal: 20,
@@ -351,11 +362,11 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 40,
     fontFamily: Fonts.extraBold,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.3,
   },
   body: {
-    color: 'rgba(236, 235, 228, 0.8)',
+    color: rgba(colors.text, 0.8),
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 20,
@@ -378,12 +389,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   pillSelected: {
-    backgroundColor: TrenaColors.primary,
-    borderColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   pillUnselected: {
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: rgba(colors.text, 0.04),
+    borderColor: rgba(colors.text, 0.12),
   },
   pillLeft: {
     marginRight: 8,
@@ -395,10 +406,10 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
   },
   pillTextSelected: {
-    color: TrenaColors.background,
+    color: colors.onPrimary,
   },
   pillTextUnselected: {
-    color: 'rgba(236, 235, 228, 0.9)',
+    color: rgba(colors.text, 0.9),
   },
   section: {
     gap: 10,
@@ -408,7 +419,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     fontSize: 16,
     lineHeight: 20,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.2,
   },
   list: {
@@ -416,8 +427,8 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     padding: 12,
     borderRadius: 14,
     flexDirection: 'row',
@@ -432,7 +443,7 @@ const styles = StyleSheet.create({
     width: 74,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: 'rgba(236, 235, 228, 0.06)',
+    backgroundColor: rgba(colors.text, 0.06),
   },
   cardBody: {
     flex: 1,
@@ -449,13 +460,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     fontSize: 16,
     lineHeight: 20,
-    color: TrenaColors.text,
+    color: colors.text,
     flex: 1,
   },
   badge: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.16)',
-    backgroundColor: 'rgba(236, 235, 228, 0.06)',
+    borderColor: rgba(colors.text, 0.16),
+    backgroundColor: rgba(colors.text, 0.06),
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
@@ -465,19 +476,19 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
     letterSpacing: 0.5,
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: rgba(colors.text, 0.85),
   },
   cardMeta: {
     fontFamily: Fonts.medium,
     fontSize: 12,
     lineHeight: 16,
-    color: 'rgba(236, 235, 228, 0.75)',
+    color: rgba(colors.text, 0.75),
   },
   cardDesc: {
     fontFamily: Fonts.regular,
     fontSize: 13,
     lineHeight: 18,
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: rgba(colors.text, 0.85),
   },
 });
 

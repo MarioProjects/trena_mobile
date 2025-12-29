@@ -1,7 +1,9 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
 import * as Haptics from 'expo-haptics';
 import React from 'react';
 import { FlatList, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 
 const ITEM_HEIGHT = 44;
 const VISIBLE_ITEMS = 5; // must be odd so we can center
@@ -34,11 +36,13 @@ function WheelColumn({
   values,
   value,
   onChange,
+  styles,
 }: {
   label: string;
   values: number[];
   value: number;
   onChange: (next: number) => void;
+  styles: ReturnType<typeof createStyles>;
 }) {
   const listRef = React.useRef<FlatList<number> | null>(null);
   const data = React.useMemo(() => buildLoopData(values), [values]);
@@ -126,6 +130,9 @@ export function DurationWheelModal({
   onConfirm: (seconds: number) => void;
   maxHours?: number;
 }) {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   const init = Math.max(0, Math.round(initialSeconds || 0));
   const initH = Math.floor(init / 3600);
   const initM = Math.floor((init % 3600) / 60);
@@ -185,6 +192,7 @@ export function DurationWheelModal({
               label="hh"
               values={hours}
               value={clamp(h, 0, maxHours)}
+              styles={styles}
               onChange={(v) => {
                 setH(v);
                 haptic();
@@ -195,6 +203,7 @@ export function DurationWheelModal({
               label="mm"
               values={mins}
               value={clamp(m, 0, 59)}
+              styles={styles}
               onChange={(v) => {
                 setM(v);
                 haptic();
@@ -205,6 +214,7 @@ export function DurationWheelModal({
               label="ss"
               values={secs}
               value={clamp(s, 0, 59)}
+              styles={styles}
               onChange={(v) => {
                 setS(v);
                 haptic();
@@ -217,71 +227,72 @@ export function DurationWheelModal({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    padding: 16,
-    justifyContent: 'flex-end',
-  },
-  backdropPressable: {
-    zIndex: 0,
-  },
-  sheet: {
-    zIndex: 1,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: '#141411',
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(236, 235, 228, 0.10)',
-  },
-  title: { flex: 1, textAlign: 'center', fontFamily: Fonts.bold, color: TrenaColors.text, fontSize: 14 },
-  headerBtn: { paddingHorizontal: 8, paddingVertical: 6, minWidth: 72 },
-  headerBtnText: { textAlign: 'right', fontFamily: Fonts.bold, color: TrenaColors.primary, fontSize: 14 },
-  headerBtnTextMuted: { textAlign: 'left', fontFamily: Fonts.bold, color: 'rgba(236, 235, 228, 0.75)', fontSize: 14 },
+const createStyles = (colors: { surface: string; text: string; primary: string }) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      padding: 16,
+      justifyContent: 'flex-end',
+    },
+    backdropPressable: {
+      zIndex: 0,
+    },
+    sheet: {
+      zIndex: 1,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.12),
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: rgba(colors.text, 0.1),
+    },
+    title: { flex: 1, textAlign: 'center', fontFamily: Fonts.bold, color: colors.text, fontSize: 14 },
+    headerBtn: { paddingHorizontal: 8, paddingVertical: 6, minWidth: 72 },
+    headerBtnText: { textAlign: 'right', fontFamily: Fonts.bold, color: colors.primary, fontSize: 14 },
+    headerBtnTextMuted: { textAlign: 'left', fontFamily: Fonts.bold, color: rgba(colors.text, 0.75), fontSize: 14 },
 
-  wheelsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-  },
-  colon: {
-    fontFamily: Fonts.extraBold,
-    color: 'rgba(236, 235, 228, 0.75)',
-    fontSize: 18,
-    marginHorizontal: 6,
-    marginTop: 18, // align with wheel items (label above)
-  },
-  column: { width: 80, alignItems: 'center' },
-  colLabel: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.45)', marginBottom: 6 },
-  wheelViewport: {
-    height: ITEM_HEIGHT * VISIBLE_ITEMS,
-    width: '100%',
-  },
-  item: { height: ITEM_HEIGHT, alignItems: 'center', justifyContent: 'center' },
-  itemText: { fontFamily: Fonts.extraBold, fontSize: 18, color: TrenaColors.text },
-  selectionFrame: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: PADDING,
-    height: ITEM_HEIGHT,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.18)',
-    backgroundColor: 'rgba(236, 235, 228, 0.03)',
-  },
-});
+    wheelsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 10,
+    },
+    colon: {
+      fontFamily: Fonts.extraBold,
+      color: rgba(colors.text, 0.75),
+      fontSize: 18,
+      marginHorizontal: 6,
+      marginTop: 18, // align with wheel items (label above)
+    },
+    column: { width: 80, alignItems: 'center' },
+    colLabel: { fontFamily: Fonts.bold, fontSize: 12, color: rgba(colors.text, 0.45), marginBottom: 6 },
+    wheelViewport: {
+      height: ITEM_HEIGHT * VISIBLE_ITEMS,
+      width: '100%',
+    },
+    item: { height: ITEM_HEIGHT, alignItems: 'center', justifyContent: 'center' },
+    itemText: { fontFamily: Fonts.extraBold, fontSize: 18, color: colors.text },
+    selectionFrame: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: PADDING,
+      height: ITEM_HEIGHT,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: rgba(colors.text, 0.18),
+      backgroundColor: rgba(colors.text, 0.03),
+    },
+  });
 
 

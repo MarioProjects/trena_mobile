@@ -8,14 +8,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
 
 import { TrenaLogo } from '@/components/TrenaLogo';
-import { Fonts, TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 
 const splashSvgUri = Asset.fromModule(require('@/assets/images/splash-letter.svg')).uri;
 
 function HeroContent() {
   const { width } = useWindowDimensions();
   void width; // keep hook for future responsive tweaks without lint warnings
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   const player = useVideoPlayer(require('@/assets/videos/hero.mp4'), (p) => {
     p.loop = true;
@@ -55,14 +58,14 @@ function HeroContent() {
             uri={splashSvgUri}
             width={180}
             height={50}
-            color={TrenaColors.primary}
+            color={colors.primary}
           />
         </View>
       ) : (
         <SafeAreaView style={styles.safe}>
           <View style={styles.content}>
             <View style={styles.centerBlock}>
-              <TrenaLogo width={200} height={55} color={TrenaColors.primary} />
+              <TrenaLogo width={200} height={55} color={colors.primary} />
               <Text style={styles.tagline}>Start training right now</Text>
             </View>
 
@@ -71,7 +74,7 @@ function HeroContent() {
               onPress={() => router.push('/get-started')}
               style={({ pressed }) => [
                 styles.cta,
-                { backgroundColor: TrenaColors.primary },
+                { backgroundColor: colors.primary },
                 pressed && styles.pressed,
               ]}
             >
@@ -95,86 +98,86 @@ export default function HeroScreen() {
   return <HeroContent />;
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: TrenaColors.background,
-  },
-  video: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 0,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-    // Dark overlay (increase alpha for darker). Keep subtle so the video stays visible.
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  desaturateOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-    // Semi-transparent gray to slightly wash out colors (lower alpha = more vivid)
-    backgroundColor: 'rgba(20, 20, 20, 0.3)',
-  },
-  loadingSplash: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 3,
-    backgroundColor: TrenaColors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  safe: {
-    flex: 1,
-    zIndex: 2,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  centerBlock: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
-  title: {
-    color: 'rgba(236, 235, 228, 0.95)',
-    fontSize: 56,
-    lineHeight: 60,
-    fontFamily: Fonts.black,
-    letterSpacing: -0.8,
-  },
-  tagline: {
-    color: TrenaColors.text,
-    fontSize: 16,
-    lineHeight: 22,
-    fontFamily: Fonts.semiBold,
-    letterSpacing: 0.2,
-    textTransform: 'uppercase',
-  },
-  cta: {
-    width: '100%',
-    borderRadius: 18,
-    paddingVertical: 16,
-    alignItems: 'center',
-    backgroundColor: TrenaColors.primary,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: TrenaColors.background,
-  },
-  ctaText: {
-    color: TrenaColors.background,
-    fontSize: 16,
-    fontFamily: Fonts.black,
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  pressed: {
-    transform: [{ scale: 0.99 }],
-    opacity: 0.96,
-  },
-});
+const createStyles = (colors: { background: string; text: string; onPrimary: string }) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    video: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 0,
+    },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 1,
+      // Dark overlay (increase alpha for darker). Keep subtle so the video stays visible.
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    desaturateOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 1,
+      // Semi-transparent gray to slightly wash out colors (lower alpha = more vivid)
+      backgroundColor: 'rgba(20, 20, 20, 0.3)',
+    },
+    loadingSplash: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 3,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    safe: {
+      flex: 1,
+      zIndex: 2,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingVertical: 24,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    centerBlock: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 10,
+    },
+    title: {
+      color: rgba(colors.text, 0.95),
+      fontSize: 56,
+      lineHeight: 60,
+      fontFamily: Fonts.black,
+      letterSpacing: -0.8,
+    },
+    tagline: {
+      color: colors.text,
+      fontSize: 16,
+      lineHeight: 22,
+      fontFamily: Fonts.semiBold,
+      letterSpacing: 0.2,
+      textTransform: 'uppercase',
+    },
+    cta: {
+      width: '100%',
+      borderRadius: 18,
+      paddingVertical: 16,
+      alignItems: 'center',
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: rgba(colors.text, 0.12),
+    },
+    ctaText: {
+      color: colors.onPrimary,
+      fontSize: 16,
+      fontFamily: Fonts.black,
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+    },
+    pressed: {
+      transform: [{ scale: 0.99 }],
+      opacity: 0.96,
+    },
+  });
 
 

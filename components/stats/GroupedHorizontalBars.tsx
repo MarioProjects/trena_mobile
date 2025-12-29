@@ -1,4 +1,5 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
@@ -26,6 +27,7 @@ export type GroupedHorizontalBarsProps = {
 };
 
 export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
+  const { colors } = useTrenaTheme();
   const { width, height, yLabels, series, maxValue, showGrid = true, xTickCount = 4, referenceValue } = props;
 
   const pad = { l: 40, r: 10, t: 10, b: 26 };
@@ -65,7 +67,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
               x2={pad.l + innerW}
               y1={pad.t}
               y2={pad.t}
-              stroke="rgba(236, 235, 228, 0.10)"
+              stroke={rgba(colors.text, 0.1)}
               strokeWidth={1}
             />
             <Line
@@ -73,7 +75,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
               x2={pad.l + innerW}
               y1={pad.t + innerH}
               y2={pad.t + innerH}
-              stroke="rgba(236, 235, 228, 0.10)"
+              stroke={rgba(colors.text, 0.1)}
               strokeWidth={1}
             />
             {ticks.slice(1, -1).map((t) => (
@@ -83,7 +85,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
                 x2={pad.l + innerW * t}
                 y1={pad.t}
                 y2={pad.t + innerH}
-                stroke="rgba(236, 235, 228, 0.08)"
+                stroke={rgba(colors.text, 0.08)}
                 strokeWidth={1}
               />
             ))}
@@ -98,7 +100,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
               key={`yl-${rowIdx}`}
               x={pad.l - 10}
               y={yCenter}
-              fill="rgba(236, 235, 228, 0.75)"
+              fill={rgba(colors.text, 0.75)}
               fontSize={12}
               fontFamily={Fonts.medium}
               textAnchor="end"
@@ -144,7 +146,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
             x2={pad.l + innerW * (referenceValue / computedMax)}
             y1={pad.t}
             y2={pad.t + innerH}
-            stroke={TrenaColors.accentRed}
+            stroke={colors.accentRed}
             strokeWidth={1.5}
             strokeDasharray="4, 4"
           />
@@ -154,7 +156,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
         <SvgText
           x={pad.l + innerW}
           y={pad.t + innerH - 8}
-          fill="rgba(236, 235, 228, 0.45)"
+          fill={rgba(colors.text, 0.45)}
           fontSize={11}
           fontFamily={Fonts.medium}
           textAnchor="end"
@@ -172,7 +174,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
               key={`xt-${t}`}
               x={x}
               y={y}
-              fill="rgba(236, 235, 228, 0.55)"
+              fill={rgba(colors.text, 0.55)}
               fontSize={11}
               fontFamily={Fonts.medium}
               textAnchor={t === 0 ? 'start' : t === 1 ? 'end' : 'middle'}
@@ -187,7 +189,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
           <SvgText
             x={pad.l + innerW / 2}
             y={pad.t + innerH / 2}
-            fill="rgba(236, 235, 228, 0.45)"
+            fill={rgba(colors.text, 0.45)}
             fontSize={12}
             fontFamily={Fonts.medium}
             textAnchor="middle"
@@ -197,7 +199,7 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
         ) : null}
 
         {/* Accent corner marker just to keep visual cohesion */}
-        <Rect x={0} y={0} width={4} height={height} fill={TrenaColors.secondary} opacity={0.25} />
+        <Rect x={0} y={0} width={4} height={height} fill={colors.secondary} opacity={0.25} />
       </Svg>
     </View>
   );

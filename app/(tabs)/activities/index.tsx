@@ -1,4 +1,5 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useFocusEffect } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -89,7 +90,7 @@ function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
 
 const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // keep consistent with session screen
 
-function WorkoutTagIcon({ tag, size = 16, color = 'rgba(236, 235, 228, 0.9)' }: { tag: WorkoutTag; size?: number; color?: string }) {
+function WorkoutTagIcon({ tag, size = 16, color }: { tag: WorkoutTag; size?: number; color: string }) {
   switch (tag) {
     case 'skippingrope':
       return <SkippingRopeIcon size={size} color={color} />;
@@ -155,6 +156,9 @@ function WorkoutTagIcon({ tag, size = 16, color = 'rgba(236, 235, 228, 0.9)' }: 
 }
 
 export default function ActivitiesIndexScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   const [sessions, setSessions] = React.useState<WorkoutSessionRow[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
@@ -299,7 +303,7 @@ export default function ActivitiesIndexScreen() {
                 hitSlop={10}
                 style={({ pressed }) => [styles.iconButton, pressed && !isBusy && { opacity: 0.85 }]}
               >
-                <MoreHorizIcon size={24} color={TrenaColors.text} />
+                <MoreHorizIcon size={24} color={colors.text} />
               </Pressable>
             </View>
             <Text style={styles.cardMeta}>{`${formatDate(s.started_at)} • ${exCount} exercise${exCount === 1 ? '' : 's'}`}</Text>
@@ -316,7 +320,7 @@ export default function ActivitiesIndexScreen() {
 
         {isBusy ? (
           <View style={styles.cardOverlay} pointerEvents="none">
-            <ActivityIndicator color={TrenaColors.primary} />
+            <ActivityIndicator color={colors.primary} />
           </View>
         ) : null}
       </View>
@@ -390,7 +394,7 @@ export default function ActivitiesIndexScreen() {
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuTargetId && openRename(menuTargetId)}
             >
-              <CharacterIcon size={20} color={TrenaColors.text} />
+              <CharacterIcon size={20} color={colors.text} />
               <Text style={styles.menuItemText}>Rename Workout</Text>
             </Pressable>
 
@@ -401,7 +405,7 @@ export default function ActivitiesIndexScreen() {
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuTargetId && onDuplicate(menuTargetId)}
             >
-              <DuplicateIcon size={20} color={TrenaColors.text} />
+              <DuplicateIcon size={20} color={colors.text} />
               <Text style={styles.menuItemText}>Duplicate Workout</Text>
             </Pressable>
 
@@ -412,8 +416,8 @@ export default function ActivitiesIndexScreen() {
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuTargetId && onDelete(menuTargetId)}
             >
-              <TrashIcon size={20} color={TrenaColors.accentRed} />
-              <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Remove Workout</Text>
+              <TrashIcon size={20} color={colors.accentRed} />
+              <Text style={[styles.menuItemText, { color: colors.accentRed }]}>Remove Workout</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -431,7 +435,7 @@ export default function ActivitiesIndexScreen() {
                 hitSlop={10}
                 style={({ pressed }) => [styles.renameClose, pressed && { opacity: 0.8 }]}
               >
-                <XIcon size={18} color={TrenaColors.text} />
+                <XIcon size={18} color={colors.text} />
               </Pressable>
             </View>
 
@@ -439,7 +443,7 @@ export default function ActivitiesIndexScreen() {
               value={renameValue}
               onChangeText={setRenameValue}
               placeholder="Workout name"
-              placeholderTextColor="rgba(236, 235, 228, 0.5)"
+              placeholderTextColor={rgba(colors.text, 0.5)}
               autoFocus
               returnKeyType="done"
               onSubmitEditing={onSaveRename}
@@ -478,10 +482,18 @@ export default function ActivitiesIndexScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: {
+  background: string;
+  surface: string;
+  primary: string;
+  text: string;
+  accentRed: string;
+  onPrimary: string;
+}) =>
+  StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: TrenaColors.background,
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -496,7 +508,7 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 40,
     fontFamily: Fonts.extraBold,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.3,
   },
   section: {
@@ -510,11 +522,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     fontSize: 18,
     lineHeight: 22,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.2,
   },
   body: {
-    color: 'rgba(236, 235, 228, 0.8)',
+    color: rgba(colors.text, 0.8),
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 20,
@@ -552,13 +564,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     columnGap: 8,
-    backgroundColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.25)',
     width: '100%',
   },
   primaryButtonText: {
-    color: '#000',
+    color: colors.onPrimary,
     fontSize: 15,
     fontFamily: Fonts.extraBold,
   },
@@ -568,13 +580,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    backgroundColor: rgba(colors.text, 0.08),
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
     minWidth: 110,
   },
   secondaryButtonText: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontSize: 15,
     fontFamily: Fonts.bold,
   },
@@ -588,8 +600,8 @@ const styles = StyleSheet.create({
   card: {
     position: 'relative',
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     padding: 12,
     borderRadius: 14,
     flexDirection: 'row',
@@ -618,14 +630,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     fontSize: 16,
     lineHeight: 20,
-    color: TrenaColors.text,
+    color: colors.text,
     flex: 1,
   },
   cardMeta: {
     fontFamily: Fonts.medium,
     fontSize: 12,
     lineHeight: 16,
-    color: 'rgba(236, 235, 228, 0.75)',
+    color: rgba(colors.text, 0.75),
   },
   cardTags: {
     position: 'absolute',
@@ -659,7 +671,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
     letterSpacing: 0.5,
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: rgba(colors.text, 0.85),
   },
 
   toast: {
@@ -671,14 +683,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.08),
   },
   toastText: {
     fontFamily: Fonts.medium,
     fontSize: 13,
     lineHeight: 18,
-    color: TrenaColors.text,
+    color: colors.text,
   },
   iconButton: {
     padding: 4,
@@ -687,7 +699,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 16,
-    backgroundColor: TrenaColors.background,
+    backgroundColor: colors.background,
   },
   modalBackdrop: {
     flex: 1,
@@ -695,7 +707,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   menuSheet: {
-    backgroundColor: '#1C1C1E', // Dark sheet color
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingVertical: 10,
@@ -714,20 +726,20 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontFamily: Fonts.bold,
     fontSize: 16,
-    color: TrenaColors.text,
+    color: colors.text,
   },
   menuSeparator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(236, 235, 228, 0.1)',
+    backgroundColor: rgba(colors.text, 0.1),
   },
 
   renameCard: {
     marginHorizontal: 16,
     marginBottom: 24,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
     padding: 16,
     gap: 12,
   },
@@ -740,19 +752,19 @@ const styles = StyleSheet.create({
   renameTitle: {
     fontFamily: Fonts.extraBold,
     fontSize: 16,
-    color: TrenaColors.text,
+    color: colors.text,
   },
   renameClose: {
     padding: 6,
   },
   renameInput: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.medium,
     fontSize: 14,
   },
@@ -760,4 +772,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-});
+  });

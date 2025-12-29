@@ -1,16 +1,18 @@
 import { ChevronLeftIcon } from '@/components/icons';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { Stack, router } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 export default function ActivitiesLayout() {
+  const { colors } = useTrenaTheme();
   return (
     <Stack
       screenOptions={{
-        contentStyle: { backgroundColor: TrenaColors.background },
-        headerStyle: { backgroundColor: TrenaColors.background },
-        headerTintColor: TrenaColors.text,
+        contentStyle: { backgroundColor: colors.background },
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.text,
         headerTitleStyle: { fontFamily: Fonts.bold },
         headerShadowVisible: false,
         headerBackVisible: false,
@@ -22,7 +24,7 @@ export default function ActivitiesLayout() {
             hitSlop={16}
             style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
           >
-            <ChevronLeftIcon size={34} color={TrenaColors.primary} strokeWidth={2} />
+            <ChevronLeftIcon size={34} color={colors.primary} strokeWidth={2} />
           </Pressable>
         ),
       }}

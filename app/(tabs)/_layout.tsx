@@ -1,12 +1,14 @@
 import { ActivitiesIcon, EnergyIcon, LearnIcon, ProfileIcon, TodayIcon } from '@/components/icons';
-import { TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
+import { rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { Redirect, router, Tabs } from 'expo-router';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
   const { isLoading, isLoggedIn } = useAuthContext();
+  const { colors } = useTrenaTheme();
   const insets = useSafeAreaInsets();
 
   // Avoid flashing the tabs while auth is loading.
@@ -24,11 +26,11 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: TrenaColors.primary,
-        tabBarInactiveTintColor: 'rgba(236, 235, 228, 0.65)',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: rgba(colors.text, 0.65),
         tabBarStyle: {
-          backgroundColor: TrenaColors.background,
-          borderTopColor: 'rgba(236, 235, 228, 0.12)',
+          backgroundColor: colors.background,
+          borderTopColor: rgba(colors.text, 0.12),
           height: barHeight,
           paddingBottom: bottomPad,
           paddingTop: 10,

@@ -1,5 +1,6 @@
-import { TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
+import { rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { supabase } from '@/lib/supabase';
 import * as Linking from 'expo-linking';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
@@ -19,6 +20,8 @@ function getParamFromUrl(url: string, key: string): string | undefined {
 
 export default function AuthCallbackScreen() {
   const { isLoggedIn } = useAuthContext();
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{
     code?: string;
     error?: string;
@@ -69,23 +72,24 @@ export default function AuthCallbackScreen() {
 
   return (
     <View style={styles.root}>
-      <ActivityIndicator color={TrenaColors.primary} />
+      <ActivityIndicator color={colors.primary} />
       <Text style={styles.text}>{message}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    backgroundColor: TrenaColors.background,
-    paddingHorizontal: 24,
-  },
-  text: {
-    color: 'rgba(236, 235, 228, 0.85)',
-    textAlign: 'center',
-  },
-});
+const createStyles = (colors: { background: string; text: string }) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    text: {
+      color: rgba(colors.text, 0.85),
+      textAlign: 'center',
+    },
+  });

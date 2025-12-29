@@ -1,4 +1,5 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import Svg, { Defs, LinearGradient, Line, Path, Stop, Text as SvgText } from 'react-native-svg';
@@ -38,7 +39,8 @@ export type ExerciseProgressChartProps = {
 };
 
 export function ExerciseProgressChart(props: ExerciseProgressChartProps) {
-  const { width, height, data, color = TrenaColors.primary } = props;
+  const { colors } = useTrenaTheme();
+  const { width, height, data, color = colors.primary } = props;
 
   const pad = { l: 30, r: 10, t: 10, b: 20 };
   const innerW = Math.max(0, width - pad.l - pad.r);
@@ -75,7 +77,7 @@ export function ExerciseProgressChart(props: ExerciseProgressChartProps) {
   if (data.length < 2) {
     return (
       <View style={{ width, height, justifyContent: 'center', alignItems: 'center' }}>
-        <SvgText fill="rgba(236, 235, 228, 0.4)" fontSize={12} fontFamily={Fonts.medium}>
+        <SvgText fill={rgba(colors.text, 0.4)} fontSize={12} fontFamily={Fonts.medium}>
           Not enough data for chart
         </SvgText>
       </View>
@@ -93,10 +95,24 @@ export function ExerciseProgressChart(props: ExerciseProgressChartProps) {
         </Defs>
 
         {/* Y Axis labels (subtle) */}
-        <SvgText x={pad.l - 6} y={pad.t + 4} fill="rgba(236, 235, 228, 0.4)" fontSize={10} textAnchor="end" fontFamily={Fonts.medium}>
+        <SvgText
+          x={pad.l - 6}
+          y={pad.t + 4}
+          fill={rgba(colors.text, 0.4)}
+          fontSize={10}
+          textAnchor="end"
+          fontFamily={Fonts.medium}
+        >
           {yMax.toFixed(0)}
         </SvgText>
-        <SvgText x={pad.l - 6} y={pad.t + innerH} fill="rgba(236, 235, 228, 0.4)" fontSize={10} textAnchor="end" fontFamily={Fonts.medium}>
+        <SvgText
+          x={pad.l - 6}
+          y={pad.t + innerH}
+          fill={rgba(colors.text, 0.4)}
+          fontSize={10}
+          textAnchor="end"
+          fontFamily={Fonts.medium}
+        >
           {yMin.toFixed(0)}
         </SvgText>
 
@@ -109,7 +125,7 @@ export function ExerciseProgressChart(props: ExerciseProgressChartProps) {
           x2={pad.l + innerW}
           y1={pad.t + innerH}
           y2={pad.t + innerH}
-          stroke="rgba(236, 235, 228, 0.12)"
+          stroke={rgba(colors.text, 0.12)}
           strokeWidth={1}
         />
 

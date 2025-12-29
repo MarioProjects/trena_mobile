@@ -1,6 +1,7 @@
 import { EditIcon, SearchIcon } from '@/components/icons';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { clearAddExerciseDraft, getAddExerciseDraft, setAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import { consumeMethodInstanceCreatedQueue, subscribeMethodInstanceCreated } from '@/lib/workouts/methods/ui-events';
 import { listDistinctFreeExercises, listMethodInstances } from '@/lib/workouts/repo';
@@ -68,11 +69,15 @@ function Pill({
   selected,
   onPress,
   onEdit,
+  styles,
+  colors,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
   onEdit?: () => void;
+  styles: ReturnType<typeof createStyles>;
+  colors: { text: string; onPrimary: string };
 }) {
   return (
     <Pressable
@@ -95,7 +100,7 @@ function Pill({
           >
             <EditIcon
               size={16}
-              color={selected ? TrenaColors.background : 'rgba(236, 235, 228, 0.9)'}
+              color={selected ? colors.onPrimary : rgba(colors.text, 0.9)}
               strokeWidth={2}
             />
           </Pressable>
@@ -121,6 +126,9 @@ export function AddExerciseModal({
   confirmLabel?: string;
   onRequestCreateMethod?: (key: MethodKey) => void;
 }) {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
+
   const [term, setTerm] = React.useState('');
   const [customs, setCustoms] = React.useState<string[]>([]);
   const [methods, setMethods] = React.useState<MethodInstanceRow[]>([]);
@@ -319,10 +327,10 @@ export function AddExerciseModal({
         </View>
 
         <View style={styles.searchRow}>
-          <SearchIcon color="rgba(236, 235, 228, 0.5)" size={18} />
+          <SearchIcon color={rgba(colors.text, 0.5)} size={18} />
           <TextInput
             placeholder="Search exercise..."
-            placeholderTextColor="rgba(236, 235, 228, 0.5)"
+            placeholderTextColor={rgba(colors.text, 0.5)}
             style={styles.input}
             value={term}
             onChangeText={setTerm}
@@ -338,6 +346,8 @@ export function AddExerciseModal({
                   <Pill
                     label="Bilbo"
                     selected={methodChoice === 'bilbo'}
+                    styles={styles}
+                    colors={colors}
                     onPress={() => {
                       setSelectedExercise(null);
                       setMethodChoice('bilbo');
@@ -347,6 +357,8 @@ export function AddExerciseModal({
                   <Pill
                     label="5/3/1"
                     selected={methodChoice === 'wendler_531'}
+                    styles={styles}
+                    colors={colors}
                     onPress={() => {
                       setSelectedExercise(null);
                       setMethodChoice('wendler_531');
@@ -357,7 +369,7 @@ export function AddExerciseModal({
 
                 {isLoadingMethods ? (
                   <View style={{ paddingTop: 8 }}>
-                    <ActivityIndicator color={TrenaColors.primary} />
+                    <ActivityIndicator color={colors.primary} />
                   </View>
                 ) : null}
 
@@ -380,6 +392,8 @@ export function AddExerciseModal({
                             label={m.name}
                             selected={selectedMethodInstanceId === m.id}
                             onEdit={selectedMethodInstanceId === m.id ? () => onEditMethod(m.id) : undefined}
+                            styles={styles}
+                            colors={colors}
                             onPress={() => {
                               setSelectedExercise(null);
                               setSelectedMethodInstanceId(m.id);
@@ -410,6 +424,8 @@ export function AddExerciseModal({
                             label={m.name}
                             selected={selectedMethodInstanceId === m.id}
                             onEdit={selectedMethodInstanceId === m.id ? () => onEditMethod(m.id) : undefined}
+                            styles={styles}
+                            colors={colors}
                             onPress={() => {
                               setSelectedExercise(null);
                               setSelectedMethodInstanceId(m.id);
@@ -424,7 +440,14 @@ export function AddExerciseModal({
                         <Text style={styles.muted}>Main lift</Text>
                         <View style={styles.pillsRow}>
                           {(['squat', 'bench', 'deadlift', 'press'] as WendlerLiftKey[]).map((k) => (
-                            <Pill key={k} label={k} selected={wendlerLift === k} onPress={() => setWendlerLift(k)} />
+                            <Pill
+                              key={k}
+                              label={k}
+                              selected={wendlerLift === k}
+                              styles={styles}
+                              colors={colors}
+                              onPress={() => setWendlerLift(k)}
+                            />
                           ))}
                         </View>
                       </View>
@@ -446,8 +469,8 @@ export function AddExerciseModal({
                 style={styles.row}
                 onPress={() => onSelectExercise({ kind: 'free', name: term.trim() })}
               >
-                <View style={[styles.iconBox, { backgroundColor: TrenaColors.primary }]}>
-                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>+</Text>
+                <View style={[styles.iconBox, { backgroundColor: colors.primary }]}>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.onPrimary }}>+</Text>
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle}>Create "{term.trim()}"</Text>
@@ -545,8 +568,15 @@ export function AddExerciseModal({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#141411' },
+const createStyles = (colors: {
+  background: string;
+  surface: string;
+  primary: string;
+  text: string;
+  onPrimary: string;
+}) =>
+  StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -554,11 +584,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: rgba(colors.text, 0.1),
   },
-  title: { fontFamily: Fonts.bold, fontSize: 18, color: '#ECEBE4' },
+  title: { fontFamily: Fonts.bold, fontSize: 18, color: colors.text },
   closeBtn: { padding: 8 },
-  closeText: { fontFamily: Fonts.bold, color: TrenaColors.primary, fontSize: 16 },
+  closeText: { fontFamily: Fonts.bold, color: colors.primary, fontSize: 16 },
 
   searchRow: {
     flexDirection: 'row',
@@ -566,30 +596,30 @@ const styles = StyleSheet.create({
     margin: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: 'rgba(236, 235, 228, 0.06)',
+    backgroundColor: rgba(colors.text, 0.06),
     borderRadius: 10,
     gap: 8,
   },
-  input: { flex: 1, fontFamily: Fonts.medium, fontSize: 16, color: '#ECEBE4' },
+  input: { flex: 1, fontFamily: Fonts.medium, fontSize: 16, color: colors.text },
 
   list: { paddingHorizontal: 16, paddingBottom: 20, gap: 16 },
   section: { gap: 10 },
   sectionHeader: {
     fontFamily: Fonts.bold,
     fontSize: 14,
-    color: 'rgba(236, 235, 228, 0.4)',
+    color: rgba(colors.text, 0.4),
     textTransform: 'uppercase',
   },
   sectionHeaderTop: {
     marginTop: 8,
   },
-  subHeader: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.35)', textTransform: 'uppercase' },
-  divider: { height: 1, backgroundColor: 'rgba(236, 235, 228, 0.10)' },
-  empty: { textAlign: 'center', color: 'rgba(236, 235, 228, 0.4)', marginTop: 10, fontFamily: Fonts.medium, fontSize: 15 },
+  subHeader: { fontFamily: Fonts.bold, fontSize: 12, color: rgba(colors.text, 0.35), textTransform: 'uppercase' },
+  divider: { height: 1, backgroundColor: rgba(colors.text, 0.10) },
+  empty: { textAlign: 'center', color: rgba(colors.text, 0.4), marginTop: 10, fontFamily: Fonts.medium, fontSize: 15 },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 },
   rowSelected: {
-    backgroundColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 10,
@@ -598,56 +628,56 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: 'rgba(236, 235, 228, 0.1)',
+    backgroundColor: rgba(colors.text, 0.1),
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconBoxSelected: {
     backgroundColor: 'rgba(0, 0, 0, 0.12)',
   },
-  iconText: { fontFamily: Fonts.bold, color: 'rgba(236, 235, 228, 0.5)', fontSize: 16 },
+  iconText: { fontFamily: Fonts.bold, color: rgba(colors.text, 0.5), fontSize: 16 },
   iconTextSelected: { color: '#000' },
-  rowTitle: { fontFamily: Fonts.semiBold, fontSize: 16, color: '#ECEBE4' },
+  rowTitle: { fontFamily: Fonts.semiBold, fontSize: 16, color: colors.text },
   rowTitleSelected: { color: '#000' },
-  rowMeta: { fontFamily: Fonts.regular, fontSize: 12, color: 'rgba(236, 235, 228, 0.6)' },
+  rowMeta: { fontFamily: Fonts.regular, fontSize: 12, color: rgba(colors.text, 0.6) },
   rowMetaSelected: { color: 'rgba(0, 0, 0, 0.7)' },
 
-  muted: { color: 'rgba(236, 235, 228, 0.7)', fontFamily: Fonts.regular, fontSize: 13, lineHeight: 18 },
+  muted: { color: rgba(colors.text, 0.7), fontFamily: Fonts.regular, fontSize: 13, lineHeight: 18 },
   pillsRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
   pill: { borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1 },
-  pillSelected: { backgroundColor: TrenaColors.primary, borderColor: TrenaColors.primary },
-  pillUnselected: { backgroundColor: 'rgba(236, 235, 228, 0.04)', borderColor: 'rgba(236, 235, 228, 0.12)' },
+  pillSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  pillUnselected: { backgroundColor: rgba(colors.text, 0.04), borderColor: rgba(colors.text, 0.12) },
   pillInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   pillEditButton: { padding: 1 },
   pillText: { fontFamily: Fonts.semiBold, fontSize: 13, lineHeight: 16 },
-  pillTextSelected: { color: TrenaColors.background },
-  pillTextUnselected: { color: 'rgba(236, 235, 228, 0.9)' },
+  pillTextSelected: { color: colors.onPrimary },
+  pillTextUnselected: { color: rgba(colors.text, 0.9) },
 
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  linkButton: { paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8, backgroundColor: 'rgba(236, 235, 228, 0.06)' },
-  linkText: { fontFamily: Fonts.bold, fontSize: 12, color: TrenaColors.primary },
+  linkButton: { paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8, backgroundColor: rgba(colors.text, 0.06) },
+  linkText: { fontFamily: Fonts.bold, fontSize: 12, color: colors.primary },
 
   footer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(236, 235, 228, 0.10)',
+    borderTopColor: rgba(colors.text, 0.10),
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  footerTitle: { fontFamily: Fonts.bold, fontSize: 14, color: TrenaColors.text },
-  footerMeta: { fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.65)' },
+  footerTitle: { fontFamily: Fonts.bold, fontSize: 14, color: colors.text },
+  footerMeta: { fontFamily: Fonts.medium, fontSize: 12, color: rgba(colors.text, 0.65) },
 
   primaryButton: {
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
-    backgroundColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
-  primaryButtonText: { color: '#000', fontSize: 15, fontFamily: Fonts.extraBold },
+  primaryButtonText: { color: colors.onPrimary, fontSize: 15, fontFamily: Fonts.extraBold },
 });
 

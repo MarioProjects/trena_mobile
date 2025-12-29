@@ -1,4 +1,5 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router } from 'expo-router';
 import React from 'react';
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -7,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { startQuickSession } from '@/lib/workouts/repo';
 
 export default function StartWorkoutScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [isStarting, setIsStarting] = React.useState(false);
 
   const DumbellManIllustration = require('../../../assets/images/illustrations/activities/dumbell.webp');
@@ -103,8 +106,17 @@ export default function StartWorkoutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: TrenaColors.background },
+const createStyles = (colors: {
+  background: string;
+  primary: string;
+  secondary: string;
+  tertiary: string;
+  onPrimary: string;
+  onSecondary: string;
+  onTertiary: string;
+}) =>
+  StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 0, paddingBottom: 16, gap: 12 },
 
   bigCard: {
@@ -157,17 +169,17 @@ const styles = StyleSheet.create({
   },
 
   freeCard: {
-    backgroundColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
-  freeTitle: { color: '#000', fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
-  freeSubtitle: { color: TrenaColors.background, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium, width: '80%' },
+  freeTitle: { color: colors.onPrimary, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  freeSubtitle: { color: rgba(colors.onPrimary, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium, width: '80%' },
 
   templateCard: {
-    backgroundColor: TrenaColors.secondary,
+    backgroundColor: colors.secondary,
   },
   templateTitle: {
-    color: TrenaColors.text,
+    color: colors.onSecondary,
     fontSize: 32,
     lineHeight: 30,
     fontFamily: Fonts.extraBold,
@@ -175,7 +187,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   templateSubtitle: {
-    color: TrenaColors.text,
+    color: rgba(colors.onSecondary, 0.92),
     fontSize: 16,
     lineHeight: 22,
     fontFamily: Fonts.medium,
@@ -183,10 +195,10 @@ const styles = StyleSheet.create({
   },
 
   aiCard: {
-    backgroundColor: TrenaColors.tertiary,
+    backgroundColor: colors.tertiary,
   },
-  aiTitle: { color: TrenaColors.background, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
-  aiSubtitle: { color: TrenaColors.background, fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
+  aiTitle: { color: colors.onTertiary, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  aiSubtitle: { color: rgba(colors.onTertiary, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
 
   illustration: {
     position: 'absolute',
@@ -204,4 +216,4 @@ const styles = StyleSheet.create({
   illustrationFlipped: {
     transform: [{ scaleX: -1 }],
   },
-});
+  });

@@ -12,9 +12,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
-import { Fonts, TrenaColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { signInWithGoogle } from '@/lib/google-oauth';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 
 function isProbablyEmail(email: string) {
   const v = email.trim();
@@ -25,6 +26,8 @@ export default function GetStartedScreen() {
   const { isLoggedIn } = useAuthContext();
   const [email, setEmail] = useState('');
   const [showError, setShowError] = useState(false);
+  const { colors } = useTrenaTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const canSendMagicLink = useMemo(() => isProbablyEmail(email), [email]);
 
@@ -68,12 +71,12 @@ export default function GetStartedScreen() {
             onPress={() => router.back()}
             hitSlop={16}
             style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
-            <ChevronLeftIcon size={36} color={TrenaColors.primary} strokeWidth={2} />
+            <ChevronLeftIcon size={36} color={colors.primary} strokeWidth={2} />
           </Pressable>
 
           {/* Header */}
           <View style={styles.header}>
-            <TrenaLogo width={180} height={50} color={TrenaColors.primary} />
+            <TrenaLogo width={180} height={50} color={colors.primary} />
             <Text style={styles.subtitle}>This is where your journey begins</Text>
           </View>
 
@@ -84,7 +87,7 @@ export default function GetStartedScreen() {
               value={email}
               onChangeText={onEmailChange}
               placeholder="you@example.com"
-              placeholderTextColor="rgba(236, 235, 228, 0.4)"
+              placeholderTextColor={rgba(colors.text, 0.4)}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -139,148 +142,149 @@ export default function GetStartedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: TrenaColors.background,
-  },
-  safe: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-    justifyContent: 'center',
-    gap: 24,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    padding: 8,
-    zIndex: 10,
-  },
-  backButtonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  header: {
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 16,
-  },
-  subtitle: {
-    color: 'rgba(236, 235, 228, 0.8)',
-    fontSize: 14,
-    lineHeight: 20,
-    fontFamily: Fonts.semiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  },
-  loginSection: {
-    gap: 12,
-  },
-  label: {
-    color: 'rgba(236, 235, 228, 0.9)',
-    fontSize: 16,
-    fontFamily: Fonts.semiBold,
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: 'rgba(236, 235, 228, 0.95)',
-    fontFamily: Fonts.regular,
-    fontSize: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.15)',
-  },
-  inputError: {
-    borderColor: TrenaColors.accentRed,
-    borderWidth: 1,
-  },
-  errorText: {
-    color: TrenaColors.accentRed,
-    fontSize: 12,
-    fontFamily: Fonts.regular,
-    marginLeft: 4,
-    marginTop: -4,
-  },
-  loginButton: {
-    backgroundColor: TrenaColors.primary,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  loginButtonDisabled: {
-    opacity: 0.5,
-  },
-  loginButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontFamily: Fonts.black,
-    letterSpacing: 0.3,
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginVertical: 8,
-  },
-  dividerLine: {
-    flex: 1,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(236, 235, 228, 0.25)',
-  },
-  dividerText: {
-    color: 'rgba(236, 235, 228, 0.6)',
-    fontSize: 13,
-    fontFamily: Fonts.semiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  socialButtons: {
-    gap: 12,
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    borderRadius: 14,
-    paddingVertical: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  buttonGoogle: {
-    backgroundColor: '#fff',
-  },
-  buttonFacebook: {
-    backgroundColor: '#1877F2',
-    borderColor: '#1877F2',
-  },
-  socialButtonText: {
-    color: '#000',
-    fontSize: 15,
-    fontFamily: Fonts.bold,
-  },
-  socialButtonTextLight: {
-    color: '#fff',
-  },
-  footnote: {
-    color: 'rgba(236, 235, 228, 0.5)',
-    textAlign: 'center',
-    fontSize: 12,
-    fontFamily: Fonts.regular,
-    marginTop: 8,
-  },
-  pressed: {
-    transform: [{ scale: 0.98 }],
-    opacity: 0.9,
-  },
-});
+const createStyles = (colors: { background: string; primary: string; text: string; accentRed: string; onPrimary: string }) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    safe: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingVertical: 32,
+      justifyContent: 'center',
+      gap: 24,
+    },
+    backButton: {
+      position: 'absolute',
+      top: 8,
+      left: 8,
+      padding: 8,
+      zIndex: 10,
+    },
+    backButtonPressed: {
+      opacity: 0.85,
+      transform: [{ scale: 0.98 }],
+    },
+    header: {
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 16,
+    },
+    subtitle: {
+      color: rgba(colors.text, 0.8),
+      fontSize: 14,
+      lineHeight: 20,
+      fontFamily: Fonts.semiBold,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      textAlign: 'center',
+    },
+    loginSection: {
+      gap: 12,
+    },
+    label: {
+      color: rgba(colors.text, 0.9),
+      fontSize: 16,
+      fontFamily: Fonts.semiBold,
+      marginLeft: 4,
+    },
+    input: {
+      backgroundColor: rgba(colors.text, 0.08),
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      color: rgba(colors.text, 0.95),
+      fontFamily: Fonts.regular,
+      fontSize: 16,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: rgba(colors.text, 0.15),
+    },
+    inputError: {
+      borderColor: colors.accentRed,
+      borderWidth: 1,
+    },
+    errorText: {
+      color: colors.accentRed,
+      fontSize: 12,
+      fontFamily: Fonts.regular,
+      marginLeft: 4,
+      marginTop: -4,
+    },
+    loginButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 14,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    loginButtonDisabled: {
+      opacity: 0.5,
+    },
+    loginButtonText: {
+      color: colors.onPrimary,
+      fontSize: 16,
+      fontFamily: Fonts.black,
+      letterSpacing: 0.3,
+    },
+    dividerContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginVertical: 8,
+    },
+    dividerLine: {
+      flex: 1,
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: rgba(colors.text, 0.25),
+    },
+    dividerText: {
+      color: rgba(colors.text, 0.6),
+      fontSize: 13,
+      fontFamily: Fonts.semiBold,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    socialButtons: {
+      gap: 12,
+    },
+    socialButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      borderRadius: 14,
+      paddingVertical: 14,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    buttonGoogle: {
+      backgroundColor: '#fff',
+    },
+    buttonFacebook: {
+      backgroundColor: '#1877F2',
+      borderColor: '#1877F2',
+    },
+    socialButtonText: {
+      color: '#000',
+      fontSize: 15,
+      fontFamily: Fonts.bold,
+    },
+    socialButtonTextLight: {
+      color: '#fff',
+    },
+    footnote: {
+      color: rgba(colors.text, 0.5),
+      textAlign: 'center',
+      fontSize: 12,
+      fontFamily: Fonts.regular,
+      marginTop: 8,
+    },
+    pressed: {
+      transform: [{ scale: 0.98 }],
+      opacity: 0.9,
+    },
+  });

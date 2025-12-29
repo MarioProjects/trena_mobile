@@ -1,4 +1,5 @@
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { learnData } from '@/data/learn';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -315,6 +316,8 @@ function pad2(n: number) {
 // toDateParts removed
 
 export default function SessionScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id?: string }>();
   const sessionId = typeof id === 'string' ? id : undefined;
 
@@ -1039,7 +1042,7 @@ export default function SessionScreen() {
                     disabled={isSavingTitle}
                     style={({ pressed }) => [styles.iconButton, (pressed || isSavingTitle) && styles.pressed]}
                   >
-                    <XIcon size={20} color={TrenaColors.text} />
+                    <XIcon size={20} color={colors.text} />
                   </Pressable>
                   <Pressable
                     accessibilityRole="button"
@@ -1048,7 +1051,7 @@ export default function SessionScreen() {
                     disabled={isSavingTitle}
                     style={({ pressed }) => [styles.iconButton, (pressed || isSavingTitle) && styles.pressed]}
                   >
-                    <CheckIcon size={20} color={TrenaColors.text} />
+                    <CheckIcon size={20} color={colors.text} />
                   </Pressable>
                 </View>
               </View>
@@ -1081,7 +1084,7 @@ export default function SessionScreen() {
                     ? 'Loading…'
                     : ''}
               </Text>
-              {isAutoSaving ? <FloppyIcon size={14} color="rgba(236, 235, 228, 0.75)" /> : null}
+              {isAutoSaving ? <FloppyIcon size={14} color={rgba(colors.text, 0.75)} /> : null}
             </View>
           </View>
 
@@ -1093,7 +1096,7 @@ export default function SessionScreen() {
                 onPress={() => setIsTagsOpen(true)}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
               >
-                <TagIcon size={22} color={TrenaColors.text} />
+                <TagIcon size={22} color={colors.text} />
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -1101,7 +1104,7 @@ export default function SessionScreen() {
                 onPress={onCalendarPress}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
               >
-                <CalendarIcon size={22} color={TrenaColors.text} />
+                <CalendarIcon size={22} color={colors.text} />
               </Pressable>
             </View>
           ) : null}
@@ -1115,7 +1118,7 @@ export default function SessionScreen() {
               <View style={styles.tagsSheetHeader}>
                 <Text style={styles.tagsSheetTitle}>Tags</Text>
                 <View style={styles.tagsSheetHeaderRight}>
-                  {isSavingTags ? <FloppyIcon size={14} color="rgba(236, 235, 228, 0.75)" /> : null}
+                  {isSavingTags ? <FloppyIcon size={14} color={rgba(colors.text, 0.75)} /> : null}
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Close tags"
@@ -1123,7 +1126,7 @@ export default function SessionScreen() {
                     hitSlop={10}
                     style={({ pressed }) => [styles.tagsCloseButton, pressed && { opacity: 0.85 }]}
                   >
-                    <XIcon size={18} color={TrenaColors.text} />
+                    <XIcon size={18} color={colors.text} />
                   </Pressable>
                 </View>
               </View>
@@ -1149,7 +1152,11 @@ export default function SessionScreen() {
                           pressed && styles.pressed,
                         ]}
                       >
-                        <WorkoutTagIcon tag={tag} size={18} color={selected ? '#141B34' : 'rgba(236, 235, 228, 0.85)'} />
+                        <WorkoutTagIcon
+                          tag={tag}
+                          size={18}
+                          color={selected ? colors.onPrimary : rgba(colors.text, 0.85)}
+                        />
                       </Pressable>
                     </View>
                   );
@@ -1161,14 +1168,14 @@ export default function SessionScreen() {
 
         <View style={styles.notesCard}>
           <View style={styles.notesHeader}>
-            <NotebookIcon size={18} color="rgba(236, 235, 228, 0.65)" />
+            <NotebookIcon size={18} color={rgba(colors.text, 0.65)} />
             <Text style={styles.notesLabel}>Workout Notes</Text>
           </View>
           <TextInput
             value={snapshot.notes ?? ''}
             onChangeText={updateWorkoutNotes}
             placeholder="Add notes about this workout…"
-            placeholderTextColor="rgba(236, 235, 228, 0.4)"
+            placeholderTextColor={rgba(colors.text, 0.4)}
             multiline
             style={styles.notesInput}
           />
@@ -1191,7 +1198,7 @@ export default function SessionScreen() {
           onRequestClose={() => setShowIosPicker(false)}
         >
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 20, width: '90%', maxWidth: 360, gap: 16 }}>
+            <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 20, width: '90%', maxWidth: 360, gap: 16 }}>
               <Text style={[styles.sectionTitle, { textAlign: 'center' }]}>Update Date</Text>
               <View style={{ alignItems: 'center' }}>
                 <DateTimePicker
@@ -1290,7 +1297,7 @@ export default function SessionScreen() {
                             hitSlop={10}
                             style={styles.dragHandle}
                           >
-                            <DragHandleIcon size={18} color="rgba(236, 235, 228, 0.65)" strokeWidth={2.5} />
+                            <DragHandleIcon size={18} color={rgba(colors.text, 0.65)} strokeWidth={2.5} />
                           </View>
                         </GestureDetector>
                         <Text style={styles.exerciseTitle} numberOfLines={1}>
@@ -1303,7 +1310,7 @@ export default function SessionScreen() {
                           hitSlop={10}
                           style={({ pressed }) => [styles.exerciseMoreButton, pressed && { opacity: 0.7 }]}
                         >
-                          <MoreHorizIcon size={22} color={TrenaColors.text} />
+                          <MoreHorizIcon size={22} color={colors.text} />
                         </Pressable>
                       </View>
 
@@ -1356,7 +1363,7 @@ export default function SessionScreen() {
                                         });
                                       }}
                                       placeholder="reps"
-                                      placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                      placeholderTextColor={rgba(colors.text, 0.5)}
                                       keyboardType="numeric"
                                       style={styles.repsInput}
                                     />
@@ -1371,7 +1378,11 @@ export default function SessionScreen() {
                                         pressed && { opacity: 0.85 },
                                       ]}
                                     >
-                                      {getDone(cur) ? <CheckIcon size={18} color="#000" /> : <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />}
+                                      {getDone(cur) ? (
+                                        <CheckIcon size={18} color={colors.onPrimary} />
+                                      ) : (
+                                        <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
+                                      )}
                                     </Pressable>
                                   </View>
                                 </View>
@@ -1418,7 +1429,7 @@ export default function SessionScreen() {
                                       });
                                     }}
                                     placeholder="reps"
-                                    placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                    placeholderTextColor={rgba(colors.text, 0.5)}
                                     keyboardType="numeric"
                                     style={styles.repsInput}
                                   />
@@ -1444,7 +1455,7 @@ export default function SessionScreen() {
                                     });
                                   }}
                                   placeholder="RIR"
-                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  placeholderTextColor={rgba(colors.text, 0.5)}
                                   keyboardType="decimal-pad"
                                   style={styles.rirInput}
                                 />
@@ -1457,7 +1468,11 @@ export default function SessionScreen() {
                                     pressed && { opacity: 0.85 },
                                   ]}
                                 >
-                                  {getDone(cur) ? <CheckIcon size={18} color="#000" /> : <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />}
+                                  {getDone(cur) ? (
+                                    <CheckIcon size={18} color={colors.onPrimary} />
+                                  ) : (
+                                    <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
+                                  )}
                                 </Pressable>
                               </View>
                             );
@@ -1503,7 +1518,7 @@ export default function SessionScreen() {
                                       style={{
                                         fontFamily: Fonts.medium,
                                         textAlign: 'center',
-                                        color: durationToText(s.durationSec) ? TrenaColors.text : 'rgba(236, 235, 228, 0.5)',
+                                        color: durationToText(s.durationSec) ? colors.text : rgba(colors.text, 0.5),
                                       }}
                                     >
                                       {durationToText(s.durationSec) || '00:00'}
@@ -1522,9 +1537,9 @@ export default function SessionScreen() {
                                     ]}
                                   >
                                     {s.done ? (
-                                      <CheckIcon size={18} color="#000" />
+                                      <CheckIcon size={18} color={colors.onPrimary} />
                                     ) : (
-                                      <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+                                      <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
                                     )}
                                   </Pressable>
                                 </View>
@@ -1573,7 +1588,7 @@ export default function SessionScreen() {
                                       });
                                     }}
                                     placeholder="km"
-                                    placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                    placeholderTextColor={rgba(colors.text, 0.5)}
                                     keyboardType="decimal-pad"
                                     style={[styles.freeInput, { flex: 1.5 }]}
                                   />
@@ -1594,7 +1609,7 @@ export default function SessionScreen() {
                                       style={{
                                         fontFamily: Fonts.medium,
                                         textAlign: 'center',
-                                        color: durationToText(s.durationSec) ? TrenaColors.text : 'rgba(236, 235, 228, 0.5)',
+                                        color: durationToText(s.durationSec) ? colors.text : rgba(colors.text, 0.5),
                                       }}
                                     >
                                       {durationToText(s.durationSec) || '00:00'}
@@ -1615,9 +1630,9 @@ export default function SessionScreen() {
                                     ]}
                                   >
                                     {s.done ? (
-                                      <CheckIcon size={18} color="#000" />
+                                      <CheckIcon size={18} color={colors.onPrimary} />
                                     ) : (
-                                      <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+                                      <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
                                     )}
                                   </Pressable>
                                 </View>
@@ -1666,7 +1681,7 @@ export default function SessionScreen() {
                                     });
                                   }}
                                   placeholder="reps"
-                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  placeholderTextColor={rgba(colors.text, 0.5)}
                                   keyboardType="numeric"
                                   style={styles.freeInput}
                                 />
@@ -1690,7 +1705,7 @@ export default function SessionScreen() {
                                     });
                                   }}
                                   placeholder="kg"
-                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  placeholderTextColor={rgba(colors.text, 0.5)}
                                   keyboardType="decimal-pad"
                                   style={styles.freeInput}
                                 />
@@ -1713,7 +1728,7 @@ export default function SessionScreen() {
                                     });
                                   }}
                                   placeholder="RIR"
-                                  placeholderTextColor="rgba(236, 235, 228, 0.5)"
+                                  placeholderTextColor={rgba(colors.text, 0.5)}
                                   keyboardType="decimal-pad"
                                   style={styles.rirInput}
                                 />
@@ -1727,9 +1742,9 @@ export default function SessionScreen() {
                                   ]}
                                 >
                                   {s.done ? (
-                                    <CheckIcon size={18} color="#000" />
+                                    <CheckIcon size={18} color={colors.onPrimary} />
                                   ) : (
-                                    <SkipStatusIcon size={18} color="rgba(236, 235, 228, 0.85)" />
+                                    <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
                                   )}
                                 </Pressable>
                               </View>
@@ -1754,14 +1769,14 @@ export default function SessionScreen() {
 
                       <View style={styles.exerciseNotesContainer}>
                         <View style={styles.exerciseNotesHeader}>
-                          <StickyNoteIcon size={14} color="rgba(236, 235, 228, 0.5)" />
+                          <StickyNoteIcon size={14} color={rgba(colors.text, 0.5)} />
                           <Text style={styles.exerciseNotesLabel}>Notes</Text>
                         </View>
                         <TextInput
                           value={ex.notes ?? ''}
                           onChangeText={(t) => updateExercise(ex.id, (old) => ({ ...old, notes: t }))}
                           placeholder="Add exercise notes…"
-                          placeholderTextColor="rgba(236, 235, 228, 0.35)"
+                          placeholderTextColor={rgba(colors.text, 0.35)}
                           multiline
                           style={styles.exerciseNotesInput}
                         />
@@ -1837,7 +1852,7 @@ export default function SessionScreen() {
                     }
                   }}
                 >
-                  <InfoIcon size={20} color={TrenaColors.text} />
+                  <InfoIcon size={20} color={colors.text} />
                   <Text style={styles.menuItemText}>Exercise Information</Text>
                 </Pressable>
                 <View style={styles.menuSeparator} />
@@ -1849,7 +1864,7 @@ export default function SessionScreen() {
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuExerciseId && startEditingExercise(menuExerciseId)}
             >
-              <EditIcon size={20} color={TrenaColors.text} />
+              <EditIcon size={20} color={colors.text} />
               <Text style={styles.menuItemText}>Edit Exercise</Text>
             </Pressable>
 
@@ -1860,7 +1875,7 @@ export default function SessionScreen() {
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuExerciseId && duplicateExercise(menuExerciseId)}
             >
-              <DuplicateIcon size={20} color={TrenaColors.text} />
+              <DuplicateIcon size={20} color={colors.text} />
               <Text style={styles.menuItemText}>Duplicate Exercise</Text>
             </Pressable>
 
@@ -1871,8 +1886,8 @@ export default function SessionScreen() {
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuExerciseId && removeExercise(menuExerciseId)}
             >
-              <TrashIcon size={20} color={TrenaColors.accentRed} />
-              <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Delete Exercise</Text>
+              <TrashIcon size={20} color={colors.accentRed} />
+              <Text style={[styles.menuItemText, { color: colors.accentRed }]}>Delete Exercise</Text>
             </Pressable>
           </Pressable>
         </Pressable>
@@ -2421,16 +2436,26 @@ function DraggableExercise({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: TrenaColors.background },
+const createStyles = (colors: {
+  background: string;
+  surface: string;
+  primary: string;
+  secondary: string;
+  text: string;
+  accentRed: string;
+  onPrimary: string;
+  onSecondary: string;
+}) =>
+StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
   container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  title: { fontSize: 26, lineHeight: 32, fontFamily: Fonts.extraBold, color: TrenaColors.text, letterSpacing: -0.25 },
+  title: { fontSize: 26, lineHeight: 32, fontFamily: Fonts.extraBold, color: colors.text, letterSpacing: -0.25 },
   titleInput: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -2444,7 +2469,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-  meta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: 'rgba(236, 235, 228, 0.75)' },
+  meta: { fontFamily: Fonts.medium, fontSize: 12, lineHeight: 16, color: rgba(colors.text, 0.75) },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   iconButton: {
     width: 44,
@@ -2453,13 +2478,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
   },
   dateCard: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     padding: 12,
     borderRadius: 14,
     gap: 10,
@@ -2467,29 +2492,29 @@ const styles = StyleSheet.create({
   dateRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   section: { gap: 12 },
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: TrenaColors.text },
-  body: { color: 'rgba(236, 235, 228, 0.8)', fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20 },
+  sectionTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: colors.text },
+  body: { color: rgba(colors.text, 0.8), fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20 },
   list: { gap: 12 },
   reorderButton: {
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
   },
-  reorderButtonText: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.9)' },
+  reorderButtonText: { fontFamily: Fonts.bold, fontSize: 12, color: rgba(colors.text, 0.9) },
   exerciseCard: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     padding: 12,
     borderRadius: 14,
     gap: 10,
   },
   exerciseHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   dragHandle: { paddingVertical: 2, paddingHorizontal: 4 },
-  exerciseTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: TrenaColors.text, flex: 1 },
+  exerciseTitle: { fontFamily: Fonts.bold, fontSize: 16, lineHeight: 20, color: colors.text, flex: 1 },
   exerciseMoreButton: {
     padding: 4,
   },
@@ -2499,7 +2524,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   menuSheet: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingVertical: 10,
@@ -2509,7 +2534,7 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: 14,
-    color: 'rgba(236, 235, 228, 0.6)',
+    color: rgba(colors.text, 0.6),
     textAlign: 'center',
     paddingVertical: 8,
     marginBottom: 4,
@@ -2526,38 +2551,38 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontFamily: Fonts.bold,
     fontSize: 16,
-    color: TrenaColors.text,
+    color: colors.text,
   },
   menuSeparator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(236, 235, 228, 0.1)',
+    backgroundColor: rgba(colors.text, 0.1),
   },
   setLabelWrap: { width: 110 },
   setRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  setLabel: { width: 110, fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.75)' },
-  setWeight: { width: 80, fontFamily: Fonts.bold, fontSize: 13, color: TrenaColors.text },
-  times: { fontFamily: Fonts.bold, fontSize: 14, color: 'rgba(236, 235, 228, 0.75)' },
+  setLabel: { width: 110, fontFamily: Fonts.medium, fontSize: 12, color: rgba(colors.text, 0.75) },
+  setWeight: { width: 80, fontFamily: Fonts.bold, fontSize: 13, color: colors.text },
+  times: { fontFamily: Fonts.bold, fontSize: 14, color: rgba(colors.text, 0.75) },
   repsInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   repsInputCompact: {
     width: 72,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.medium,
     textAlign: 'center',
   },
@@ -2569,31 +2594,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
   },
-  freeSetIndexText: { fontFamily: Fonts.bold, fontSize: 12, color: 'rgba(236, 235, 228, 0.85)' },
+  freeSetIndexText: { fontFamily: Fonts.bold, fontSize: 12, color: rgba(colors.text, 0.85) },
   freeInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   rirInput: {
     width: 54,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.medium,
     textAlign: 'center',
   },
@@ -2607,21 +2632,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   donePillOn: {
-    backgroundColor: TrenaColors.primary,
-    borderColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   donePillOff: {
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    backgroundColor: rgba(colors.text, 0.04),
+    borderColor: rgba(colors.text, 0.12),
   },
   input: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.medium,
   },
   actionsRow: { flexDirection: 'row', gap: 10, paddingTop: 4 },
@@ -2630,32 +2655,32 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
-    backgroundColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
-  primaryButtonText: { color: '#000', fontSize: 15, fontFamily: Fonts.extraBold },
+  primaryButtonText: { color: colors.onPrimary, fontSize: 15, fontFamily: Fonts.extraBold },
   programButton: {
     flex: 1,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
-    backgroundColor: TrenaColors.secondary,
+    backgroundColor: colors.secondary,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
   },
-  programButtonText: { color: TrenaColors.text, fontSize: 15, fontFamily: Fonts.extraBold },
+  programButtonText: { color: colors.onSecondary, fontSize: 15, fontFamily: Fonts.extraBold },
   secondaryButton: {
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    backgroundColor: rgba(colors.text, 0.08),
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
   },
-  secondaryButtonText: { color: TrenaColors.text, fontSize: 14, fontFamily: Fonts.bold },
+  secondaryButtonText: { color: colors.text, fontSize: 14, fontFamily: Fonts.bold },
   pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
   toast: {
     position: 'absolute',
@@ -2666,25 +2691,25 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.08),
   },
-  toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: TrenaColors.text },
+  toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: colors.text },
   addCard: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     padding: 12,
     borderRadius: 14,
     gap: 10,
   },
   pillsRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
   pill: { borderRadius: 999, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1 },
-  pillSelected: { backgroundColor: TrenaColors.primary, borderColor: TrenaColors.primary },
-  pillUnselected: { backgroundColor: 'rgba(236, 235, 228, 0.04)', borderColor: 'rgba(236, 235, 228, 0.12)' },
+  pillSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  pillUnselected: { backgroundColor: rgba(colors.text, 0.04), borderColor: rgba(colors.text, 0.12) },
   pillText: { fontFamily: Fonts.semiBold, fontSize: 13, lineHeight: 16 },
-  pillTextSelected: { color: TrenaColors.background },
-  pillTextUnselected: { color: 'rgba(236, 235, 228, 0.9)' },
+  pillTextSelected: { color: colors.onPrimary },
+  pillTextUnselected: { color: rgba(colors.text, 0.9) },
   tagsGridContent: { paddingTop: 2, paddingBottom: 2, rowGap: 10 },
   tagsGridRow: { columnGap: 10, justifyContent: 'flex-start' },
   tagsGridCell: { flex: 1, alignItems: 'center' },
@@ -2696,17 +2721,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
   },
-  tagButtonSelected: { backgroundColor: TrenaColors.primary, borderColor: TrenaColors.primary },
-  tagButtonUnselected: { backgroundColor: 'rgba(236, 235, 228, 0.04)', borderColor: 'rgba(236, 235, 228, 0.12)' },
+  tagButtonSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  tagButtonUnselected: { backgroundColor: rgba(colors.text, 0.04), borderColor: rgba(colors.text, 0.12) },
   tagsSheet: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
     paddingBottom: 18,
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
   },
   tagsSheetHeader: {
     flexDirection: 'row',
@@ -2714,14 +2739,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  tagsSheetTitle: { fontFamily: Fonts.extraBold, fontSize: 16, color: TrenaColors.text },
+  tagsSheetTitle: { fontFamily: Fonts.extraBold, fontSize: 16, color: colors.text },
   tagsSheetHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tagsCloseButton: { padding: 6 },
   // Workout notes styles
   notesCard: {
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 14,
     padding: 12,
     gap: 8,
@@ -2734,10 +2759,10 @@ const styles = StyleSheet.create({
   notesLabel: {
     fontFamily: Fonts.semiBold,
     fontSize: 13,
-    color: 'rgba(236, 235, 228, 0.65)',
+    color: rgba(colors.text, 0.65),
   },
   notesInput: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontSize: 14,
     fontFamily: Fonts.regular,
     minHeight: 40,
@@ -2746,7 +2771,7 @@ const styles = StyleSheet.create({
   // Exercise notes styles
   exerciseNotesContainer: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(236, 235, 228, 0.06)',
+    borderTopColor: rgba(colors.text, 0.06),
     marginTop: 4,
     paddingTop: 10,
     gap: 4,
@@ -2759,11 +2784,11 @@ const styles = StyleSheet.create({
   exerciseNotesLabel: {
     fontFamily: Fonts.medium,
     fontSize: 11,
-    color: 'rgba(236, 235, 228, 0.5)',
+    color: rgba(colors.text, 0.5),
   },
   exerciseNotesInput: {
     fontSize: 13,
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.regular,
     minHeight: 28,
     textAlignVertical: 'top',

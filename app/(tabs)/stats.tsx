@@ -2,7 +2,8 @@ import { ExerciseProgressChart } from '@/components/stats/ExerciseProgressChart'
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
 import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
 import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
-import { Fonts, TrenaColors } from '@/constants/theme';
+import { Fonts, rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
 import { bilboCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, weekdayHistogram } from '@/lib/workouts/stats';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -10,6 +11,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function StatsScreen() {
+  const { colors } = useTrenaTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
@@ -92,7 +95,7 @@ export default function StatsScreen() {
 
     // Keep it readable: show last 4 cycles by default.
     const cyclesToShow = selectedBilbo.cycles.slice(-4);
-    const palette = [TrenaColors.secondary, TrenaColors.primary, TrenaColors.tertiary, TrenaColors.accentRed];
+    const palette = [colors.secondary, colors.primary, colors.tertiary, colors.accentRed];
 
     const series = cyclesToShow.map((c, idx) => {
       const values = Array.from({ length: maxN }, () => null as number | null);
@@ -110,7 +113,7 @@ export default function StatsScreen() {
 
     const maxValue = Math.max(1, selectedBilbo.maxReps);
     return { yLabels, series, maxValue };
-  }, [selectedBilbo]);
+  }, [colors.accentRed, colors.primary, colors.secondary, colors.tertiary, selectedBilbo]);
 
   const chartW = Math.max(0, containerWidth - 32);
   const histH = 170;
@@ -143,12 +146,12 @@ export default function StatsScreen() {
         ) : (
           <>
             <View style={styles.cardsRow}>
-              <View style={[styles.card, { backgroundColor: TrenaColors.tertiary }]}>
+              <View style={[styles.card, { backgroundColor: colors.tertiary }]}>
                 <Text style={[styles.cardLabel, styles.cardTextOnTertiary]}>Workouts</Text>
                 <Text style={[styles.cardValue, styles.cardTextOnTertiary]}>{workoutsThisWeek}</Text>
                 <Text style={[styles.cardHint, styles.cardTextOnTertiary]}>this week</Text>
               </View>
-              <View style={[styles.card, { backgroundColor: TrenaColors.secondary }]}>
+              <View style={[styles.card, { backgroundColor: colors.secondary }]}>
                 <Text style={styles.cardLabel}>Total</Text>
                 <Text style={styles.cardValue}>{totalWorkouts}</Text>
                 <Text style={styles.cardHint}>workouts done</Text>
@@ -302,7 +305,7 @@ export default function StatsScreen() {
                               <View style={styles.legendDash} />
                               <View style={styles.legendDash} />
                             </View>
-                            <Text style={[styles.legendText, { color: TrenaColors.accentRed }]}>RESET</Text>
+                            <Text style={[styles.legendText, { color: colors.accentRed }]}>RESET</Text>
                           </View>
                         )}
                         <Text style={styles.legendHint}>last 4 cycles</Text>
@@ -333,10 +336,19 @@ export default function StatsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: {
+  background: string;
+  primary: string;
+  secondary: string;
+  tertiary: string;
+  text: string;
+  accentRed: string;
+  onPrimary: string;
+}) =>
+  StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: TrenaColors.background,
+    backgroundColor: colors.background,
   },
   container: {
     paddingHorizontal: 20,
@@ -347,11 +359,11 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 40,
     fontFamily: Fonts.extraBold,
-    color: TrenaColors.text,
+    color: colors.text,
     letterSpacing: -0.3,
   },
   body: {
-    color: 'rgba(236, 235, 228, 0.8)',
+    color: rgba(colors.text, 0.8),
     fontFamily: Fonts.regular,
     fontSize: 14,
     lineHeight: 20,
@@ -363,15 +375,15 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   notice: {
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    backgroundColor: rgba(colors.text, 0.08),
     borderRadius: 18,
     padding: 16,
     gap: 6,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
   },
   noticeTitle: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontSize: 16,
     fontFamily: Fonts.extraBold,
   },
@@ -384,45 +396,45 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 14,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(20, 20, 17, 0.2)',
+    borderColor: rgba(colors.text, 0.2),
     gap: 6,
   },
   cardLabel: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontSize: 12,
     fontFamily: Fonts.extraBold,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
   cardValue: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontSize: 28,
     fontFamily: Fonts.black,
     letterSpacing: -0.2,
   },
   cardHint: {
-    color: 'rgba(236, 235, 228, 0.75)',
+    color: rgba(colors.text, 0.75),
     fontSize: 12,
     fontFamily: Fonts.semiBold,
   },
   cardTextOnTertiary: {
-    color: TrenaColors.background,
+    color: colors.onPrimary,
   },
   sectionCard: {
-    backgroundColor: 'rgba(236, 235, 228, 0.08)',
+    backgroundColor: rgba(colors.text, 0.08),
     borderRadius: 18,
     padding: 16,
     gap: 10,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
   },
   sectionTitle: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontSize: 18,
     fontFamily: Fonts.extraBold,
   },
   sectionBody: {
-    color: 'rgba(236, 235, 228, 0.7)',
+    color: rgba(colors.text, 0.7),
     fontSize: 13,
     lineHeight: 18,
     fontFamily: Fonts.regular,
@@ -435,22 +447,22 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 999,
-    backgroundColor: 'rgba(236, 235, 228, 0.06)',
+    backgroundColor: rgba(colors.text, 0.06),
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(236, 235, 228, 0.12)',
+    borderColor: rgba(colors.text, 0.12),
     maxWidth: 220,
   },
   pillSelected: {
-    backgroundColor: TrenaColors.primary,
-    borderColor: TrenaColors.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   pillText: {
-    color: 'rgba(236, 235, 228, 0.85)',
+    color: rgba(colors.text, 0.85),
     fontFamily: Fonts.semiBold,
     fontSize: 13,
   },
   pillTextSelected: {
-    color: TrenaColors.background,
+    color: colors.onPrimary,
   },
   legendRow: {
     flexDirection: 'row',
@@ -476,17 +488,17 @@ const styles = StyleSheet.create({
   legendDash: {
     width: 5,
     height: 2,
-    backgroundColor: TrenaColors.accentRed,
+    backgroundColor: colors.accentRed,
     borderRadius: 1,
   },
   legendText: {
-    color: 'rgba(236, 235, 228, 0.75)',
+    color: rgba(colors.text, 0.75),
     fontFamily: Fonts.semiBold,
     fontSize: 12,
   },
   legendHint: {
     marginLeft: 'auto',
-    color: 'rgba(236, 235, 228, 0.45)',
+    color: rgba(colors.text, 0.45),
     fontFamily: Fonts.medium,
     fontSize: 12,
   },
@@ -500,11 +512,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: 'rgba(236, 235, 228, 0.04)',
+    backgroundColor: rgba(colors.text, 0.04),
     borderRadius: 12,
   },
   exerciseRowName: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.semiBold,
     fontSize: 15,
     flex: 1,
@@ -514,12 +526,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   exerciseRowValue: {
-    color: TrenaColors.primary,
+    color: colors.primary,
     fontFamily: Fonts.black,
     fontSize: 16,
   },
   exerciseRowDate: {
-    color: 'rgba(236, 235, 228, 0.4)',
+    color: rgba(colors.text, 0.4),
     fontFamily: Fonts.medium,
     fontSize: 11,
   },
@@ -534,32 +546,32 @@ const styles = StyleSheet.create({
   detailItem: {
     flex: 1,
     padding: 12,
-    backgroundColor: 'rgba(236, 235, 228, 0.05)',
+    backgroundColor: rgba(colors.text, 0.05),
     borderRadius: 14,
     gap: 4,
   },
   detailLabel: {
-    color: 'rgba(236, 235, 228, 0.5)',
+    color: rgba(colors.text, 0.5),
     fontFamily: Fonts.bold,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   detailValue: {
-    color: TrenaColors.text,
+    color: colors.text,
     fontFamily: Fonts.black,
     fontSize: 20,
   },
   unit: {
     fontSize: 14,
-    color: 'rgba(236, 235, 228, 0.6)',
+    color: rgba(colors.text, 0.6),
   },
   chartContainer: {
     marginTop: 8,
     gap: 12,
   },
   chartTitle: {
-    color: 'rgba(236, 235, 228, 0.6)',
+    color: rgba(colors.text, 0.6),
     fontFamily: Fonts.bold,
     fontSize: 12,
     textAlign: 'center',
@@ -568,17 +580,17 @@ const styles = StyleSheet.create({
     height: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(236, 235, 228, 0.03)',
+    backgroundColor: rgba(colors.text, 0.03),
     borderRadius: 14,
     borderStyle: 'dashed',
     borderWidth: 1,
-    borderColor: 'rgba(236, 235, 228, 0.1)',
+    borderColor: rgba(colors.text, 0.1),
   },
   chartPlaceholderText: {
-    color: 'rgba(236, 235, 228, 0.4)',
+    color: rgba(colors.text, 0.4),
     fontFamily: Fonts.medium,
     fontSize: 13,
     textAlign: 'center',
     paddingHorizontal: 20,
   },
-});
+  });
