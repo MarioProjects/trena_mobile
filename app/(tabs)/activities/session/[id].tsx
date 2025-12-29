@@ -29,6 +29,7 @@ import {
   DuplicateIcon,
   EditIcon,
   EnergyIcon,
+  ExpandIcon,
   FireIcon,
   FloppyIcon,
   HappyIcon,
@@ -47,6 +48,7 @@ import {
   RollerskateIcon,
   SadIcon,
   ShoeIcon,
+  ShrinkIcon,
   SkippingRopeIcon,
   SkipStatusIcon,
   SnowIcon,
@@ -338,6 +340,10 @@ export default function SessionScreen() {
   const [weightDraftBySetId, setWeightDraftBySetId] = React.useState<Record<string, string>>({});
   const [repsDraftBySetId, setRepsDraftBySetId] = React.useState<Record<string, string>>({});
   const [rirDraftBySetId, setRirDraftBySetId] = React.useState<Record<string, string>>({});
+  const [compactRepsDraftByExId, setCompactRepsDraftByExId] = React.useState<Record<string, string>>({});
+  const [compactWeightDraftByExId, setCompactWeightDraftByExId] = React.useState<Record<string, string>>({});
+  const [compactRirDraftByExId, setCompactRirDraftByExId] = React.useState<Record<string, string>>({});
+  const [compactSetsDraftByExId, setCompactSetsDraftByExId] = React.useState<Record<string, string>>({});
   const [durationPicker, setDurationPicker] = React.useState<null | { exerciseId: string; setIdx: number; seconds: number }>(null);
   // Removed explicit reorderMode state
   const heightsRef = React.useRef<Record<string, number>>({});
@@ -669,6 +675,13 @@ export default function SessionScreen() {
     setEditingExerciseId(null);
   };
 
+  const toggleLoggingMode = (exerciseId: string) => {
+    updateExercise(exerciseId, (ex) => ({
+      ...ex,
+      loggingMode: ex.loggingMode === 'compact' ? 'expanded' : 'compact',
+    }));
+  };
+
   const setPlannedReps = (exerciseId: string, plannedSet: PlannedSet, text: string) => {
     const reps = numOrEmpty(text);
     if (reps === undefined && text.trim() === '') {
@@ -731,37 +744,54 @@ export default function SessionScreen() {
     plannedSet: PlannedSet,
     patch: Partial<Pick<PerformedSet, 'rir' | 'done'>>
   ) => {
+    // ... existing code ...
+  };
+
+  const setAllPlannedSetsValues = (exerciseId: string, repsText: string, weightText: string, rirText: string) => {
+    // ... existing code ...
+  };
+
+  const setAllFreeSetsValues = (exerciseId: string, setsText: string, repsText: string, weightText: string, rirText: string) => {
+    const numSets = parseInt(setsText, 10);
+    const reps = numOrEmpty(repsText);
+    const weight = numOrEmpty(weightText);
+    const rir = numOrEmpty(rirText);
+
     updateExercise(exerciseId, (ex) => {
-      const existing = (ex.performedSets ?? []).find((s) => s.id === plannedSet.id);
       const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
       const isBilbo = isBilboExercise(ex);
+      let nextPerformed = [...(ex.performedSets ?? [])];
 
-      if (existing) {
-        const nextSet = { ...existing, ...patch };
-        if (!('done' in patch) && shouldAutoComplete(existing, nextSet, tracking.type, isBilbo)) {
+      if (!isNaN(numSets) && numSets >= 0) {
+        if (numSets < nextPerformed.length) {
+          nextPerformed = nextPerformed.slice(0, numSets);
+        } else if (numSets > nextPerformed.length) {
+          const toAdd = numSets - nextPerformed.length;
+          for (let i = 0; i < toAdd; i++) {
+            const prev = nextPerformed[nextPerformed.length - 1];
+            nextPerformed.push(prev
+              ? { id: makeLocalId('set'), weightKg: prev.weightKg ?? 0, reps: prev.reps ?? 0, rir: prev.rir, done: false }
+              : { id: makeLocalId('set'), weightKg: 0, reps: 0, done: false }
+            );
+          }
+        }
+      }
+
+      const finalPerformed = nextPerformed.map(s => {
+        const oldSet = s;
+        const nextSet: PerformedSet = {
+          ...oldSet,
+          reps: reps !== undefined ? (reps ?? 0) : oldSet.reps,
+          weightKg: weight !== undefined ? (weight ?? 0) : oldSet.weightKg,
+          rir: rir !== undefined ? rir : oldSet.rir,
+        };
+        if (shouldAutoComplete(oldSet, nextSet, tracking.type, isBilbo)) {
           nextSet.done = true;
         }
-        return {
-          ...ex,
-          performedSets: (ex.performedSets ?? []).map((s) => (s.id === plannedSet.id ? nextSet : s)),
-        };
-      }
+        return nextSet;
+      });
 
-      const nextSet: PerformedSet = {
-        id: plannedSet.id,
-        reps: 0,
-        weightKg: plannedSet.weightKg,
-        done: false,
-        ...patch,
-      };
-      if (!('done' in patch) && shouldAutoComplete(undefined, nextSet, tracking.type, isBilbo)) {
-        nextSet.done = true;
-      }
-
-      return {
-        ...ex,
-        performedSets: [...(ex.performedSets ?? []), nextSet],
-      };
+      return { ...ex, performedSets: finalPerformed };
     });
   };
 
@@ -1363,7 +1393,54 @@ export default function SessionScreen() {
 
                       {ex.plannedSets.length > 0 ? (
                         <View style={{ gap: 8 }}>
-                          {ex.plannedSets.map((ps, idx) => {
+                          {ex.loggingMode === 'compact' ? (
+                            <View style={styles.compactRow}>
+                              <TextInput
+                                value={compactRepsDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.reps ? String(ex.performedSets[0].reps) : '')}
+                                onChangeText={(t) => {
+                                  setCompactRepsDraftByExId((cur) => ({ ...cur, [ex.id]: t }));
+                                  setAllPlannedSetsValues(ex.id, t, compactWeightDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.weightKg ? String(ex.performedSets[0].weightKg) : ''), compactRirDraftByExId[ex.id] ?? '');
+                                }}
+                                onBlur={() => setCompactRepsDraftByExId((cur) => { const next = { ...cur }; delete next[ex.id]; return next; })}
+                                placeholder="reps"
+                                placeholderTextColor={rgba(colors.text, 0.5)}
+                                keyboardType="numeric"
+                                style={styles.compactInput}
+                              />
+                              <Text style={styles.times}>x</Text>
+                              <TextInput
+                                value={compactWeightDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.weightKg ? String(ex.performedSets[0].weightKg) : '')}
+                                onChangeText={(t) => {
+                                  setCompactWeightDraftByExId((cur) => ({ ...cur, [ex.id]: t }));
+                                  setAllPlannedSetsValues(ex.id, compactRepsDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.reps ? String(ex.performedSets[0].reps) : ''), t, compactRirDraftByExId[ex.id] ?? '');
+                                }}
+                                onBlur={() => setCompactWeightDraftByExId((cur) => { const next = { ...cur }; delete next[ex.id]; return next; })}
+                                placeholder="kg"
+                                placeholderTextColor={rgba(colors.text, 0.5)}
+                                keyboardType="decimal-pad"
+                                style={styles.compactInput}
+                              />
+                              <Pressable
+                                accessibilityRole="button"
+                                onPress={() => {
+                                  const allDone = ex.plannedSets.every(ps => (ex.performedSets ?? []).find(s => s.id === ps.id)?.done);
+                                  ex.plannedSets.forEach(ps => setPlannedMeta(ex.id, ps, { done: !allDone }));
+                                }}
+                                style={({ pressed }) => [
+                                  styles.donePill,
+                                  ex.plannedSets.every(ps => (ex.performedSets ?? []).find(s => s.id === ps.id)?.done) ? styles.donePillOn : styles.donePillOff,
+                                  pressed && { opacity: 0.85 },
+                                ]}
+                              >
+                                {ex.plannedSets.every(ps => (ex.performedSets ?? []).find(s => s.id === ps.id)?.done) ? (
+                                  <CheckIcon size={18} color={colors.onPrimary} />
+                                ) : (
+                                  <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
+                                )}
+                              </Pressable>
+                            </View>
+                          ) : (
+                            ex.plannedSets.map((ps, idx) => {
                             const cur = (ex.performedSets ?? []).find((s) => s.id === ps.id);
                             const repsText = cur && typeof cur.reps === 'number' && cur.reps > 0 ? String(cur.reps) : '';
                             const bilbo = isBilboExercise(ex);
@@ -1523,7 +1600,8 @@ export default function SessionScreen() {
                                 </Pressable>
                               </View>
                             );
-                          })}
+                          })
+                        )}
                         </View>
                       ) : (
                         <View style={{ gap: 10 }}>
@@ -1687,6 +1765,69 @@ export default function SessionScreen() {
                             }
 
                             // strength default
+                            if (ex.loggingMode === 'compact') {
+                              return (
+                                <View key="compact" style={styles.compactRow}>
+                                  <TextInput
+                                    value={compactSetsDraftByExId[ex.id] ?? (ex.performedSets?.length ? String(ex.performedSets.length) : '')}
+                                    onChangeText={(t) => {
+                                      setCompactSetsDraftByExId(cur => ({ ...cur, [ex.id]: t }));
+                                      setAllFreeSetsValues(ex.id, t, compactRepsDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.reps ? String(ex.performedSets[0].reps) : ''), compactWeightDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.weightKg ? String(ex.performedSets[0].weightKg) : ''), compactRirDraftByExId[ex.id] ?? '');
+                                    }}
+                                    onBlur={() => setCompactSetsDraftByExId(cur => { const next = { ...cur }; delete next[ex.id]; return next; })}
+                                    placeholder="sets"
+                                    placeholderTextColor={rgba(colors.text, 0.5)}
+                                    keyboardType="numeric"
+                                    style={styles.compactInput}
+                                  />
+                                  <Text style={styles.times}>x</Text>
+                                  <TextInput
+                                    value={compactRepsDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.reps ? String(ex.performedSets[0].reps) : '')}
+                                    onChangeText={(t) => {
+                                      setCompactRepsDraftByExId(cur => ({ ...cur, [ex.id]: t }));
+                                      setAllFreeSetsValues(ex.id, compactSetsDraftByExId[ex.id] ?? (ex.performedSets?.length ? String(ex.performedSets.length) : ''), t, compactWeightDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.weightKg ? String(ex.performedSets[0].weightKg) : ''), compactRirDraftByExId[ex.id] ?? '');
+                                    }}
+                                    onBlur={() => setCompactRepsDraftByExId(cur => { const next = { ...cur }; delete next[ex.id]; return next; })}
+                                    placeholder="reps"
+                                    placeholderTextColor={rgba(colors.text, 0.5)}
+                                    keyboardType="numeric"
+                                    style={styles.compactInput}
+                                  />
+                                  <Text style={styles.times}>x</Text>
+                                  <TextInput
+                                    value={compactWeightDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.weightKg ? String(ex.performedSets[0].weightKg) : '')}
+                                    onChangeText={(t) => {
+                                      setCompactWeightDraftByExId(cur => ({ ...cur, [ex.id]: t }));
+                                      setAllFreeSetsValues(ex.id, compactSetsDraftByExId[ex.id] ?? (ex.performedSets?.length ? String(ex.performedSets.length) : ''), compactRepsDraftByExId[ex.id] ?? (ex.performedSets?.[0]?.reps ? String(ex.performedSets[0].reps) : ''), t, compactRirDraftByExId[ex.id] ?? '');
+                                    }}
+                                    onBlur={() => setCompactWeightDraftByExId(cur => { const next = { ...cur }; delete next[ex.id]; return next; })}
+                                    placeholder="kg"
+                                    placeholderTextColor={rgba(colors.text, 0.5)}
+                                    keyboardType="decimal-pad"
+                                    style={styles.compactInput}
+                                  />
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => {
+                                      const allDone = (ex.performedSets ?? []).length > 0 && (ex.performedSets ?? []).every(s => s.done);
+                                      const nextPerformed = (ex.performedSets ?? []).map(s => ({ ...s, done: !allDone }));
+                                      updateExercise(ex.id, e => ({ ...e, performedSets: nextPerformed }));
+                                    }}
+                                    style={({ pressed }) => [
+                                      styles.donePill,
+                                      (ex.performedSets ?? []).length > 0 && (ex.performedSets ?? []).every(s => s.done) ? styles.donePillOn : styles.donePillOff,
+                                      pressed && { opacity: 0.85 },
+                                    ]}
+                                  >
+                                    {(ex.performedSets ?? []).length > 0 && (ex.performedSets ?? []).every(s => s.done) ? (
+                                      <CheckIcon size={18} color={colors.onPrimary} />
+                                    ) : (
+                                      <SkipStatusIcon size={18} color={rgba(colors.text, 0.85)} />
+                                    )}
+                                  </Pressable>
+                                </View>
+                              );
+                            }
                             return (ex.performedSets ?? []).map((s, idx) => (
                               <View key={s.id} style={styles.freeSetRow}>
                                 <Pressable
@@ -1798,19 +1939,21 @@ export default function SessionScreen() {
                             ));
                           })()}
 
-                          <Pressable
-                            accessibilityRole="button"
-                            onPress={() => addFreeSet(ex.id)}
-                            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
-                          >
-                            <Text style={styles.secondaryButtonText}>
-                              {(ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise)).type === 'interval_time'
-                                ? 'Add interval'
-                                : (ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise)).type === 'distance_time'
+                          {ex.loggingMode !== 'compact' && (
+                            <Pressable
+                              accessibilityRole="button"
+                              onPress={() => addFreeSet(ex.id)}
+                              style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+                            >
+                              <Text style={styles.secondaryButtonText}>
+                                {(ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise)).type === 'interval_time'
+                                  ? 'Add interval'
+                                  : (ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise)).type === 'distance_time'
                                   ? 'Add lap'
                                   : 'Add set'}
-                            </Text>
-                          </Pressable>
+                              </Text>
+                            </Pressable>
+                          )}
                         </View>
                       )}
 
@@ -1913,10 +2056,32 @@ export default function SessionScreen() {
             <Pressable
               accessibilityRole="button"
               style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => {
+                if (menuExerciseId) {
+                  toggleLoggingMode(menuExerciseId);
+                  setMenuExerciseId(null);
+                }
+              }}
+            >
+              {menuExercise?.loggingMode === 'compact' ? (
+                <ExpandIcon size={20} color={colors.text} />
+              ) : (
+                <ShrinkIcon size={20} color={colors.text} />
+              )}
+              <Text style={styles.menuItemText}>
+                {menuExercise?.loggingMode === 'compact' ? 'Expanded Mode' : 'Compact Mode'}
+              </Text>
+            </Pressable>
+
+            <View style={styles.menuSeparator} />
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
               onPress={() => menuExerciseId && startEditingExercise(menuExerciseId)}
             >
               <EditIcon size={20} color={colors.text} />
-              <Text style={styles.menuItemText}>Edit Exercise</Text>
+              <Text style={styles.menuItemText}>Change Exercise</Text>
             </Pressable>
 
             <View style={styles.menuSeparator} />
@@ -2404,7 +2569,7 @@ const styles = StyleSheet.create({
                 style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
                 onPress={() => menuExerciseId && duplicateExercise(menuExerciseId)}
               >
-                <DuplicateIcon size={20} color={TrenaColors.text} />
+                <DuplicateIcon size={20} color={colors.text} />
                 <Text style={styles.menuItemText}>Duplicate Exercise</Text>
               </Pressable>
 
@@ -2415,8 +2580,8 @@ const styles = StyleSheet.create({
                 style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
                 onPress={() => menuExerciseId && removeExercise(menuExerciseId)}
               >
-                <TrashIcon size={20} color={TrenaColors.accentRed} />
-                <Text style={[styles.menuItemText, { color: TrenaColors.accentRed }]}>Delete Exercise</Text>
+                <TrashIcon size={20} color={colors.accentRed} />
+                <Text style={[styles.menuItemText, { color: colors.accentRed }]}>Delete Exercise</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -2647,6 +2812,19 @@ StyleSheet.create({
   setRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   setLabel: { width: 110, fontFamily: Fonts.medium, fontSize: 12, color: rgba(colors.text, 0.75) },
   setWeight: { width: 80, fontFamily: Fonts.bold, fontSize: 13, color: colors.text },
+  compactRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  compactInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: colors.text,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+  },
   times: { fontFamily: Fonts.bold, fontSize: 14, color: rgba(colors.text, 0.75) },
   repsInput: {
     flex: 1,

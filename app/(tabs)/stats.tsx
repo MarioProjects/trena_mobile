@@ -1,4 +1,5 @@
 import { ExercisePicker } from '@/components/ExercisePicker';
+import { ViewIcon } from '@/components/icons';
 import { ExerciseProgressChart } from '@/components/stats/ExerciseProgressChart';
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
 import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
@@ -209,6 +210,7 @@ export default function StatsScreen() {
                     value={selectedExerciseKey ? keyToRef(selectedExerciseKey) : null}
                     onChange={(ref) => setSelectedExerciseKey(getExerciseKey(ref))}
                     allowedExercises={allowedExercises}
+                    placeholderIcon={<ViewIcon color={rgba(colors.text, 0.5)} size={18} />}
                   />
 
                   {selectedExercise ? (

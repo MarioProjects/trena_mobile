@@ -16,12 +16,14 @@ export function ExercisePicker({
     initialOpen = false,
     onClose,
     allowedExercises,
+    placeholderIcon,
 }: {
     value: ExerciseRef | null;
     onChange: (v: ExerciseRef) => void;
     initialOpen?: boolean;
     onClose?: () => void;
     allowedExercises?: ExerciseRef[];
+    placeholderIcon?: React.ReactNode;
 }) {
     const { colors } = useTrenaTheme();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
@@ -85,7 +87,12 @@ export function ExercisePicker({
         <>
             {!initialOpen && (
                 <Pressable onPress={() => setOpen(true)} style={styles.trigger}>
-                    <Text style={[styles.triggerText, !value && styles.placeholder]}>{getLabel(value)}</Text>
+                    <View style={styles.triggerContent}>
+                        {!value ? placeholderIcon : null}
+                        <Text style={[styles.triggerText, !value && styles.placeholder]} numberOfLines={1}>
+                            {getLabel(value)}
+                        </Text>
+                    </View>
                 </Pressable>
             )}
 
@@ -192,6 +199,11 @@ StyleSheet.create({
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
+    },
+    triggerContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
     triggerText: {
         fontFamily: Fonts.medium,

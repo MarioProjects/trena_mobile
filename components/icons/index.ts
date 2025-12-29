@@ -1,3 +1,5 @@
+export { ShrinkIcon } from './ShrinkIcon';
+export { ExpandIcon } from './ExpandIcon';
 export { ActivitiesIcon } from './ActivitiesIcon';
 export { CalendarIcon } from './CalendarIcon';
 export { CharacterIcon } from './CharacterIcon';
@@ -24,6 +26,7 @@ export { StickyNoteIcon } from './StickyNoteIcon';
 export { TagIcon } from './TagIcon';
 export { TodayIcon } from './TodayIcon';
 export { TrashIcon } from './TrashIcon';
+export { ViewIcon } from './ViewIcon';
 export { XIcon } from './XIcon';
 
 export {

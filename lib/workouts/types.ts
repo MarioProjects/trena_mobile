@@ -105,6 +105,7 @@ export type SessionExercise = {
    * If omitted, assume strength-style logging.
    */
   tracking?: ExerciseTracking;
+  loggingMode?: 'expanded' | 'compact';
   plannedSets: PlannedSet[];
   performedSets: PerformedSet[];
   notes?: string;
