@@ -13,7 +13,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SvgUri } from 'react-native-svg';
@@ -23,6 +23,7 @@ import { useAuthContext } from '@/hooks/use-auth-context';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import AuthProvider from '@/providers/auth-provider';
 import TrenaThemeProvider from '@/providers/theme-provider';
+import { hasSupabaseConfig } from '@/lib/supabase';
 
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
@@ -96,6 +97,25 @@ function RootLayoutWithProviders() {
     } as const;
   }, [colors, mode]);
 
+  if (!hasSupabaseConfig()) {
+    return (
+      <View style={[styles.configContainer, { backgroundColor: colors.background }]}>
+        <SvgUri
+          uri={splashSvgUri}
+          width={SPLASH_LOGO_WIDTH}
+          height={SPLASH_LOGO_HEIGHT}
+          color={colors.primary}
+        />
+        <Text style={[styles.configTitle, { color: colors.text }]}>Build misconfigured</Text>
+        <Text style={[styles.configBody, { color: rgba(colors.text, 0.78) }]}>
+          Missing EXPO_PUBLIC_SUPABASE_URL and/or EXPO_PUBLIC_SUPABASE_ANON_KEY.
+          {'\n\n'}
+          Fix: add them as EAS Secrets (or build env vars) and rebuild.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -150,5 +170,24 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  configContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  configTitle: {
+    marginTop: 14,
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  configBody: {
+    marginTop: 10,
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+    maxWidth: 520,
   },
 });

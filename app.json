@@ -47,6 +47,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "45f1dc39-eea5-4fb6-b86d-af84d69cff88"
+      }
+    },
+    "owner": "maparla"
   }
 }
