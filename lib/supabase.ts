@@ -25,7 +25,12 @@ const ExpoWebStorageAdapter: StorageAdapter = {
 const storage = Platform.OS === 'web' ? ExpoWebStorageAdapter : ExpoSecureStoreAdapter;
 
 function readPublicEnv(name: 'EXPO_PUBLIC_SUPABASE_URL' | 'EXPO_PUBLIC_SUPABASE_ANON_KEY') {
-  const raw = process.env?.[name];
+  let raw: string | undefined;
+  if (name === 'EXPO_PUBLIC_SUPABASE_URL') {
+    raw = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  } else if (name === 'EXPO_PUBLIC_SUPABASE_ANON_KEY') {
+    raw = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+  }
   const v = typeof raw === 'string' ? raw.trim() : '';
   return v.length ? v : undefined;
 }
