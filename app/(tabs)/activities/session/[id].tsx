@@ -1,6 +1,6 @@
-import { Fonts, rgba } from '@/constants/theme';
-import { useTrenaTheme } from '@/hooks/use-theme-context';
+import { Fonts, rgba, type TrenaColorPalette } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Alert, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -2656,16 +2656,7 @@ function DraggableExercise({
   );
 }
 
-const createStyles = (colors: {
-  background: string;
-  surface: string;
-  primary: string;
-  secondary: string;
-  text: string;
-  accentRed: string;
-  onPrimary: string;
-  onSecondary: string;
-}) =>
+const createStyles = (colors: TrenaColorPalette) =>
 StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   container: { paddingHorizontal: 20, paddingVertical: 24, gap: 14 },
