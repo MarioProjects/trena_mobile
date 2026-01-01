@@ -13,6 +13,8 @@ export type GroupedHorizontalBarsSeries = {
   label?: string;
   color: string;
   values: Array<number | null>; // aligned to yLabels
+  meta?: Array<string | null>; // additional info to show near the bar
+  metaColor?: string; // color for the meta text
 };
 
 export type GroupedHorizontalBarsProps = {
@@ -123,18 +125,32 @@ export function GroupedHorizontalBars(props: GroupedHorizontalBarsProps) {
             const x = pad.l;
             const y = yRowTop + sIdx * (barH + barGap);
             const r = Math.min(8, barH / 2);
+            const meta = s.meta?.[rowIdx];
 
             return (
-              <Rect
-                key={`bar-${rowIdx}-${s.key}`}
-                x={x}
-                y={y}
-                width={w}
-                height={barH}
-                rx={r}
-                fill={s.color}
-                opacity={0.9}
-              />
+              <React.Fragment key={`bar-${rowIdx}-${s.key}`}>
+                <Rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={barH}
+                  rx={r}
+                  fill={s.color}
+                  opacity={0.9}
+                />
+                {meta && w > 35 && (
+                  <SvgText
+                    x={x + 8}
+                    y={y + barH / 2 + 3.5}
+                    fill={s.metaColor || colors.background}
+                    fontSize={8}
+                    fontFamily={Fonts.bold}
+                    pointerEvents="none"
+                  >
+                    {meta}
+                  </SvgText>
+                )}
+              </React.Fragment>
             );
           });
         })}

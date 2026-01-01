@@ -107,19 +107,31 @@ export default function StatsScreen() {
 
     // Keep it readable: show last 4 cycles by default.
     const cyclesToShow = selectedBilbo.cycles.slice(-4);
-    const palette = [colors.secondary, colors.primary, colors.tertiary, colors.accentRed];
+    const palette = [
+      { color: colors.secondary, on: colors.onSecondary },
+      { color: colors.primary, on: colors.onPrimary },
+      { color: colors.tertiary, on: colors.onTertiary },
+      { color: colors.accentRed, on: colors.onSecondary },
+    ];
 
     const series = cyclesToShow.map((c, idx) => {
       const values = Array.from({ length: maxN }, () => null as number | null);
+      const meta = Array.from({ length: maxN }, () => null as string | null);
       for (const s of c.sessions) {
         const i = s.sessionIndexInCycle - 1;
-        if (i >= 0 && i < values.length) values[i] = s.reps;
+        if (i >= 0 && i < values.length) {
+          values[i] = s.reps;
+          meta[i] = s.weightKg ? `${s.weightKg} kg` : null;
+        }
       }
+      const p = palette[idx % palette.length]!;
       return {
         key: `cycle_${c.cycleIndex}`,
         label: `C${c.cycleIndex}`,
-        color: palette[idx % palette.length],
+        color: p.color,
+        metaColor: p.on,
         values,
+        meta,
       };
     });
 

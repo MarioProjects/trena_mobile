@@ -90,7 +90,7 @@ function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
 
 const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // keep consistent with session screen
 
-function WorkoutTagIcon({ tag, size = 16, color }: { tag: WorkoutTag; size?: number; color: string }) {
+function WorkoutTagIcon({ tag, size = 16, color }: { tag: WorkoutTag; size?: number; color?: string }) {
   switch (tag) {
     case 'skippingrope':
       return <SkippingRopeIcon size={size} color={color} />;
@@ -315,7 +315,7 @@ export default function ActivitiesIndexScreen() {
         {s.tags && s.tags.length > 0 ? (
           <View style={styles.cardTags} pointerEvents="none">
             {s.tags.slice(0, 3).map((tag) => (
-              <WorkoutTagIcon key={tag} tag={tag} />
+              <WorkoutTagIcon key={tag} tag={tag} size={16} color={rgba(colors.text, 0.7)} />
             ))}
           </View>
         ) : null}
