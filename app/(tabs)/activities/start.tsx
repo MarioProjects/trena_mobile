@@ -1,3 +1,4 @@
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router } from 'expo-router';
@@ -12,6 +13,18 @@ export default function StartWorkoutScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [isStarting, setIsStarting] = React.useState(false);
 
+  const [actionSheetVisible, setActionSheetVisible] = React.useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = React.useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
+
   const DumbellManIllustration = require('../../../assets/images/illustrations/activities/dumbell.webp');
   const NotebookManIllustration = require('../../../assets/images/illustrations/activities/notebook_man.webp');
   const RobotIllustration = require('../../../assets/images/illustrations/activities/robot_ai.webp');
@@ -23,14 +36,22 @@ export default function StartWorkoutScreen() {
       const session = await startQuickSession();
       router.replace(`/activities/session/${session.id}` as any);
     } catch (e: any) {
-      Alert.alert('Could not start workout', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Could not start workout',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setIsStarting(false);
     }
   };
 
   const onAIWorkout = () => {
-    Alert.alert('AI workout', 'Coming soon.');
+    showActionSheet({
+      title: 'AI workout',
+      message: 'Coming soon.',
+      options: [{ text: 'OK', onPress: () => {} }],
+    });
   };
 
   return (
@@ -102,6 +123,13 @@ export default function StartWorkoutScreen() {
           </View>
         </Pressable>
       </View>
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }

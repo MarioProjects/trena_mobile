@@ -1,3 +1,4 @@
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { ExercisePicker } from '@/components/ExercisePicker';
 import { Fonts, TrenaColors } from '@/constants/theme';
 import { getAddExerciseDraft, setAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
@@ -28,6 +29,18 @@ export default function CreateBilboMethodScreen() {
   const [resetAt, setResetAt] = React.useState('15');
   const [isSaving, setIsSaving] = React.useState(false);
 
+  const [actionSheetVisible, setActionSheetVisible] = React.useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = React.useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
+
   const onCreate = async () => {
     if (isSaving) return;
     setIsSaving(true);
@@ -49,7 +62,11 @@ export default function CreateBilboMethodScreen() {
       if (draft) setAddExerciseDraft({ ...draft, shouldReopen: true, awaitingCreatedMethodKey: null });
       router.back();
     } catch (e: any) {
-      Alert.alert('Could not create progression', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Could not create progression',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setIsSaving(false);
     }
@@ -98,6 +115,14 @@ export default function CreateBilboMethodScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }

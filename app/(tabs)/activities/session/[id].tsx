@@ -1,3 +1,5 @@
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
+import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba, type TrenaColorPalette } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -465,6 +467,18 @@ export default function SessionScreen() {
     [flushAutosave, isFinishing, sessionId],
   );
 
+  const [actionSheetVisible, setActionSheetVisible] = React.useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = React.useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
+
   const load = React.useCallback(async () => {
     if (!sessionId) return;
     setIsLoading(true);
@@ -484,7 +498,11 @@ export default function SessionScreen() {
         setTempDate(new Date(s.started_at));
       }
     } catch (e: any) {
-      Alert.alert('Could not load workout', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Could not load workout',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setIsLoading(false);
     }
@@ -622,19 +640,23 @@ export default function SessionScreen() {
 
   const removeExercise = (exerciseId: string) => {
     setMenuExerciseId(null);
-    Alert.alert('Delete exercise?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          setSnapshot((cur) => ({
-            ...cur,
-            exercises: cur.exercises.filter((x) => x.id !== exerciseId),
-          }));
+    showActionSheet({
+      title: 'Delete exercise?',
+      message: 'This cannot be undone.',
+      options: [
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setSnapshot((cur) => ({
+              ...cur,
+              exercises: cur.exercises.filter((x) => x.id !== exerciseId),
+            }));
+          },
         },
-      },
-    ]);
+        { text: 'Cancel', style: 'cancel', onPress: () => {} },
+      ],
+    });
   };
 
   const duplicateExercise = (exerciseId: string) => {
@@ -694,20 +716,24 @@ export default function SessionScreen() {
         return;
       }
       // remove set?
-      Alert.alert('Remove set?', 'This cannot be undone.', [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            updateExercise(exerciseId, (ex) => ({
-              ...ex,
-              plannedSets: ex.plannedSets.filter((ps) => ps.id !== plannedSet.id),
-              performedSets: (ex.performedSets ?? []).filter((s) => s.id !== plannedSet.id),
-            }));
+      showActionSheet({
+        title: 'Remove set?',
+        message: 'This cannot be undone.',
+        options: [
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: () => {
+              updateExercise(exerciseId, (ex) => ({
+                ...ex,
+                plannedSets: ex.plannedSets.filter((ps) => ps.id !== plannedSet.id),
+                performedSets: (ex.performedSets ?? []).filter((s) => s.id !== plannedSet.id),
+              }));
+            },
           },
-        },
-      ]);
+          { text: 'Cancel', style: 'cancel', onPress: () => {} },
+        ],
+      });
       return;
     }
     const safeReps = reps ?? 0;
@@ -935,16 +961,18 @@ export default function SessionScreen() {
       const finished = await finishSessionAndAdvanceMethods({ id: sessionId, snapshot });
       if (finished === null) {
         // Empty workout was discarded
-        Alert.alert('Workout discarded', 'Empty workouts are not saved.');
-        router.replace('/activities' as any);
+        router.replace('/activities?toast=Empty workout discarded' as any);
         return;
       }
       setRow(finished);
-      Alert.alert('Workout saved', 'Nice work.');
-      router.replace('/activities' as any);
+      router.replace('/activities?toast=Workout saved' as any);
     } catch (e: any) {
       didFinishRef.current = false; // Reset if finish failed
-      Alert.alert('Finish failed', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Finish failed',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setIsFinishing(false);
     }
@@ -960,11 +988,14 @@ export default function SessionScreen() {
       await flushAutosave();
       const updated = await updateSessionSnapshot({ id: sessionId, snapshot });
       setRow(updated);
-      Alert.alert('Workout programmed', 'Saved for later.');
-      router.replace('/activities' as any);
+      router.replace('/activities?toast=Workout saved' as any);
     } catch (e: any) {
       didFinishRef.current = false;
-      Alert.alert('Program failed', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Program failed',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setIsFinishing(false);
     }
@@ -977,7 +1008,11 @@ export default function SessionScreen() {
     if (isUpdatingTime) return;
 
     if (Number.isNaN(candidate.getTime())) {
-      Alert.alert('Invalid date/time', 'Please check the values.');
+      showActionSheet({
+        title: 'Invalid date/time',
+        message: 'Please check the values.',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
       return;
     }
 
@@ -1007,7 +1042,11 @@ export default function SessionScreen() {
       setRow(updated);
       setShowIosPicker(false);
     } catch (e: any) {
-      Alert.alert('Update failed', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Update failed',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setIsUpdatingTime(false);
     }
@@ -1450,18 +1489,22 @@ export default function SessionScreen() {
                                   <Pressable
                                     accessibilityRole="button"
                                     onLongPress={() =>
-                                      Alert.alert('Set options', ps.label ?? 'Set', [
-                                        { text: 'Cancel', style: 'cancel' },
-                                        {
-                                          text: getDone(cur) ? 'Mark not done' : 'Mark done',
-                                          onPress: () => setPlannedMeta(ex.id, ps, { done: !getDone(cur) }),
-                                        },
-                                        {
-                                          text: 'Remove set',
-                                          style: 'destructive',
-                                          onPress: () => setPlannedReps(ex.id, ps, ''),
-                                        },
-                                      ])
+                                      showActionSheet({
+                                        title: 'Set options',
+                                        message: ps.label ?? 'Set',
+                                        options: [
+                                          {
+                                            text: getDone(cur) ? 'Mark not done' : 'Mark done',
+                                            onPress: () => setPlannedMeta(ex.id, ps, { done: !getDone(cur) }),
+                                          },
+                                          {
+                                            text: 'Remove set',
+                                            style: 'destructive',
+                                            onPress: () => setPlannedReps(ex.id, ps, ''),
+                                          },
+                                          { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                                        ],
+                                      })
                                     }
                                     style={[styles.setLabelWrap, { alignSelf: 'flex-start' }]}
                                   >
@@ -1517,18 +1560,22 @@ export default function SessionScreen() {
                                 <Pressable
                                   accessibilityRole="button"
                                   onLongPress={() =>
-                                    Alert.alert('Set options', ps.label ?? 'Set', [
-                                      { text: 'Cancel', style: 'cancel' },
-                                      {
-                                        text: getDone(cur) ? 'Mark not done' : 'Mark done',
-                                        onPress: () => setPlannedMeta(ex.id, ps, { done: !getDone(cur) }),
-                                      },
-                                      {
-                                        text: 'Remove set',
-                                        style: 'destructive',
-                                        onPress: () => setPlannedReps(ex.id, ps, ''),
-                                      },
-                                    ])
+                                    showActionSheet({
+                                      title: 'Set options',
+                                      message: ps.label ?? 'Set',
+                                      options: [
+                                        {
+                                          text: getDone(cur) ? 'Mark not done' : 'Mark done',
+                                          onPress: () => setPlannedMeta(ex.id, ps, { done: !getDone(cur) }),
+                                        },
+                                        {
+                                          text: 'Remove set',
+                                          style: 'destructive',
+                                          onPress: () => setPlannedReps(ex.id, ps, ''),
+                                        },
+                                        { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                                      ],
+                                    })
                                   }
                                   style={styles.setLabelWrap}
                                 >
@@ -1613,18 +1660,22 @@ export default function SessionScreen() {
                                   <Pressable
                                     accessibilityRole="button"
                                     onLongPress={() =>
-                                      Alert.alert('Set options', `Interval ${idx + 1}`, [
-                                        { text: 'Cancel', style: 'cancel' },
-                                        {
-                                          text: s.done ? 'Mark not done' : 'Mark done',
-                                          onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
-                                        },
-                                        {
-                                          text: 'Remove interval',
-                                          style: 'destructive',
-                                          onPress: () => removeFreeSet(ex.id, idx),
-                                        },
-                                      ])
+                                      showActionSheet({
+                                        title: 'Set options',
+                                        message: `Interval ${idx + 1}`,
+                                        options: [
+                                          {
+                                            text: s.done ? 'Mark not done' : 'Mark done',
+                                            onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                          },
+                                          {
+                                            text: 'Remove interval',
+                                            style: 'destructive',
+                                            onPress: () => removeFreeSet(ex.id, idx),
+                                          },
+                                          { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                                        ],
+                                      })
                                     }
                                     style={styles.freeSetIndex}
                                   >
@@ -1677,18 +1728,22 @@ export default function SessionScreen() {
                                   <Pressable
                                     accessibilityRole="button"
                                     onLongPress={() =>
-                                      Alert.alert('Set options', `Lap ${idx + 1}`, [
-                                        { text: 'Cancel', style: 'cancel' },
-                                        {
-                                          text: s.done ? 'Mark not done' : 'Mark done',
-                                          onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
-                                        },
-                                        {
-                                          text: 'Remove lap',
-                                          style: 'destructive',
-                                          onPress: () => removeFreeSet(ex.id, idx),
-                                        },
-                                      ])
+                                      showActionSheet({
+                                        title: 'Set options',
+                                        message: `Lap ${idx + 1}`,
+                                        options: [
+                                          {
+                                            text: s.done ? 'Mark not done' : 'Mark done',
+                                            onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                          },
+                                          {
+                                            text: 'Remove lap',
+                                            style: 'destructive',
+                                            onPress: () => removeFreeSet(ex.id, idx),
+                                          },
+                                          { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                                        ],
+                                      })
                                     }
                                     style={styles.freeSetIndex}
                                   >
@@ -1832,20 +1887,24 @@ export default function SessionScreen() {
                               <View key={s.id} style={styles.freeSetRow}>
                                 <Pressable
                                   accessibilityRole="button"
-                                  onLongPress={() =>
-                                    Alert.alert('Set options', `Set ${idx + 1}`, [
-                                      { text: 'Cancel', style: 'cancel' },
-                                      {
-                                        text: s.done ? 'Mark not done' : 'Mark done',
-                                        onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
-                                      },
-                                      {
-                                        text: 'Remove set',
-                                        style: 'destructive',
-                                        onPress: () => removeFreeSet(ex.id, idx),
-                                      },
-                                    ])
-                                  }
+                                    onLongPress={() =>
+                                      showActionSheet({
+                                        title: 'Set options',
+                                        message: `Set ${idx + 1}`,
+                                        options: [
+                                          {
+                                            text: s.done ? 'Mark not done' : 'Mark done',
+                                            onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                          },
+                                          {
+                                            text: 'Remove set',
+                                            style: 'destructive',
+                                            onPress: () => removeFreeSet(ex.id, idx),
+                                          },
+                                          { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                                        ],
+                                      })
+                                    }
                                   style={styles.freeSetIndex}
                                 >
                                   <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
@@ -2113,31 +2172,17 @@ export default function SessionScreen() {
         </Pressable>
       </Modal>
 
-      {toast ? (
-        <View pointerEvents="none" style={styles.toast}>
-          <Text style={styles.toastText}>{toast}</Text>
-        </View>
-      ) : null}
-
-      <AddExerciseModal
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        onConfirm={onConfirmAdd}
-        title="Add exercise"
-        confirmLabel="Add"
-        onRequestCreateMethod={onRequestCreateMethod}
+      <Toast 
+        message={toast || ''} 
+        visible={!!toast} 
+        onHide={() => setToast(null)} 
       />
-
-      <DurationWheelModal
-        visible={!!durationPicker}
-        title="Duration"
-        initialSeconds={durationPicker?.seconds ?? 0}
-        onCancel={() => setDurationPicker(null)}
-        onConfirm={(seconds) => {
-          if (!durationPicker) return;
-          setFreeSetValue(durationPicker.exerciseId, durationPicker.setIdx, { durationSec: seconds });
-          setDurationPicker(null);
-        }}
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
       />
     </SafeAreaView>
   );
@@ -2411,20 +2456,24 @@ const styles = StyleSheet.create({
                             <View key={s.id} style={styles.freeSetRow}>
                               <Pressable
                                 accessibilityRole="button"
-                                onLongPress={() =>
-                                  Alert.alert('Set options', `Set ${idx + 1}`, [
-                                    { text: 'Cancel', style: 'cancel' },
-                                    {
-                                      text: s.done ? 'Mark not done' : 'Mark done',
-                                      onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
-                                    },
-                                    {
-                                      text: 'Remove set',
-                                      style: 'destructive',
-                                      onPress: () => removeFreeSet(ex.id, idx),
-                                    },
-                                  ])
-                                }
+                                    onLongPress={() =>
+                                      showActionSheet({
+                                        title: 'Set options',
+                                        message: `Set ${idx + 1}`,
+                                        options: [
+                                          {
+                                            text: s.done ? 'Mark not done' : 'Mark done',
+                                            onPress: () => setFreeSetValue(ex.id, idx, { done: !s.done }),
+                                          },
+                                          {
+                                            text: 'Remove set',
+                                            style: 'destructive',
+                                            onPress: () => removeFreeSet(ex.id, idx),
+                                          },
+                                          { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                                        ],
+                                      })
+                                    }
                                 style={styles.freeSetIndex}
                               >
                                 <Text style={styles.freeSetIndexText}>{idx + 1}</Text>
@@ -2941,19 +2990,6 @@ StyleSheet.create({
   },
   secondaryButtonText: { color: colors.text, fontSize: 14, fontFamily: Fonts.bold },
   pressed: { transform: [{ scale: 0.99 }], opacity: 0.95 },
-  toast: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: rgba(colors.text, 0.12),
-    backgroundColor: rgba(colors.text, 0.08),
-  },
-  toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: colors.text },
   addCard: {
     borderWidth: 1,
     borderColor: rgba(colors.text, 0.12),

@@ -1,4 +1,6 @@
 import { TrashIcon } from '@/components/icons';
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
+import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba, TrenaColors } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -67,6 +69,18 @@ export default function ProgramsScreen() {
   const [tmBench, setTmBench] = React.useState('80');
   const [tmDead, setTmDead] = React.useState('120');
   const [tmPress, setTmPress] = React.useState('50');
+
+  const [actionSheetVisible, setActionSheetVisible] = React.useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = React.useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
 
   const load = React.useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setIsLoading(true);
@@ -263,26 +277,30 @@ export default function ProgramsScreen() {
   };
 
   const onDelete = async (id: string, opts?: { afterDelete?: () => void }) => {
-    Alert.alert('Delete progression?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setDeletingId(id);
-            await deleteMethodInstance(id);
-            setRows((cur) => cur.filter((x) => x.id !== id));
-            await load({ silent: true });
-            opts?.afterDelete?.();
-          } catch (e: any) {
-            showToast(e?.message ?? 'Could not delete');
-          } finally {
-            setDeletingId(null);
-          }
+    showActionSheet({
+      title: 'Delete progression?',
+      message: 'This cannot be undone.',
+      options: [
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeletingId(id);
+              await deleteMethodInstance(id);
+              setRows((cur) => cur.filter((x) => x.id !== id));
+              await load({ silent: true });
+              opts?.afterDelete?.();
+            } catch (e: any) {
+              showToast(e?.message ?? 'Could not delete');
+            } finally {
+              setDeletingId(null);
+            }
+          },
         },
-      },
-    ]);
+        { text: 'Cancel', style: 'cancel', onPress: () => {} },
+      ],
+    });
   };
 
   return (
@@ -457,12 +475,20 @@ export default function ProgramsScreen() {
           </View>
         ) : null}
 
-        {toast ? (
-          <View style={styles.toast} pointerEvents="none">
-            <Text style={styles.toastText}>{toast}</Text>
-          </View>
-        ) : null}
       </ScrollView>
+
+      <Toast 
+        message={toast || ''} 
+        visible={!!toast} 
+        onHide={() => setToast(null)} 
+      />
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -557,17 +583,4 @@ const createStyles = (colors: any) =>
       backgroundColor: rgba(colors.background, 0.55),
       borderRadius: 14,
     },
-    toast: {
-      position: 'absolute',
-      left: 16,
-      right: 16,
-      bottom: 16,
-      borderRadius: 14,
-      paddingVertical: 12,
-      paddingHorizontal: 14,
-      borderWidth: 1,
-      borderColor: rgba(colors.text, 0.12),
-      backgroundColor: rgba(colors.text, 0.08),
-    },
-    toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: colors.text },
   });

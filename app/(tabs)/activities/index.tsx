@@ -1,6 +1,8 @@
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
+import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -158,6 +160,7 @@ function WorkoutTagIcon({ tag, size = 16, color }: { tag: WorkoutTag; size?: num
 export default function ActivitiesIndexScreen() {
   const { colors } = useTrenaTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const params = useLocalSearchParams<{ toast?: string }>();
 
   const [sessions, setSessions] = React.useState<WorkoutSessionRow[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -172,6 +175,18 @@ export default function ActivitiesIndexScreen() {
   const menuTarget = React.useMemo(() => (menuTargetId ? sessions.find((s) => s.id === menuTargetId) : null), [menuTargetId, sessions]);
 
   const hasLoaded = React.useRef(false);
+
+  const [actionSheetVisible, setActionSheetVisible] = React.useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = React.useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
 
   const load = React.useCallback(async (opts?: { silent?: boolean }) => {
     const shouldLoad = !opts?.silent && !hasLoaded.current;
@@ -192,6 +207,14 @@ export default function ActivitiesIndexScreen() {
     }, [load])
   );
 
+  React.useEffect(() => {
+    if (params.toast) {
+      showToast(params.toast);
+      // Clean up the URL so the toast doesn't reappear on reload/re-focus
+      router.setParams({ toast: undefined } as any);
+    }
+  }, [params.toast]);
+
   const showToast = (message: string) => {
     setToast(message);
     setTimeout(() => setToast(null), 2200);
@@ -199,25 +222,29 @@ export default function ActivitiesIndexScreen() {
 
   const onDelete = (id: string) => {
     setMenuTargetId(null);
-    Alert.alert('Delete workout?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setDeletingId(id);
-            await deleteSession(id);
-            setSessions((cur) => cur.filter((x) => x.id !== id));
-            await load({ silent: true });
-          } catch (e: any) {
-            showToast(e?.message ?? 'Delete failed');
-          } finally {
-            setDeletingId(null);
-          }
+    showActionSheet({
+      title: 'Delete workout?',
+      message: 'This cannot be undone.',
+      options: [
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeletingId(id);
+              await deleteSession(id);
+              setSessions((cur) => cur.filter((x) => x.id !== id));
+              await load({ silent: true });
+            } catch (e: any) {
+              showToast(e?.message ?? 'Delete failed');
+            } finally {
+              setDeletingId(null);
+            }
+          },
         },
-      },
-    ]);
+        { text: 'Cancel', style: 'cancel', onPress: () => {} },
+      ],
+    });
   };
 
   const onDuplicate = async (id: string) => {
@@ -479,11 +506,19 @@ export default function ActivitiesIndexScreen() {
         </Pressable>
       </Modal>
 
-      {toast ? (
-        <View style={styles.toast} pointerEvents="none">
-          <Text style={styles.toastText}>{toast}</Text>
-        </View>
-      ) : null}
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
+
+      <Toast 
+        message={toast || ''} 
+        visible={!!toast} 
+        onHide={() => setToast(null)} 
+      />
     </SafeAreaView>
   );
 }
@@ -680,24 +715,6 @@ const createStyles = (colors: {
     color: rgba(colors.text, 0.85),
   },
 
-  toast: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: rgba(colors.text, 0.12),
-    backgroundColor: rgba(colors.text, 0.08),
-  },
-  toastText: {
-    fontFamily: Fonts.medium,
-    fontSize: 13,
-    lineHeight: 18,
-    color: colors.text,
-  },
   iconButton: {
     padding: 4,
   },

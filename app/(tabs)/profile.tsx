@@ -1,3 +1,4 @@
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -26,6 +27,18 @@ export default function ProfileScreen() {
   const { colors, mode, setMode } = useTrenaTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
+
   const user = session?.user;
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
   const { avatarUrl, displayName } = getDisplayNameAndAvatar(meta);
@@ -41,7 +54,11 @@ export default function ProfileScreen() {
       // Local sign-out (this device/session only).
       const { error } = await supabase.auth.signOut({ scope: 'local' });
       if (error) {
-        Alert.alert('Sign out failed', error.message);
+        showActionSheet({
+          title: 'Sign out failed',
+          message: error.message,
+          options: [{ text: 'OK', onPress: () => {} }],
+        });
         return;
       }
       router.replace('/');
@@ -107,6 +124,13 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
       </View>
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }

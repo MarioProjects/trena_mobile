@@ -1,5 +1,7 @@
 import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExerciseModal';
 import { DuplicateIcon, EditIcon, EnergyIcon, MoreHorizIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
+import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -48,6 +50,18 @@ export default function TemplatesScreen() {
   const [items, setItems] = React.useState<WorkoutTemplateItem[]>([]);
 
   const [addOpen, setAddOpen] = React.useState(false);
+
+  const [actionSheetVisible, setActionSheetVisible] = React.useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = React.useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
 
   const load = React.useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setIsLoading(true);
@@ -145,7 +159,11 @@ export default function TemplatesScreen() {
     try {
       const trimmed = name.trim();
       if (!trimmed) {
-        Alert.alert('Name required', 'Please enter a template name.');
+        showActionSheet({
+          title: 'Name required',
+          message: 'Please enter a template name.',
+          options: [{ text: 'OK', onPress: () => {} }],
+        });
         return;
       }
 
@@ -158,7 +176,11 @@ export default function TemplatesScreen() {
       await load();
       resetEditor();
     } catch (e: any) {
-      Alert.alert('Could not save template', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Could not save template',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     }
   };
 
@@ -169,26 +191,30 @@ export default function TemplatesScreen() {
 
   const onDeleteTemplate = async (id: string) => {
     setMenuTargetId(null);
-    Alert.alert('Delete template?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            setDeletingId(id);
-            await deleteTemplate(id);
-            if (editingId === id) resetEditor();
-            setTemplates((cur) => cur.filter((x) => x.id !== id));
-            await load({ silent: true });
-          } catch (e: any) {
-            showToast(e?.message ?? 'Could not delete');
-          } finally {
-            setDeletingId(null);
-          }
+    showActionSheet({
+      title: 'Delete template?',
+      message: 'This cannot be undone.',
+      options: [
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeletingId(id);
+              await deleteTemplate(id);
+              if (editingId === id) resetEditor();
+              setTemplates((cur) => cur.filter((x) => x.id !== id));
+              await load({ silent: true });
+            } catch (e: any) {
+              showToast(e?.message ?? 'Could not delete');
+            } finally {
+              setDeletingId(null);
+            }
+          },
         },
-      },
-    ]);
+        { text: 'Cancel', style: 'cancel', onPress: () => {} },
+      ],
+    });
   };
 
   const onDuplicateTemplate = async (id: string) => {
@@ -213,7 +239,11 @@ export default function TemplatesScreen() {
       const session = await startSessionFromTemplate({ templateId: t.id });
       router.replace(`/activities/session/${session.id}` as any);
     } catch (e: any) {
-      Alert.alert('Could not start workout', e?.message ?? 'Unknown error');
+      showActionSheet({
+        title: 'Could not start workout',
+        message: e?.message ?? 'Unknown error',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     } finally {
       setStartingId(null);
     }
@@ -376,12 +406,13 @@ export default function TemplatesScreen() {
           </View>
         ) : null}
 
-        {toast ? (
-          <View style={styles.toast} pointerEvents="none">
-            <Text style={styles.toastText}>{toast}</Text>
-          </View>
-        ) : null}
         </ScrollView>
+
+        <Toast 
+          message={toast || ''} 
+          visible={!!toast} 
+          onHide={() => setToast(null)} 
+        />
 
         {!editingId ? (
           <View style={styles.footer}>
@@ -466,6 +497,13 @@ export default function TemplatesScreen() {
         confirmLabel="Add"
         onRequestCreateMethod={onRequestCreateMethod}
       />
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -523,19 +561,6 @@ const createStyles = (colors: {
     backgroundColor: rgba(colors.background, 0.55),
     borderRadius: 14,
   },
-  toast: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: rgba(colors.text, 0.12),
-    backgroundColor: rgba(colors.text, 0.08),
-  },
-  toastText: { fontFamily: Fonts.medium, fontSize: 13, lineHeight: 18, color: colors.text },
   editorCard: {
     borderWidth: 1,
     borderColor: rgba(colors.text, 0.12),

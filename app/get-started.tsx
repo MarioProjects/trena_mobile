@@ -14,6 +14,7 @@ import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { signInWithGoogle } from '@/lib/google-oauth';
+import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 
@@ -29,6 +30,18 @@ export default function GetStartedScreen() {
   const { colors } = useTrenaTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [actionSheetConfig, setActionSheetConfig] = useState<{
+    title?: string;
+    message?: string;
+    options: ActionSheetOption[];
+  }>({ options: [] });
+
+  const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
+    setActionSheetConfig(config);
+    setActionSheetVisible(true);
+  };
+
   const canSendMagicLink = useMemo(() => isProbablyEmail(email), [email]);
 
   const onGoogle = async () => {
@@ -36,10 +49,18 @@ export default function GetStartedScreen() {
       await signInWithGoogle();
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Google sign-in failed.';
-      Alert.alert('Sign-in error', message);
+      showActionSheet({
+        title: 'Sign-in error',
+        message,
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
     }
   };
-  const onFacebook = () => Alert.alert('Not implemented', 'Facebook auth is not wired yet.');
+  const onFacebook = () => showActionSheet({
+    title: 'Not implemented',
+    message: 'Facebook auth is not wired yet.',
+    options: [{ text: 'OK', onPress: () => {} }],
+  });
 
   const onLogin = () => {
     if (!canSendMagicLink) {
@@ -47,7 +68,11 @@ export default function GetStartedScreen() {
       return;
     }
     setShowError(false);
-    Alert.alert('Not implemented', 'Email magic-link login is not wired yet.');
+    showActionSheet({
+      title: 'Not implemented',
+      message: 'Email magic-link login is not wired yet.',
+      options: [{ text: 'OK', onPress: () => {} }],
+    });
   };
 
   const onEmailChange = (text: string) => {
@@ -138,6 +163,13 @@ export default function GetStartedScreen() {
           <Text style={styles.footnote}>Dummy auth for now — wiring real sign-in next.</Text>
         </View>
       </SafeAreaView>
+      <ActionSheet
+        visible={actionSheetVisible}
+        title={actionSheetConfig.title}
+        message={actionSheetConfig.message}
+        options={actionSheetConfig.options}
+        onClose={() => setActionSheetVisible(false)}
+      />
     </View>
   );
 }
