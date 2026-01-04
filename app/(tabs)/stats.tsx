@@ -8,14 +8,15 @@ import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
 import { bilboCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, getExerciseKey, keyToRef, weekdayHistogram } from '@/lib/workouts/stats';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function StatsScreen() {
   const { colors } = useTrenaTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [containerWidth, setContainerWidth] = useState<number>(0);
@@ -37,15 +38,32 @@ export default function StatsScreen() {
     return exerciseStats.map((s) => keyToRef(s.exerciseKey));
   }, [exerciseStats]);
 
+  const fetchStats = useCallback(async () => {
+    const rows = await listCompletedSessionsForStats({ max: 5000, pageSize: 500 });
+    setSessions(rows as any);
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchStats();
+      setError(null);
+    } catch (e: any) {
+      // We don't necessarily want to show the full error screen if we already have data
+      // but for now let's keep it simple.
+      console.error('Refresh failed:', e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchStats]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoading(true);
         setError(null);
-        const rows = await listCompletedSessionsForStats({ max: 5000, pageSize: 500 });
-        if (cancelled) return;
-        setSessions(rows as any);
+        await fetchStats();
       } catch (e: any) {
         if (cancelled) return;
         setError(e?.message ?? 'Failed to load stats.');
@@ -56,7 +74,7 @@ export default function StatsScreen() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [fetchStats]);
 
   useEffect(() => {
     // Default selection + resolve method instance names
@@ -157,7 +175,19 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.container} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.onPrimary]}
+            progressBackgroundColor={colors.primary}
+          />
+        }
+      >
         <Text style={styles.title}>Workout Stats</Text>
 
         {loading ? (
