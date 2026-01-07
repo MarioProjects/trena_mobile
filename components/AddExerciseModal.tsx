@@ -36,7 +36,7 @@ function inferExerciseFromMethod(args: {
   binding: MethodBinding;
   fallbackExercise: ExerciseRef | null;
 }): ExerciseRef | null {
-  if (args.methodKey === 'bilbo') {
+  if (args.methodKey === 'amrap') {
     const cfg = (args.methodInstance.config ?? {}) as any;
     const ex = cfg.exercise as ExerciseRef | undefined;
     return ex ?? null;
@@ -54,8 +54,8 @@ function inferExerciseFromMethod(args: {
   return { kind: 'free', name: 'Overhead Press' };
 }
 
-function matchesBilboExercise(mi: MethodInstanceRow, ex: ExerciseRef) {
-  if (mi.method_key !== 'bilbo') return false;
+function matchesAmrapExercise(mi: MethodInstanceRow, ex: ExerciseRef) {
+  if (mi.method_key !== 'amrap') return false;
   const cfg = (mi.config ?? {}) as any;
   const cfgEx = cfg.exercise as ExerciseRef | undefined;
   if (!cfgEx) return false;
@@ -193,7 +193,7 @@ export function AddExerciseModal({
 
       // Auto-add the newly created method instance to selections
       const binding: MethodBinding =
-        row.method_key === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
+        row.method_key === 'amrap' ? { methodKey: 'amrap' } : { methodKey: 'wendler_531', lift: wendlerLift };
       const ex = inferExerciseFromMethod({
         methodKey: row.method_key,
         methodInstance: row,
@@ -225,7 +225,7 @@ export function AddExerciseModal({
 
     // Auto-add the newly created method instance to selections
     const binding: MethodBinding =
-      row.method_key === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
+      row.method_key === 'amrap' ? { methodKey: 'amrap' } : { methodKey: 'wendler_531', lift: wendlerLift };
     const ex = inferExerciseFromMethod({
       methodKey: row.method_key,
       methodInstance: row,
@@ -255,17 +255,17 @@ export function AddExerciseModal({
     );
   }, [filteredCustom, filteredLearn, term]);
 
-  const bilbos = React.useMemo(() => methods.filter((m) => m.method_key === 'bilbo'), [methods]);
+  const amraps = React.useMemo(() => methods.filter((m) => m.method_key === 'amrap'), [methods]);
   const wendlers = React.useMemo(() => methods.filter((m) => m.method_key === 'wendler_531'), [methods]);
 
-  const suggestedBilbos = React.useMemo(() => {
+  const suggestedAmraps = React.useMemo(() => {
     // If we have selections, try to suggest based on the last one
     const lastEx = selectedSelections.length > 0 ? selectedSelections[selectedSelections.length - 1].exercise : null;
-    if (!lastEx) return bilbos;
-    const matching = bilbos.filter((m) => matchesBilboExercise(m, lastEx));
-    const rest = bilbos.filter((m) => !matchesBilboExercise(m, lastEx));
+    if (!lastEx) return amraps;
+    const matching = amraps.filter((m) => matchesAmrapExercise(m, lastEx));
+    const rest = amraps.filter((m) => !matchesAmrapExercise(m, lastEx));
     return [...matching, ...rest];
-  }, [bilbos, selectedSelections]);
+  }, [amraps, selectedSelections]);
 
   const selectedMethodInstance = React.useMemo(
     () => (selectedMethodInstanceId ? methods.find((m) => m.id === selectedMethodInstanceId) ?? null : null),
@@ -316,7 +316,7 @@ export function AddExerciseModal({
 
   const onSelectMethod = (mi: MethodInstanceRow) => {
     const binding: MethodBinding =
-      mi.method_key === 'bilbo' ? { methodKey: 'bilbo' } : { methodKey: 'wendler_531', lift: wendlerLift };
+      mi.method_key === 'amrap' ? { methodKey: 'amrap' } : { methodKey: 'wendler_531', lift: wendlerLift };
 
     setSelectedSelections((cur) => {
       const idx = cur.findIndex((s) => {
@@ -409,12 +409,12 @@ export function AddExerciseModal({
             <>
                 <View style={styles.pillsRow}>
                   <Pill
-                    label="Bilbo"
-                    selected={methodChoice === 'bilbo'}
+                    label="AMRAP Method"
+                    selected={methodChoice === 'amrap'}
                     styles={styles}
                     colors={colors}
                     onPress={() => {
-                      setMethodChoice('bilbo');
+                      setMethodChoice('amrap');
                       setSelectedMethodInstanceId(null);
                     }}
                   />
@@ -436,20 +436,20 @@ export function AddExerciseModal({
                   </View>
                 ) : null}
 
-                {methodChoice === 'bilbo' ? (
+                {methodChoice === 'amrap' ? (
                   <View style={{ gap: 10 }}>
                     <View style={styles.rowBetween}>
-                      <Text style={styles.muted}>Select a Bilbo progression</Text>
-                      <Pressable accessibilityRole="button" onPress={() => onCreateMethod('bilbo')} style={styles.linkButton}>
+                      <Text style={styles.muted}>Select an AMRAP progression</Text>
+                      <Pressable accessibilityRole="button" onPress={() => onCreateMethod('amrap')} style={styles.linkButton}>
                         <Text style={styles.linkText}>Create new</Text>
                       </Pressable>
                     </View>
 
-                    {suggestedBilbos.length === 0 && !isLoadingMethods ? (
-                      <Text style={styles.muted}>No Bilbo progressions yet.</Text>
-                    ) : suggestedBilbos.length > 0 ? (
+                    {suggestedAmraps.length === 0 && !isLoadingMethods ? (
+                      <Text style={styles.muted}>No AMRAP progressions yet.</Text>
+                    ) : suggestedAmraps.length > 0 ? (
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-                        {suggestedBilbos.map((m) => (
+                        {suggestedAmraps.map((m) => (
                           <Pill
                             key={m.id}
                             label={m.name}

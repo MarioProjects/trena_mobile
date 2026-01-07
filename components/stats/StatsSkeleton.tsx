@@ -77,7 +77,7 @@ export function StatsSkeleton() {
         <SkeletonBlock opacity={opacity} width="100%" height={170} radius={14} style={{ marginTop: 8 }} />
       </View>
 
-      {/* Bilbo */}
+      {/* AMRAP */}
       <View style={styles.sectionCard}>
         <SkeletonBlock opacity={opacity} width="28%" height={16} radius={8} />
         <SkeletonBlock opacity={opacity} width="78%" height={12} radius={6} style={{ marginTop: 2 }} />

@@ -1,6 +1,6 @@
 import type {
-    BilboConfig,
-    BilboState,
+    AmrapConfig,
+    AmrapState,
     MethodBinding,
     MethodKey,
     PerformedSet,
@@ -10,11 +10,11 @@ import type {
     WendlerLiftKey,
 } from '../types';
 import {
-    bilboApplyResult,
-    bilboPlannedSets,
-    coerceBilboConfig,
-    coerceBilboState,
-} from './bilbo';
+    amrapApplyResult,
+    amrapPlannedSets,
+    coerceAmrapConfig,
+    coerceAmrapState,
+} from './amrap';
 import {
     coerceWendler531Config,
     coerceWendler531State,
@@ -28,11 +28,11 @@ export function generatePlannedSets(args: {
   methodConfig: unknown;
   methodState: unknown;
 }): { plannedSets: PlannedSet[]; coercedConfig: unknown; coercedState: unknown } {
-  if (args.methodKey === 'bilbo') {
-    const config = coerceBilboConfig(args.methodConfig);
-    const state = coerceBilboState(args.methodState, config);
+  if (args.methodKey === 'amrap') {
+    const config = coerceAmrapConfig(args.methodConfig);
+    const state = coerceAmrapState(args.methodState, config);
     return {
-      plannedSets: bilboPlannedSets(state),
+      plannedSets: amrapPlannedSets(state),
       coercedConfig: config,
       coercedState: state,
     };
@@ -58,11 +58,11 @@ export function applyMethodResult(args: {
   binding: MethodBinding;
   performedSets: PerformedSet[];
 }): { nextState: unknown; completed: boolean } {
-  if (args.methodKey === 'bilbo') {
-    const config = coerceBilboConfig(args.methodConfig) as BilboConfig;
-    const state = coerceBilboState(args.methodState, config) as BilboState;
+  if (args.methodKey === 'amrap') {
+    const config = coerceAmrapConfig(args.methodConfig) as AmrapConfig;
+    const state = coerceAmrapState(args.methodState, config) as AmrapState;
 
-    const next = bilboApplyResult({ config, state, performedSets: args.performedSets });
+    const next = amrapApplyResult({ config, state, performedSets: args.performedSets });
     const completed = (args.performedSets?.[0]?.reps ?? 0) > 0;
     return { nextState: next, completed };
   }

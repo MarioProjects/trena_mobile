@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const placeholderImage = require('@/assets/images/mock.webp');
 const localLearnImages: Record<string, number> = {
-  'assets/images/learn/methods/bilbo.webp': require('@/assets/images/learn/methods/bilbo.webp'),
+  'assets/images/learn/methods/amrap.webp': require('@/assets/images/learn/methods/amrap.webp'),
 };
 
 type PrimaryFilter = 'all' | 'method' | 'exercise';

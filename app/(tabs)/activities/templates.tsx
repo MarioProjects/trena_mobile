@@ -107,7 +107,7 @@ export default function TemplatesScreen() {
 
   const onRequestCreateMethod = (key: MethodKey) => {
     // AddExerciseModal already saved a draft and closed itself.
-    if (key === 'bilbo') router.push('/activities/methods/bilbo/create' as any);
+    if (key === 'amrap') router.push('/activities/methods/amrap/create' as any);
     else router.push('/activities/methods/wendler_531/create' as any);
   };
 
@@ -305,16 +305,16 @@ export default function TemplatesScreen() {
                               <View style={{ flex: 1, gap: 4 }}>
                                 <Text style={styles.itemTitle} numberOfLines={1}>
                                   {`${globalIdx + 1}. ${
-                                    it.type === 'method' && it.binding.methodKey === 'bilbo'
-                                      ? `Bilbo - ${coerceExerciseName(it.exercise)}`
+                                    it.type === 'method' && it.binding.methodKey === 'amrap'
+                                      ? `AMRAP - ${coerceExerciseName(it.exercise)}`
                                       : coerceExerciseName(it.exercise)
                                   }`}
                                 </Text>
                                 <Text style={styles.itemMeta}>
                                   {it.type === 'free'
                                     ? 'Free'
-                                    : it.binding.methodKey === 'bilbo'
-                                      ? 'Bilbo'
+                                    : it.binding.methodKey === 'amrap'
+                                      ? 'AMRAP Method'
                                       : `5/3/1 • ${(it.binding as any).lift}`}
                                 </Text>
                               </View>

@@ -51,17 +51,17 @@ export default function ProgramsScreen() {
   const [creating, setCreating] = React.useState(false);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [kind, setKind] = React.useState<'bilbo' | 'wendler_531'>('bilbo');
+  const [kind, setKind] = React.useState<'amrap' | 'wendler_531'>('amrap');
 
-  // Bilbo form
-  const [bilboName, setBilboName] = React.useState('Bilbo');
-  const [bilboExercise, setBilboExercise] = React.useState<ExerciseRef>({
+  // AMRAP form
+  const [amrapName, setAmrapName] = React.useState('AMRAP');
+  const [amrapExercise, setAmrapExercise] = React.useState<ExerciseRef>({
     kind: 'learn',
     learnExerciseId: 'exercise-bench', // fallback default
   });
-  const [bilboStart, setBilboStart] = React.useState('20');
-  const [bilboInc, setBilboInc] = React.useState('2.5');
-  const [bilboResetAt, setBilboResetAt] = React.useState('15');
+  const [amrapStart, setAmrapStart] = React.useState('20');
+  const [amrapInc, setAmrapInc] = React.useState('2.5');
+  const [amrapResetAt, setAmrapResetAt] = React.useState('15');
 
   // 5/3/1 form
   const [wName, setWName] = React.useState('5/3/1');
@@ -126,14 +126,14 @@ export default function ProgramsScreen() {
     setEditingId(m.id);
     setKind(m.method_key);
 
-    if (m.method_key === 'bilbo') {
+    if (m.method_key === 'amrap') {
       const cfg = (m.config ?? {}) as any;
       const st = (m.state ?? {}) as any;
-      setBilboName(m.name ?? 'Bilbo');
-      setBilboExercise((cfg.exercise ?? bilboExercise) as ExerciseRef);
-      setBilboStart(String(cfg.startWeightKg ?? 20));
-      setBilboInc(String(cfg.incrementKg ?? 2.5));
-      setBilboResetAt(String(cfg.resetAtReps ?? 15));
+      setAmrapName(m.name ?? 'AMRAP');
+      setAmrapExercise((cfg.exercise ?? amrapExercise) as ExerciseRef);
+      setAmrapStart(String(cfg.startWeightKg ?? 20));
+      setAmrapInc(String(cfg.incrementKg ?? 2.5));
+      setAmrapResetAt(String(cfg.resetAtReps ?? 15));
       // Keep current weight in state; we don't expose editing it yet.
       if (typeof st.currentWeightKg === 'number') {
         // no-op: state preserved on save
@@ -155,17 +155,17 @@ export default function ProgramsScreen() {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      if (kind === 'bilbo') {
-        const startWeightKg = numOr(bilboStart, 20);
-        const incrementKg = numOr(bilboInc, 2.5);
-        const resetAtReps = Math.max(1, Math.floor(numOr(bilboResetAt, 15)));
+      if (kind === 'amrap') {
+        const startWeightKg = numOr(amrapStart, 20);
+        const incrementKg = numOr(amrapInc, 2.5);
+        const resetAtReps = Math.max(1, Math.floor(numOr(amrapResetAt, 15)));
 
         await createMethodInstance({
-          method_key: 'bilbo',
+          method_key: 'amrap',
           scope: 'exercise',
-          name: bilboName.trim() || 'Bilbo',
+          name: amrapName.trim() || 'AMRAP',
           config: {
-            exercise: bilboExercise,
+            exercise: amrapExercise,
             startWeightKg,
             incrementKg,
             resetAtReps,
@@ -219,10 +219,10 @@ export default function ProgramsScreen() {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      if (kind === 'bilbo') {
-        const startWeightKg = numOr(bilboStart, 20);
-        const incrementKg = numOr(bilboInc, 2.5);
-        const resetAtReps = Math.max(1, Math.floor(numOr(bilboResetAt, 15)));
+      if (kind === 'amrap') {
+        const startWeightKg = numOr(amrapStart, 20);
+        const incrementKg = numOr(amrapInc, 2.5);
+        const resetAtReps = Math.max(1, Math.floor(numOr(amrapResetAt, 15)));
 
         // Preserve currentWeightKg to avoid surprising jumps.
         const prev = rows.find((x) => x.id === editingId);
@@ -233,8 +233,8 @@ export default function ProgramsScreen() {
         await updateMethodInstance({
           id: editingId,
           patch: {
-            name: bilboName.trim() || 'Bilbo',
-            config: { exercise: bilboExercise, startWeightKg, incrementKg, resetAtReps },
+            name: amrapName.trim() || 'AMRAP',
+            config: { exercise: amrapExercise, startWeightKg, incrementKg, resetAtReps },
             state: { currentWeightKg },
           },
         });
@@ -323,41 +323,41 @@ export default function ProgramsScreen() {
 
             {!editingId ? (
               <View style={styles.pillsRow}>
-                <Pill label="Bilbo" selected={kind === 'bilbo'} onPress={() => setKind('bilbo')} styles={styles} />
+                <Pill label="AMRAP Method" selected={kind === 'amrap'} onPress={() => setKind('amrap')} styles={styles} />
                 <Pill label="5/3/1" selected={kind === 'wendler_531'} onPress={() => setKind('wendler_531')} styles={styles} />
               </View>
             ) : null}
 
-            {kind === 'bilbo' ? (
+            {kind === 'amrap' ? (
               <View style={{ gap: 12 }}>
                 <View style={{ gap: 8 }}>
                   <Text style={styles.label}>Name</Text>
-                  <TextInput value={bilboName} onChangeText={setBilboName} style={styles.input} />
+                  <TextInput value={amrapName} onChangeText={setAmrapName} style={styles.input} />
                 </View>
 
                 <View style={{ gap: 8 }}>
                   <Text style={styles.label}>Exercise</Text>
-                  <ExercisePicker value={bilboExercise} onChange={setBilboExercise} />
+                  <ExercisePicker value={amrapExercise} onChange={setAmrapExercise} />
                 </View>
 
                 <View style={styles.grid2}>
                   <View style={{ gap: 8, flex: 1 }}>
                     <Text style={styles.label}>Start (kg)</Text>
-                    <TextInput value={bilboStart} onChangeText={setBilboStart} keyboardType="decimal-pad" style={styles.input} />
+                    <TextInput value={amrapStart} onChangeText={setAmrapStart} keyboardType="decimal-pad" style={styles.input} />
                   </View>
                   <View style={{ gap: 8, flex: 1 }}>
                     <Text style={styles.label}>Increment (kg)</Text>
-                    <TextInput value={bilboInc} onChangeText={setBilboInc} keyboardType="decimal-pad" style={styles.input} />
+                    <TextInput value={amrapInc} onChangeText={setAmrapInc} keyboardType="decimal-pad" style={styles.input} />
                   </View>
                 </View>
 
                 <View style={{ gap: 8 }}>
                   <Text style={styles.label}>Reset at reps (≤)</Text>
-                  <TextInput value={bilboResetAt} onChangeText={setBilboResetAt} keyboardType="numeric" style={styles.input} />
+                  <TextInput value={amrapResetAt} onChangeText={setAmrapResetAt} keyboardType="numeric" style={styles.input} />
                 </View>
 
                 <Text style={styles.muted}>
-                  Bilbo logs 1 set only: the app prescribes the weight, you record reps.
+                  AMRAP Method logs 1 set only: the app prescribes the weight, you record reps.
                 </Text>
               </View>
             ) : (
@@ -460,7 +460,7 @@ export default function ProgramsScreen() {
                           <TrashIcon size={20} color={TrenaColors.accentRed} />
                         </Pressable>
                       </View>
-                      <Text style={styles.cardMeta}>{m.method_key === 'bilbo' ? 'Bilbo' : '5/3/1'} • {m.scope}</Text>
+                      <Text style={styles.cardMeta}>{m.method_key === 'amrap' ? 'AMRAP Method' : '5/3/1'} • {m.scope}</Text>
                     </View>
 
                     {isDeletingThis ? (

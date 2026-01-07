@@ -1,6 +1,6 @@
 import type { WorkoutTag } from './tags';
 
-export type MethodKey = 'bilbo' | 'wendler_531';
+export type MethodKey = 'amrap' | 'wendler_531';
 export type MethodScope = 'exercise' | 'group';
 
 export type ExerciseTracking =
@@ -24,7 +24,7 @@ export type WendlerLiftKey = 'squat' | 'bench' | 'deadlift' | 'press';
 
 export type MethodBinding =
   | {
-    methodKey: 'bilbo';
+    methodKey: 'amrap';
   }
   | {
     methodKey: 'wendler_531';
@@ -129,7 +129,7 @@ export type WorkoutSessionRow = {
   updated_at?: string;
 };
 
-export type BilboConfig = {
+export type AmrapConfig = {
   exercise: ExerciseRef;
   startWeightKg: number;
   incrementKg: number;
@@ -137,7 +137,7 @@ export type BilboConfig = {
   capReps?: number;
 };
 
-export type BilboState = {
+export type AmrapState = {
   currentWeightKg: number;
 };
 

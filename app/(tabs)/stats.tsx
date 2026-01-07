@@ -7,7 +7,7 @@ import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
-import { bilboCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, getExerciseKey, keyToRef, weekdayHistogram } from '@/lib/workouts/stats';
+import { amrapCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, getExerciseKey, keyToRef, weekdayHistogram } from '@/lib/workouts/stats';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,8 +22,8 @@ export default function StatsScreen() {
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const [methodNameById, setMethodNameById] = useState<Record<string, string>>({});
-  const bilboSeries = useMemo(() => bilboCyclesSeries({ sessions: sessions as any }), [sessions]);
-  const [selectedBilboMethodId, setSelectedBilboMethodId] = useState<string | null>(null);
+  const amrapSeries = useMemo(() => amrapCyclesSeries({ sessions: sessions as any }), [sessions]);
+  const [selectedAmrapMethodId, setSelectedAmrapMethodId] = useState<string | null>(null);
 
   const exerciseStats = useMemo(() => computeExerciseStats({ sessions: sessions as any }), [sessions]);
   const [selectedExerciseKey, setSelectedExerciseKey] = useState<string | null>(null);
@@ -78,10 +78,10 @@ export default function StatsScreen() {
 
   useEffect(() => {
     // Default selection + resolve method instance names
-    if (!bilboSeries.length) return;
-    if (!selectedBilboMethodId) setSelectedBilboMethodId(bilboSeries[0]!.methodInstanceId);
+    if (!amrapSeries.length) return;
+    if (!selectedAmrapMethodId) setSelectedAmrapMethodId(amrapSeries[0]!.methodInstanceId);
 
-    const ids = bilboSeries.map((x) => x.methodInstanceId);
+    const ids = amrapSeries.map((x) => x.methodInstanceId);
     (async () => {
       try {
         const map = await getMethodInstancesByIds(ids);
@@ -96,7 +96,7 @@ export default function StatsScreen() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bilboSeries.length]);
+  }, [amrapSeries.length]);
 
   const totalWorkouts = useMemo(() => countCompletedSessions(sessions as any), [sessions]);
   const workoutsThisWeek = useMemo(
@@ -108,9 +108,9 @@ export default function StatsScreen() {
     [sessions],
   );
 
-  const selectedBilbo = useMemo(
-    () => bilboSeries.find((x) => x.methodInstanceId === selectedBilboMethodId) ?? null,
-    [bilboSeries, selectedBilboMethodId],
+  const selectedAmrap = useMemo(
+    () => amrapSeries.find((x) => x.methodInstanceId === selectedAmrapMethodId) ?? null,
+    [amrapSeries, selectedAmrapMethodId],
   );
 
   const selectedExercise = useMemo(
@@ -118,13 +118,13 @@ export default function StatsScreen() {
     [exerciseStats, selectedExerciseKey],
   );
 
-  const bilboChartModel = useMemo(() => {
-    if (!selectedBilbo) return null;
-    const maxN = Math.max(1, selectedBilbo.maxSessionIndexInCycle);
+  const amrapChartModel = useMemo(() => {
+    if (!selectedAmrap) return null;
+    const maxN = Math.max(1, selectedAmrap.maxSessionIndexInCycle);
     const yLabels = Array.from({ length: maxN }, (_, i) => String(i + 1));
 
     // Keep it readable: show last 4 cycles by default.
-    const cyclesToShow = selectedBilbo.cycles.slice(-4);
+    const cyclesToShow = selectedAmrap.cycles.slice(-4);
     const palette = [
       { color: colors.secondary, on: colors.onSecondary },
       { color: colors.primary, on: colors.onPrimary },
@@ -153,13 +153,13 @@ export default function StatsScreen() {
       };
     });
 
-    const maxValue = Math.max(1, selectedBilbo.maxReps);
+    const maxValue = Math.max(1, selectedAmrap.maxReps);
     return { yLabels, series, maxValue };
-  }, [colors.accentRed, colors.primary, colors.secondary, colors.tertiary, selectedBilbo]);
+  }, [colors.accentRed, colors.primary, colors.secondary, colors.tertiary, selectedAmrap]);
 
   const chartW = Math.max(0, containerWidth - 32);
   const histH = 170;
-  const bilboH = bilboChartModel ? Math.min(520, 60 + bilboChartModel.yLabels.length * 40) : 240;
+  const amrapH = amrapChartModel ? Math.min(520, 60 + amrapChartModel.yLabels.length * 40) : 240;
   const todayIdx = (new Date().getDay() + 6) % 7; // monday-first 0..6
 
   function formatDateRelative(iso: string) {
@@ -321,22 +321,22 @@ export default function StatsScreen() {
             </View>
 
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Bilbo</Text>
+              <Text style={styles.sectionTitle}>AMRAP Method</Text>
               <Text style={styles.sectionBody}>Reps (x) by session index within cycle (y)</Text>
 
-              {bilboSeries.length === 0 ? (
-                <Text style={styles.body}>No Bilbo sessions logged yet.</Text>
+              {amrapSeries.length === 0 ? (
+                <Text style={styles.body}>No AMRAP sessions logged yet.</Text>
               ) : (
                 <>
                   {/* Method instance selector */}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
-                    {bilboSeries.map((s) => {
-                      const selected = s.methodInstanceId === selectedBilboMethodId;
-                      const title = methodNameById[s.methodInstanceId] ?? s.exerciseName ?? 'Bilbo';
+                    {amrapSeries.map((s) => {
+                      const selected = s.methodInstanceId === selectedAmrapMethodId;
+                      const title = methodNameById[s.methodInstanceId] ?? s.exerciseName ?? 'AMRAP';
                       return (
                         <Pressable
                           key={s.methodInstanceId}
-                          onPress={() => setSelectedBilboMethodId(s.methodInstanceId)}
+                          onPress={() => setSelectedAmrapMethodId(s.methodInstanceId)}
                           style={({ pressed }) => [
                             styles.pill,
                             selected && styles.pillSelected,
@@ -351,16 +351,16 @@ export default function StatsScreen() {
                     })}
                   </ScrollView>
 
-                  {bilboChartModel && chartW > 0 ? (
+                  {amrapChartModel && chartW > 0 ? (
                     <>
                       <View style={styles.legendRow}>
-                        {bilboChartModel.series.map((s) => (
+                        {amrapChartModel.series.map((s) => (
                           <View key={`leg-${s.key}`} style={styles.legendItem}>
                             <View style={[styles.legendDot, { backgroundColor: s.color }]} />
                             <Text style={styles.legendText}>{s.label ?? s.key}</Text>
                           </View>
                         ))}
-                        {selectedBilbo?.resetAtReps && (
+                        {selectedAmrap?.resetAtReps && (
                           <View style={styles.legendItem}>
                             <View style={styles.legendDashContainer}>
                               <View style={styles.legendDash} />
@@ -376,12 +376,12 @@ export default function StatsScreen() {
                         <ScrollView nestedScrollEnabled>
                           <GroupedHorizontalBars
                             width={chartW}
-                            height={bilboH}
-                            yLabels={bilboChartModel.yLabels}
-                            series={bilboChartModel.series}
-                            maxValue={bilboChartModel.maxValue}
+                            height={amrapH}
+                            yLabels={amrapChartModel.yLabels}
+                            series={amrapChartModel.series}
+                            maxValue={amrapChartModel.maxValue}
                             xTickCount={4}
-                            referenceValue={selectedBilbo?.resetAtReps}
+                            referenceValue={selectedAmrap?.resetAtReps}
                           />
                         </ScrollView>
                       </View>

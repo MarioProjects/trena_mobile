@@ -1,6 +1,6 @@
 import { learnData } from '@/data/learn';
-import { coerceBilboConfig, coerceBilboState } from '@/lib/workouts/methods/bilbo';
-import type { BilboConfig, BilboState, ExerciseRef, SessionExercise, WorkoutSessionRow } from '@/lib/workouts/types';
+import { coerceAmrapConfig, coerceAmrapState } from '@/lib/workouts/methods/amrap';
+import type { AmrapConfig, AmrapState, ExerciseRef, SessionExercise, WorkoutSessionRow } from '@/lib/workouts/types';
 
 function isFiniteNumber(x: unknown): x is number {
   return typeof x === 'number' && Number.isFinite(x);
@@ -177,21 +177,21 @@ export function computeExerciseStats(args: { sessions: WorkoutSessionRow[] }): E
   );
 }
 
-function isBilboExercise(ex: SessionExercise): ex is SessionExercise & {
-  source: Extract<SessionExercise['source'], { type: 'method'; methodKey: 'bilbo' }>;
+function isAmrapExercise(ex: SessionExercise): ex is SessionExercise & {
+  source: Extract<SessionExercise['source'], { type: 'method'; methodKey: 'amrap' }>;
 } {
-  return ex.source.type === 'method' && ex.source.methodKey === 'bilbo';
+  return ex.source.type === 'method' && ex.source.methodKey === 'amrap';
 }
 
-function getBilboReps(ex: SessionExercise): number | null {
+function getAmrapReps(ex: SessionExercise): number | null {
   const performed = ex.performedSets ?? [];
-  const top = performed.find((s) => s.id === 'bilbo-top-set') ?? performed[0];
+  const top = performed.find((s) => s.id === 'amrap-top-set') ?? performed[0];
   const reps = top?.reps;
   if (!isFiniteNumber(reps) || reps <= 0) return null;
   return reps;
 }
 
-export type BilboCycleSession = {
+export type AmrapCycleSession = {
   sessionId: string;
   startedAt?: string;
   endedAt: string;
@@ -200,23 +200,23 @@ export type BilboCycleSession = {
   sessionIndexInCycle: number;
 };
 
-export type BilboCycle = {
+export type AmrapCycle = {
   cycleIndex: number;
-  sessions: BilboCycleSession[];
+  sessions: AmrapCycleSession[];
 };
 
-export type BilboInstanceSeries = {
+export type AmrapInstanceSeries = {
   methodInstanceId: string;
   exerciseName?: string;
-  cycles: BilboCycle[];
+  cycles: AmrapCycle[];
   maxSessionIndexInCycle: number;
   maxReps: number;
   resetAtReps?: number;
 };
 
-type BilboInstanceAcc = {
-  cycles: BilboCycle[];
-  curCycle: BilboCycle | null;
+type AmrapInstanceAcc = {
+  cycles: AmrapCycle[];
+  curCycle: AmrapCycle | null;
   curCycleIndex: number;
   curSessionIndex: number;
   maxSessionIndexInCycle: number;
@@ -227,29 +227,29 @@ type BilboInstanceAcc = {
   lastReps?: number;
 };
 
-function getBilboWeightKg(ex: SessionExercise): number | null {
-  // Prefer planned weight (what the system prescribed for that Bilbo session).
-  const plannedTop = ex.plannedSets?.find((s) => s.id === 'bilbo-top-set') ?? ex.plannedSets?.[0];
+function getAmrapWeightKg(ex: SessionExercise): number | null {
+  // Prefer planned weight (what the system prescribed for that AMRAP session).
+  const plannedTop = ex.plannedSets?.find((s) => s.id === 'amrap-top-set') ?? ex.plannedSets?.[0];
   if (plannedTop && isFiniteNumber((plannedTop as any).weightKg)) return (plannedTop as any).weightKg as number;
 
   // Fallback to performed weight (what ended up being logged).
-  const performedTop = (ex.performedSets ?? []).find((s) => s.id === 'bilbo-top-set') ?? (ex.performedSets ?? [])[0];
+  const performedTop = (ex.performedSets ?? []).find((s) => s.id === 'amrap-top-set') ?? (ex.performedSets ?? [])[0];
   if (performedTop && isFiniteNumber((performedTop as any).weightKg)) return (performedTop as any).weightKg as number;
 
   return null;
 }
 
-function shouldStartNewBilboCycle(args: {
-  config: BilboConfig;
-  stateAtStart: BilboState;
+function shouldStartNewAmrapCycle(args: {
+  config: AmrapConfig;
+  stateAtStart: AmrapState;
   reps: number;
   weightKg: number | null;
-  acc: BilboInstanceAcc;
+  acc: AmrapInstanceAcc;
 }): boolean {
   // First seen session always starts a cycle.
   if (!args.acc.curCycle) return true;
 
-  // Primary signal: weight drops (Bilbo reset) => new cycle.
+  // Primary signal: weight drops (AMRAP reset) => new cycle.
   // This avoids false "new cycles" when `methodStateAtStart` is missing/invalid (it coerces to `startWeightKg`).
   const lastW = args.acc.lastWeightKg;
   const w = args.weightKg ?? args.stateAtStart.currentWeightKg;
@@ -260,7 +260,7 @@ function shouldStartNewBilboCycle(args: {
   }
 
   // Secondary signal: if the previous session hit the reset threshold, the next one starts a new cycle.
-  // (Matches `bilboApplyResult`: reps <= resetAtReps => next weight = startWeightKg)
+  // (Matches `amrapApplyResult`: reps <= resetAtReps => next weight = startWeightKg)
   const resetAt = args.acc.resetAtReps ?? args.config.resetAtReps;
   const lastReps = args.acc.lastReps;
   if (isFiniteNumber(resetAt) && isFiniteNumber(lastReps) && lastReps <= resetAt) return true;
@@ -269,12 +269,12 @@ function shouldStartNewBilboCycle(args: {
 }
 
 /**
- * Build Bilbo cycle series for charts.
+ * Build AMRAP cycle series for charts.
  *
  * Sorting: sessions are processed by `ended_at` ascending (completed workouts only).
  * Cycle boundaries: primarily when the session weight drops (reset), with a fallback to the reset-reps rule.
  */
-export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): BilboInstanceSeries[] {
+export function amrapCyclesSeries(args: { sessions: WorkoutSessionRow[] }): AmrapInstanceSeries[] {
   const completed = args.sessions
     .filter((s) => Boolean(s.ended_at))
     .slice()
@@ -284,7 +284,7 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
       return new Date(aIso).getTime() - new Date(bIso).getTime();
     });
 
-  const byInstance = new Map<string, BilboInstanceAcc>();
+  const byInstance = new Map<string, AmrapInstanceAcc>();
 
   for (const s of completed) {
     const startedAt = s.started_at ?? undefined;
@@ -292,17 +292,17 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
     const exercises = s.snapshot?.exercises ?? [];
 
     for (const ex of exercises) {
-      if (!isBilboExercise(ex)) continue;
+      if (!isAmrapExercise(ex)) continue;
 
-      const reps = getBilboReps(ex);
+      const reps = getAmrapReps(ex);
       if (reps == null) continue;
 
       const methodInstanceId = ex.source.methodInstanceId;
-      const config = coerceBilboConfig(ex.source.methodConfig) as BilboConfig;
-      const stateAtStart = coerceBilboState(ex.source.methodStateAtStart, config) as BilboState;
-      const weightKg = getBilboWeightKg(ex);
+      const config = coerceAmrapConfig(ex.source.methodConfig) as AmrapConfig;
+      const stateAtStart = coerceAmrapState(ex.source.methodStateAtStart, config) as AmrapState;
+      const weightKg = getAmrapWeightKg(ex);
 
-      const acc: BilboInstanceAcc =
+      const acc: AmrapInstanceAcc =
         byInstance.get(methodInstanceId) ??
         ({
           cycles: [],
@@ -315,17 +315,17 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
           resetAtReps: config.resetAtReps,
           lastWeightKg: undefined,
           lastReps: undefined,
-        } satisfies BilboInstanceAcc);
+        } satisfies AmrapInstanceAcc);
 
       if (!byInstance.has(methodInstanceId)) byInstance.set(methodInstanceId, acc);
       if (!acc.exerciseName && config.exercise) acc.exerciseName = formatExerciseName(config.exercise);
       if (!acc.resetAtReps) acc.resetAtReps = config.resetAtReps;
 
-      const startNew = shouldStartNewBilboCycle({ config, stateAtStart, reps, weightKg, acc });
+      const startNew = shouldStartNewAmrapCycle({ config, stateAtStart, reps, weightKg, acc });
       if (startNew) {
         acc.curCycleIndex += 1;
         acc.curSessionIndex = 0;
-        const cycle: BilboCycle = { cycleIndex: acc.curCycleIndex, sessions: [] };
+        const cycle: AmrapCycle = { cycleIndex: acc.curCycleIndex, sessions: [] };
         acc.cycles.push(cycle);
         acc.curCycle = cycle;
       }
@@ -333,7 +333,7 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
       // Safety: if for some reason we still have no current cycle, create one.
       if (!acc.curCycle) {
         acc.curCycleIndex += 1;
-        const cycle: BilboCycle = { cycleIndex: acc.curCycleIndex, sessions: [] };
+        const cycle: AmrapCycle = { cycleIndex: acc.curCycleIndex, sessions: [] };
         acc.cycles.push(cycle);
         acc.curCycle = cycle;
         acc.curSessionIndex = 0;
@@ -367,5 +367,4 @@ export function bilboCyclesSeries(args: { sessions: WorkoutSessionRow[] }): Bilb
     resetAtReps: acc.resetAtReps,
   }));
 }
-
 

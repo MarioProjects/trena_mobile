@@ -162,8 +162,8 @@ function formatExerciseName(ref: ExerciseRef) {
   return ref.name;
 }
 
-function isBilboExercise(ex: SessionExercise) {
-  return ex.source.type === 'method' && ex.source.methodKey === 'bilbo';
+function isAmrapExercise(ex: SessionExercise) {
+  return ex.source.type === 'method' && ex.source.methodKey === 'amrap';
 }
 
 function removeSetByIndex(performed: PerformedSet[], index: number) {
@@ -189,7 +189,7 @@ function shouldAutoComplete(
   oldSet: PerformedSet | undefined,
   newSet: PerformedSet,
   trackingType: string,
-  isBilbo: boolean
+  isAmrap: boolean
 ): boolean {
   if (newSet.done) return false;
 
@@ -206,8 +206,8 @@ function shouldAutoComplete(
 
   const rirJustFilled = newRir !== undefined && oldRir === undefined;
 
-  if (isBilbo) {
-    // Bilbo: weight is session-fixed, only reps matter.
+  if (isAmrap) {
+    // AMRAP Method: weight is session-fixed, only reps matter.
     return (newReps > 0 && oldReps === 0) || rirJustFilled;
   }
 
@@ -382,7 +382,7 @@ export default function SessionScreen() {
     if (!menuExercise) return null;
     if (menuExercise.source.type === 'method') {
       const { methodKey } = menuExercise.source;
-      if (methodKey === 'bilbo') return `/learn/method/bilbo-method` as const;
+      if (methodKey === 'amrap') return `/learn/method/amrap-method` as const;
       if (methodKey === 'wendler_531') return `/learn/method/wendler-531` as const;
     }
     if (menuExercise.exercise.kind === 'learn') {
@@ -776,11 +776,11 @@ export default function SessionScreen() {
     updateExercise(exerciseId, (ex) => {
       const existing = (ex.performedSets ?? []).find((s) => s.id === plannedSet.id);
       const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
-      const isBilbo = isBilboExercise(ex);
+      const isAmrap = isAmrapExercise(ex);
 
       if (existing) {
         const nextSet = { ...existing, reps: safeReps };
-        if (shouldAutoComplete(existing, nextSet, tracking.type, isBilbo)) {
+        if (shouldAutoComplete(existing, nextSet, tracking.type, isAmrap)) {
           nextSet.done = true;
         }
         return {
@@ -790,7 +790,7 @@ export default function SessionScreen() {
       }
 
       const nextSet: PerformedSet = { id: plannedSet.id, reps: safeReps, weightKg: plannedSet.weightKg, done: false };
-      if (shouldAutoComplete(undefined, nextSet, tracking.type, isBilbo)) {
+      if (shouldAutoComplete(undefined, nextSet, tracking.type, isAmrap)) {
         nextSet.done = true;
       }
 
@@ -821,7 +821,7 @@ export default function SessionScreen() {
 
     updateExercise(exerciseId, (ex) => {
       const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
-      const isBilbo = isBilboExercise(ex);
+      const isAmrap = isAmrapExercise(ex);
       let nextPerformed = [...(ex.performedSets ?? [])];
 
       if (!isNaN(numSets) && numSets >= 0) {
@@ -847,7 +847,7 @@ export default function SessionScreen() {
           weightKg: weight !== undefined ? (weight ?? 0) : oldSet.weightKg,
           rir: rir !== undefined ? rir : oldSet.rir,
         };
-        if (shouldAutoComplete(oldSet, nextSet, tracking.type, isBilbo)) {
+        if (shouldAutoComplete(oldSet, nextSet, tracking.type, isAmrap)) {
           nextSet.done = true;
         }
         return nextSet;
@@ -868,8 +868,8 @@ export default function SessionScreen() {
       // Auto-complete if not a manual 'done' toggle
       if (!('done' in patch)) {
         const tracking = ex.tracking ?? defaultTrackingForExerciseRef(ex.exercise);
-        const isBilbo = isBilboExercise(ex);
-        if (shouldAutoComplete(oldSet, nextSet, tracking.type, isBilbo)) {
+        const isAmrap = isAmrapExercise(ex);
+        if (shouldAutoComplete(oldSet, nextSet, tracking.type, isAmrap)) {
           nextSet.done = true;
         }
       }
@@ -976,8 +976,8 @@ export default function SessionScreen() {
     setAddOpen(false);
   };
 
-  const onRequestCreateMethod = (key: 'bilbo' | 'wendler_531') => {
-    if (key === 'bilbo') router.push('/activities/methods/bilbo/create' as any);
+  const onRequestCreateMethod = (key: 'amrap' | 'wendler_531') => {
+    if (key === 'amrap') router.push('/activities/methods/amrap/create' as any);
     else router.push('/activities/methods/wendler_531/create' as any);
   };
 
@@ -1406,9 +1406,9 @@ export default function SessionScreen() {
 
                   <View style={isSuperset ? styles.supersetInner : undefined}>
                     {group.exercises.map((ex, exIdx) => {
-                      const bilbo = isBilboExercise(ex);
+                      const isAmrap = isAmrapExercise(ex);
               const baseName = formatExerciseName(ex.exercise);
-              const name = bilbo ? `Bilbo - ${baseName}` : baseName;
+              const name = isAmrap ? `AMRAP - ${baseName}` : baseName;
 
               const onLayout = (h: number) => {
                 heightsRef.current[ex.id] = h;
@@ -1518,8 +1518,8 @@ export default function SessionScreen() {
                             ex.plannedSets.map((ps, idx) => {
                             const cur = (ex.performedSets ?? []).find((s) => s.id === ps.id);
                             const repsText = cur && typeof cur.reps === 'number' && cur.reps > 0 ? String(cur.reps) : '';
-                            const bilbo = isBilboExercise(ex);
-                            if (bilbo) {
+                            const isAmrapEx = isAmrapExercise(ex);
+                            if (isAmrapEx) {
                               return (
                                 <View key={ps.id} style={{ gap: 6 }}>
                                   <Pressable
@@ -2320,10 +2320,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(236, 235, 228, 0.1)',
   },
   setLabelWrap: { width: 110 },
-  setLabelWrapBilbo: { alignSelf: 'flex-start' },
+  setLabelWrapAmrap: { alignSelf: 'flex-start' },
   setRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   setLabel: { width: 110, fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.75)' },
-  setLabelBilbo: { fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.75)' },
+  setLabelAmrap: { fontFamily: Fonts.medium, fontSize: 12, color: 'rgba(236, 235, 228, 0.75)' },
   setWeight: { width: 80, fontFamily: Fonts.bold, fontSize: 13, color: TrenaColors.text },
   times: { fontFamily: Fonts.bold, fontSize: 14, color: 'rgba(236, 235, 228, 0.75)' },
   repsInput: {

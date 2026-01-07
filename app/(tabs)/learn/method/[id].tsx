@@ -15,7 +15,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 
 const placeholderImage = require('@/assets/images/mock.webp');
 const localLearnImages: Record<string, number> = {
-  'assets/images/learn/methods/bilbo.webp': require('@/assets/images/learn/methods/bilbo.webp'),
+  'assets/images/learn/methods/amrap.webp': require('@/assets/images/learn/methods/amrap.webp'),
 };
 
 function getImageSource(image: string | undefined) {

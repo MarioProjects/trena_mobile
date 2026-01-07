@@ -15,14 +15,14 @@ function numOr(x: string, fallback: number) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-export default function CreateBilboMethodScreen() {
+export default function CreateAmrapMethodScreen() {
   const draft = getAddExerciseDraft();
   const defaultExercise: ExerciseRef = draft?.selectedExercise ?? {
     kind: 'learn',
     learnExerciseId: 'exercise-bench',
   };
 
-  const [name, setName] = React.useState('Bilbo');
+  const [name, setName] = React.useState('AMRAP');
   const [exercise, setExercise] = React.useState<ExerciseRef>(defaultExercise);
   const [start, setStart] = React.useState('20');
   const [inc, setInc] = React.useState('2.5');
@@ -50,9 +50,9 @@ export default function CreateBilboMethodScreen() {
       const resetAtReps = Math.max(1, Math.floor(numOr(resetAt, 15)));
 
       const row = await createMethodInstance({
-        method_key: 'bilbo',
+        method_key: 'amrap',
         scope: 'exercise',
-        name: name.trim() || 'Bilbo',
+        name: name.trim() || 'AMRAP',
         config: { exercise, startWeightKg, incrementKg, resetAtReps },
         state: { currentWeightKg: startWeightKg },
       });
@@ -75,7 +75,7 @@ export default function CreateBilboMethodScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Create Bilbo</Text>
+        <Text style={styles.title}>Create AMRAP Method</Text>
         <Text style={styles.subtitle}>One top set. The app prescribes the weight; you log reps.</Text>
 
         <View style={{ gap: 12 }}>

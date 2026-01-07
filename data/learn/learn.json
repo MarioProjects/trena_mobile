@@ -1,13 +1,13 @@
 [
   {
-    "id": "bilbo-method",
-    "name": "Bilbo Method",
+    "id": "amrap-method",
+    "name": "AMRAP Method",
     "type": "method",
     "level": "Intermediate-Advanced",
     "days_per_week": "2-3",
     "goal": "Explosive Strength / Hypertrophy",
-    "description": "A method focusing on explosive strength using a single set of high repetitions (15-50) to failure.",
-    "long_description": "The Bilbo Method operates on a cyclical progression model where athletes perform a single maximal-effort set to failure per session. Starting with moderate loads near 50% of capacity, the lifter executes repetitions with maximum explosive velocity, strictly ensuring a distinct muscular pause at the bottom to eliminate momentum and rebound. As weight increases incrementally each session, the repetition count naturally decreases from high ranges down to a 15-rep threshold, triggering a cycle reset that drives continuous neural and hypertrophic adaptation.",
+    "description": "A method focusing on explosive strength using a single AMRAP (As Many Reps As Possible) set with cyclical progression.",
+    "long_description": "The AMRAP Method operates on a cyclical progression model where athletes perform a single maximal-effort set to failure per session. Starting with moderate loads near 50% of capacity, the lifter executes repetitions with maximum explosive velocity, strictly ensuring a distinct muscular pause at the bottom to eliminate momentum and rebound. As weight increases incrementally each session, the repetition count naturally decreases from high ranges down to a threshold (typically 15 reps), triggering a cycle reset that drives continuous neural and hypertrophic adaptation.",
     "equipment": [
       "Barbell",
       "Bench",
@@ -27,8 +27,8 @@
       "Speed",
       "Bench Press Specialist"
     ],
-    "image": "assets/images/learn/methods/bilbo.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_bilbo",
+    "image": "assets/images/learn/methods/amrap.webp",
+    "videoUrl": "https://www.youtube.com/watch?v=placeholder_amrap",
     "isFavorite": false
   },
   {

@@ -1,11 +1,11 @@
-import type { BilboConfig, BilboState, PerformedSet, PlannedSet } from '../types';
+import type { AmrapConfig, AmrapState, PerformedSet, PlannedSet } from '../types';
 
 function isFiniteNumber(x: unknown): x is number {
   return typeof x === 'number' && Number.isFinite(x);
 }
 
-export function coerceBilboConfig(config: unknown): BilboConfig {
-  const c = (config ?? {}) as Partial<BilboConfig>;
+export function coerceAmrapConfig(config: unknown): AmrapConfig {
+  const c = (config ?? {}) as Partial<AmrapConfig>;
 
   const startWeightKg = isFiniteNumber(c.startWeightKg) ? c.startWeightKg : 20;
   const incrementKg = isFiniteNumber(c.incrementKg) ? c.incrementKg : 2.5;
@@ -13,7 +13,7 @@ export function coerceBilboConfig(config: unknown): BilboConfig {
   const capReps = isFiniteNumber(c.capReps) ? c.capReps : undefined;
 
   // exercise is required for UX filtering, but the engine can operate without it.
-  const exercise = (c.exercise ?? { kind: 'free', name: 'Unknown exercise' }) as BilboConfig['exercise'];
+  const exercise = (c.exercise ?? { kind: 'free', name: 'Unknown exercise' }) as AmrapConfig['exercise'];
 
   return {
     exercise,
@@ -24,17 +24,17 @@ export function coerceBilboConfig(config: unknown): BilboConfig {
   };
 }
 
-export function coerceBilboState(state: unknown, config: BilboConfig): BilboState {
-  const s = (state ?? {}) as Partial<BilboState>;
+export function coerceAmrapState(state: unknown, config: AmrapConfig): AmrapState {
+  const s = (state ?? {}) as Partial<AmrapState>;
   const currentWeightKg = isFiniteNumber(s.currentWeightKg) ? s.currentWeightKg : config.startWeightKg;
   return { currentWeightKg };
 }
 
-export function bilboPlannedSets(state: BilboState): PlannedSet[] {
-  // Bilbo: exactly one top set, weight prescribed by the system.
+export function amrapPlannedSets(state: AmrapState): PlannedSet[] {
+  // AMRAP Method: exactly one top set, weight prescribed by the system.
   return [
     {
-      id: 'bilbo-top-set',
+      id: 'amrap-top-set',
       kind: 'top',
       weightKg: state.currentWeightKg,
       targetReps: null,
@@ -44,11 +44,11 @@ export function bilboPlannedSets(state: BilboState): PlannedSet[] {
   ];
 }
 
-export function bilboApplyResult(args: {
-  config: BilboConfig;
-  state: BilboState;
+export function amrapApplyResult(args: {
+  config: AmrapConfig;
+  state: AmrapState;
   performedSets: PerformedSet[];
-}): BilboState {
+}): AmrapState {
   const { config, state, performedSets } = args;
 
   const reps = performedSets?.[0]?.reps;
@@ -65,3 +65,4 @@ export function bilboApplyResult(args: {
 
   return { currentWeightKg: state.currentWeightKg + config.incrementKg };
 }
+
