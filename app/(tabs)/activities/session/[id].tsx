@@ -617,13 +617,49 @@ export default function SessionScreen() {
     setSnapshot((cur) => ({ ...cur, notes: text }));
   };
 
-  const reorderExercisesByIds = React.useCallback((orderedIds: string[]) => {
+  const reorderExercisesByIds = React.useCallback((orderedIds: string[], movedId: string) => {
     setSnapshot((cur) => {
       const map = new Map(cur.exercises.map((x) => [x.id, x]));
-      const next = orderedIds.map((id) => map.get(id)).filter(Boolean) as SessionExercise[];
-      // Keep any exercises not present in the ordered list (shouldn't happen).
-      const remaining = cur.exercises.filter((x) => !orderedIds.includes(x.id));
-      return { ...cur, exercises: [...next, ...remaining] };
+      let nextExercises = orderedIds.map((id) => map.get(id)).filter(Boolean) as SessionExercise[];
+
+      // Find the moved exercise in the new list
+      const movedIdx = nextExercises.findIndex(ex => ex.id === movedId);
+      if (movedIdx === -1) return cur;
+
+      const movedEx = { ...nextExercises[movedIdx] };
+      const prevEx = movedIdx > 0 ? nextExercises[movedIdx - 1] : null;
+      const nextEx = movedIdx < nextExercises.length - 1 ? nextExercises[movedIdx + 1] : null;
+
+      // Logic for joining/leaving supersets
+      if (prevEx?.supersetId && nextEx?.supersetId && prevEx.supersetId === nextEx.supersetId) {
+        // Dropped between two exercises of the same superset
+        movedEx.supersetId = prevEx.supersetId;
+      } else if (prevEx?.supersetId) {
+        // Dropped after a superset
+        movedEx.supersetId = prevEx.supersetId;
+      } else if (nextEx?.supersetId) {
+        // Dropped before a superset
+        movedEx.supersetId = nextEx.supersetId;
+      } else {
+        // Dropped outside or reordered within a non-superset area
+        movedEx.supersetId = undefined;
+      }
+
+      nextExercises[movedIdx] = movedEx;
+
+      // Post-process: clear supersetId for exercises that are now alone
+      // A superset must have at least 2 adjacent exercises with the same ID.
+      nextExercises = nextExercises.map((ex, i) => {
+        if (!ex.supersetId) return ex;
+        const prev = i > 0 ? nextExercises[i - 1] : null;
+        const next = i < nextExercises.length - 1 ? nextExercises[i + 1] : null;
+        if (prev?.supersetId === ex.supersetId || next?.supersetId === ex.supersetId) {
+          return ex;
+        }
+        return { ...ex, supersetId: undefined };
+      });
+
+      return { ...cur, exercises: nextExercises };
     });
   }, []);
 
@@ -1390,10 +1426,10 @@ export default function SessionScreen() {
                   onReorder={(from, to) => {
                     const arr = [...positionsRef.current];
                     if (from < 0 || from >= arr.length) return;
-                    const [moved] = arr.splice(from, 1);
-                    arr.splice(to, 0, moved);
+                    const [movedId] = arr.splice(from, 1);
+                    arr.splice(to, 0, movedId);
                     positionsRef.current = arr;
-                    reorderExercisesByIds(arr);
+                    reorderExercisesByIds(arr, movedId);
                   }}
                 >
                   {(gesture) => (
@@ -2183,6 +2219,27 @@ export default function SessionScreen() {
         message={actionSheetConfig.message}
         options={actionSheetConfig.options}
         onClose={() => setActionSheetVisible(false)}
+      />
+
+      <AddExerciseModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onConfirm={onConfirmAdd}
+        title="Add exercise"
+        confirmLabel="Add"
+        onRequestCreateMethod={onRequestCreateMethod}
+      />
+
+      <DurationWheelModal
+        visible={!!durationPicker}
+        initialSeconds={durationPicker?.seconds ?? 0}
+        onCancel={() => setDurationPicker(null)}
+        onConfirm={(sec) => {
+          if (durationPicker) {
+            setFreeSetValue(durationPicker.exerciseId, durationPicker.setIdx, { durationSec: sec });
+          }
+          setDurationPicker(null);
+        }}
       />
     </SafeAreaView>
   );
