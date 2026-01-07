@@ -6,15 +6,15 @@ Trena is a gym/sport training app for logging workouts and tracking progress ove
 
 1. Install dependencies
 
-   ```bash
-   npm install
-   ```
+```bash
+pnpm install
+```
 
 2. Start the app
 
-   ```bash
-   npx expo start
-   ```
+```bash
+npx expo start
+```
 
 In the output, you'll find options to open the app in a
 
