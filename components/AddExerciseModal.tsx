@@ -133,6 +133,7 @@ export function AddExerciseModal({
   const [customs, setCustoms] = React.useState<string[]>([]);
   const [methods, setMethods] = React.useState<MethodInstanceRow[]>([]);
   const [isLoadingMethods, setIsLoadingMethods] = React.useState(false);
+  const [hasLoadedMethods, setHasLoadedMethods] = React.useState(false);
 
   const [selectedSelections, setSelectedSelections] = React.useState<AddExerciseSelection[]>([]);
 
@@ -146,6 +147,8 @@ export function AddExerciseModal({
     if (!open) return;
     const d = getAddExerciseDraft();
     setTerm('');
+    setMethods([]);
+    setHasLoadedMethods(false);
     setSelectedSelections(d?.selectedExercise ? [{ exercise: d.selectedExercise, method: null }] : []);
     setMethodChoice(d?.methodChoice ?? null);
     setSelectedMethodInstanceId(d?.selectedMethodInstanceId ?? null);
@@ -167,15 +170,16 @@ export function AddExerciseModal({
     try {
       const rows = await listMethodInstances();
       setMethods(rows);
+      setHasLoadedMethods(true);
     } finally {
       setIsLoadingMethods(false);
     }
   }, []);
 
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || hasLoadedMethods || isLoadingMethods) return;
     loadMethods();
-  }, [loadMethods, open]);
+  }, [loadMethods, open, hasLoadedMethods, isLoadingMethods]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -426,7 +430,7 @@ export function AddExerciseModal({
                   />
                 </View>
 
-                {isLoadingMethods ? (
+                {isLoadingMethods && methodChoice ? (
                   <View style={{ paddingTop: 8 }}>
                     <ActivityIndicator color={colors.primary} />
                   </View>
@@ -441,9 +445,9 @@ export function AddExerciseModal({
                       </Pressable>
                     </View>
 
-                    {suggestedBilbos.length === 0 ? (
+                    {suggestedBilbos.length === 0 && !isLoadingMethods ? (
                       <Text style={styles.muted}>No Bilbo progressions yet.</Text>
-                    ) : (
+                    ) : suggestedBilbos.length > 0 ? (
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
                         {suggestedBilbos.map((m) => (
                           <Pill
@@ -457,7 +461,7 @@ export function AddExerciseModal({
                           />
                         ))}
                       </ScrollView>
-                    )}
+                    ) : null}
                   </View>
                 ) : null}
 
@@ -470,9 +474,9 @@ export function AddExerciseModal({
                       </Pressable>
                     </View>
 
-                    {wendlers.length === 0 ? (
+                    {wendlers.length === 0 && !isLoadingMethods ? (
                       <Text style={styles.muted}>No 5/3/1 progressions yet.</Text>
-                    ) : (
+                    ) : wendlers.length > 0 ? (
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
                         {wendlers.map((m) => (
                           <Pill
@@ -488,7 +492,7 @@ export function AddExerciseModal({
                           />
                         ))}
                       </ScrollView>
-                    )}
+                    ) : null}
 
                     {selectedMethodInstanceId ? (
                       <View style={{ gap: 8 }}>

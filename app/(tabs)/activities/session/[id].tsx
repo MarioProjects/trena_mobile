@@ -2077,15 +2077,13 @@ export default function SessionScreen() {
             })}
           </View>
 
-          {!addOpen ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setAddOpen(true)}
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
-            >
-              <Text style={styles.secondaryButtonText}>Add exercise</Text>
-            </Pressable>
-          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setAddOpen(true)}
+            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.secondaryButtonText}>Add exercise</Text>
+          </Pressable>
 
           {editingExerciseId ? (
             <ExercisePicker
