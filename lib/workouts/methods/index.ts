@@ -28,7 +28,7 @@ export function generatePlannedSets(args: {
   methodConfig: unknown;
   methodState: unknown;
 }): { plannedSets: PlannedSet[]; coercedConfig: unknown; coercedState: unknown } {
-  if (args.methodKey === 'amrap') {
+  if (args.methodKey === 'amrap' || (args.methodKey as any) === 'bilbo') {
     const config = coerceAmrapConfig(args.methodConfig);
     const state = coerceAmrapState(args.methodState, config);
     return {
@@ -58,7 +58,7 @@ export function applyMethodResult(args: {
   binding: MethodBinding;
   performedSets: PerformedSet[];
 }): { nextState: unknown; completed: boolean } {
-  if (args.methodKey === 'amrap') {
+  if (args.methodKey === 'amrap' || (args.methodKey as any) === 'bilbo') {
     const config = coerceAmrapConfig(args.methodConfig) as AmrapConfig;
     const state = coerceAmrapState(args.methodState, config) as AmrapState;
 

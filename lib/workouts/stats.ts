@@ -178,9 +178,9 @@ export function computeExerciseStats(args: { sessions: WorkoutSessionRow[] }): E
 }
 
 function isAmrapExercise(ex: SessionExercise): ex is SessionExercise & {
-  source: Extract<SessionExercise['source'], { type: 'method'; methodKey: 'amrap' }>;
+  source: Extract<SessionExercise['source'], { type: 'method'; methodKey: 'amrap' | 'bilbo' }>;
 } {
-  return ex.source.type === 'method' && ex.source.methodKey === 'amrap';
+  return ex.source.type === 'method' && (ex.source.methodKey === 'amrap' || ex.source.methodKey === 'bilbo');
 }
 
 function getAmrapReps(ex: SessionExercise): number | null {

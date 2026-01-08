@@ -305,7 +305,7 @@ export default function TemplatesScreen() {
                               <View style={{ flex: 1, gap: 4 }}>
                                 <Text style={styles.itemTitle} numberOfLines={1}>
                                   {`${globalIdx + 1}. ${
-                                    it.type === 'method' && it.binding.methodKey === 'amrap'
+                                    it.type === 'method' && (it.binding.methodKey === 'amrap' || (it.binding.methodKey as any) === 'bilbo')
                                       ? `AMRAP - ${coerceExerciseName(it.exercise)}`
                                       : coerceExerciseName(it.exercise)
                                   }`}
@@ -313,7 +313,7 @@ export default function TemplatesScreen() {
                                 <Text style={styles.itemMeta}>
                                   {it.type === 'free'
                                     ? 'Free'
-                                    : it.binding.methodKey === 'amrap'
+                                    : (it.binding.methodKey === 'amrap' || (it.binding.methodKey as any) === 'bilbo')
                                       ? 'AMRAP Method'
                                       : `5/3/1 • ${(it.binding as any).lift}`}
                                 </Text>

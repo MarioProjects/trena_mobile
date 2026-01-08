@@ -36,7 +36,7 @@ function inferExerciseFromMethod(args: {
   binding: MethodBinding;
   fallbackExercise: ExerciseRef | null;
 }): ExerciseRef | null {
-  if (args.methodKey === 'amrap') {
+  if (args.methodKey === 'amrap' || (args.methodKey as any) === 'bilbo') {
     const cfg = (args.methodInstance.config ?? {}) as any;
     const ex = cfg.exercise as ExerciseRef | undefined;
     return ex ?? null;
@@ -55,7 +55,7 @@ function inferExerciseFromMethod(args: {
 }
 
 function matchesAmrapExercise(mi: MethodInstanceRow, ex: ExerciseRef) {
-  if (mi.method_key !== 'amrap') return false;
+  if (mi.method_key !== 'amrap' && (mi.method_key as any) !== 'bilbo') return false;
   const cfg = (mi.config ?? {}) as any;
   const cfgEx = cfg.exercise as ExerciseRef | undefined;
   if (!cfgEx) return false;
@@ -255,7 +255,7 @@ export function AddExerciseModal({
     );
   }, [filteredCustom, filteredLearn, term]);
 
-  const amraps = React.useMemo(() => methods.filter((m) => m.method_key === 'amrap'), [methods]);
+  const amraps = React.useMemo(() => methods.filter((m) => m.method_key === 'amrap' || (m.method_key as any) === 'bilbo'), [methods]);
   const wendlers = React.useMemo(() => methods.filter((m) => m.method_key === 'wendler_531'), [methods]);
 
   const suggestedAmraps = React.useMemo(() => {

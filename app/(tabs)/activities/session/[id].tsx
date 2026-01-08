@@ -163,7 +163,7 @@ function formatExerciseName(ref: ExerciseRef) {
 }
 
 function isAmrapExercise(ex: SessionExercise) {
-  return ex.source.type === 'method' && ex.source.methodKey === 'amrap';
+  return ex.source.type === 'method' && (ex.source.methodKey === 'amrap' || ex.source.methodKey === 'bilbo');
 }
 
 function removeSetByIndex(performed: PerformedSet[], index: number) {
@@ -382,7 +382,7 @@ export default function SessionScreen() {
     if (!menuExercise) return null;
     if (menuExercise.source.type === 'method') {
       const { methodKey } = menuExercise.source;
-      if (methodKey === 'amrap') return `/learn/method/amrap-method` as const;
+      if (methodKey === 'amrap' || (methodKey as any) === 'bilbo') return `/learn/method/amrap-method` as const;
       if (methodKey === 'wendler_531') return `/learn/method/wendler-531` as const;
     }
     if (menuExercise.exercise.kind === 'learn') {

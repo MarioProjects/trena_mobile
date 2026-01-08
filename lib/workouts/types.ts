@@ -1,6 +1,6 @@
 import type { WorkoutTag } from './tags';
 
-export type MethodKey = 'amrap' | 'wendler_531';
+export type MethodKey = 'amrap' | 'wendler_531' | 'bilbo'; // 'bilbo' is legacy name for 'amrap'
 export type MethodScope = 'exercise' | 'group';
 
 export type ExerciseTracking =

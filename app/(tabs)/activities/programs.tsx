@@ -124,9 +124,9 @@ export default function ProgramsScreen() {
   const beginEdit = (m: MethodInstanceRow) => {
     setCreating(false);
     setEditingId(m.id);
-    setKind(m.method_key);
+    setKind((m.method_key as any) === 'bilbo' ? 'amrap' : m.method_key);
 
-    if (m.method_key === 'amrap') {
+    if (m.method_key === 'amrap' || (m.method_key as any) === 'bilbo') {
       const cfg = (m.config ?? {}) as any;
       const st = (m.state ?? {}) as any;
       setAmrapName(m.name ?? 'AMRAP');
@@ -460,7 +460,7 @@ export default function ProgramsScreen() {
                           <TrashIcon size={20} color={TrenaColors.accentRed} />
                         </Pressable>
                       </View>
-                      <Text style={styles.cardMeta}>{m.method_key === 'amrap' ? 'AMRAP Method' : '5/3/1'} • {m.scope}</Text>
+                      <Text style={styles.cardMeta}>{(m.method_key === 'amrap' || (m.method_key as any) === 'bilbo') ? 'AMRAP Method' : '5/3/1'} • {m.scope}</Text>
                     </View>
 
                     {isDeletingThis ? (
