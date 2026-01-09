@@ -35,7 +35,23 @@ export default function ActivitiesLayout() {
       <Stack.Screen name="programs" options={{ title: 'Programs' }} />
       <Stack.Screen name="methods/amrap/create" options={{ title: 'Create AMRAP Method' }} />
       <Stack.Screen name="methods/wendler_531/create" options={{ title: 'Create 5/3/1' }} />
-      <Stack.Screen name="session/[id]" options={{ title: 'Workout' }} />
+      <Stack.Screen
+        name="session/[id]"
+        options={{
+          title: 'Workout',
+          headerLeft: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back to Activities"
+              onPress={() => router.replace('/activities' as any)}
+              hitSlop={16}
+              style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
+            >
+              <ChevronLeftIcon size={34} color={colors.primary} strokeWidth={2} />
+            </Pressable>
+          ),
+        }}
+      />
     </Stack>
   );
 }
