@@ -127,7 +127,7 @@ export function ExercisePicker({
                                     <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.onPrimary }}>+</Text>
                                 </View>
                                 <View>
-                                    <Text style={styles.rowTitle}>Create "{term.trim()}"</Text>
+                                    <Text style={styles.rowTitle}>Create &quot;{term.trim()}&quot;</Text>
                                     <Text style={styles.rowMeta}>Custom exercise</Text>
                                 </View>
                             </Pressable>

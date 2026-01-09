@@ -8,12 +8,11 @@ import {
   WorkSans_900Black,
 } from '@expo-google-fonts/work-sans';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
-import { Asset } from 'expo-asset';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SvgUri } from 'react-native-svg';
@@ -28,9 +27,7 @@ import { hasSupabaseConfig } from '@/lib/supabase';
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
 
-const splashSvgUri = Asset.fromModule(
-  require('../assets/images/splash-letter.svg')
-).uri;
+const splashSvgUri = Image.resolveAssetSource(require('../assets/images/splash-letter.svg')).uri;
 
 const SPLASH_LOGO_WIDTH = 240;
 const SPLASH_LOGO_HEIGHT = 160;
@@ -68,6 +65,7 @@ function AppNavigator() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="connect" />
         <Stack.Screen name="get-started" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="home" />

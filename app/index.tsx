@@ -1,9 +1,9 @@
 import { useEvent } from 'expo';
-import { Asset } from 'expo-asset';
 import { Redirect, router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect } from 'react';
-import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
+import { Image, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
 
@@ -12,7 +12,7 @@ import { useAuthContext } from '@/hooks/use-auth-context';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 
-const splashSvgUri = Asset.fromModule(require('@/assets/images/splash-letter.svg')).uri;
+const splashSvgUri = Image.resolveAssetSource(require('@/assets/images/splash-letter.svg')).uri;
 
 function HeroContent() {
   const { width } = useWindowDimensions();
@@ -89,10 +89,16 @@ function HeroContent() {
 
 export default function HeroScreen() {
   const { isLoading, isLoggedIn } = useAuthContext();
+  const netinfo = useNetInfo();
 
   // If already authenticated, skip the hero CTA and go straight home.
   if (!isLoading && isLoggedIn) {
     return <Redirect href="/today" />;
+  }
+
+  // Model A gating: if not signed in and offline, show only a connect screen.
+  if (!isLoading && !isLoggedIn && netinfo.isConnected === false) {
+    return <Redirect href="/connect" />;
   }
 
   return <HeroContent />;
