@@ -10,6 +10,12 @@ Trena is a gym/sport training app for logging workouts and tracking progress ove
 pnpm install
 ```
 
+Optional: verify your Expo-managed dependency versions match the current SDK:
+
+```bash
+npx expo install --check
+```
+
 2. Start the app
 
 ```bash
