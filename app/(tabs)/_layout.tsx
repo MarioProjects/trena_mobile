@@ -1,5 +1,4 @@
 import { ActivitiesIcon, EnergyIcon, LearnIcon, ProfileIcon, TodayIcon } from '@/components/icons';
-import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -25,7 +24,6 @@ export default function TabsLayout() {
 
   return (
     <>
-      <OfflineBadge />
       <Tabs
         screenOptions={{
           headerShown: false,
