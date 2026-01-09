@@ -7,6 +7,7 @@ import {
   getMethodInstancesByIdsLocal,
   getSessionLocal,
   getTemplateLocal,
+  listCompletedSessionsForStatsLocal,
   listMethodInstancesLocal,
   listRecentCompletedSessionsLocal,
   listSessionsLocal,
@@ -18,7 +19,6 @@ import {
   upsertMethodInstanceLocal,
   upsertSessionLocal,
   upsertTemplateLocal,
-  listCompletedSessionsForStatsLocal,
 } from './local-repo';
 import { applyMethodResult, generatePlannedSets } from './methods';
 import { coerceWorkoutTags } from './tags';
@@ -34,6 +34,25 @@ import type {
   WorkoutTemplate,
   WorkoutTemplateItem,
 } from './types';
+
+/**
+ * Best-effort sync trigger.
+ *
+ * `sync-engine` imports React Native modules; keeping this as a dynamic import
+ * avoids eagerly loading (or failing to load) those dependencies in contexts
+ * where they may not be available. Callers should treat this as optional.
+ */
+async function tryRunSyncOnce(): Promise<void> {
+  try {
+    const { runSyncOnce } = await import('@/lib/sync/sync-engine');
+    await runSyncOnce();
+  } catch (e) {
+    // Best-effort: callers typically have local data to fall back to.
+    // If we ever want to surface this, we can plumb a toast/logger here.
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn('[sync] runSyncOnce unavailable/failed:', msg);
+  }
+}
 
 async function requireUserIdFromCachedSession() {
   const { data, error } = await supabase.auth.getSession();
@@ -163,8 +182,7 @@ export async function listMethodInstances() {
   const userId = await requireUserIdFromCachedSession();
   let rows = await listMethodInstancesLocal({ userId, includeArchived: false });
   if (rows.length === 0) {
-    const { runSyncOnce } = await import('@/lib/sync/sync-engine');
-    await runSyncOnce();
+    await tryRunSyncOnce();
     rows = await listMethodInstancesLocal({ userId, includeArchived: false });
   }
   return rows;
@@ -310,8 +328,7 @@ export async function listTemplates() {
   const userId = await requireUserIdFromCachedSession();
   let rows = await listTemplatesLocal({ userId });
   if (rows.length === 0) {
-    const { runSyncOnce } = await import('@/lib/sync/sync-engine');
-    await runSyncOnce();
+    await tryRunSyncOnce();
     rows = await listTemplatesLocal({ userId });
   }
   return rows.map(normalizeTemplate);
@@ -412,8 +429,7 @@ export async function listSessions(limit = 20) {
   const userId = await requireUserIdFromCachedSession();
   let rows = await listSessionsLocal({ userId, limit });
   if (rows.length === 0) {
-    const { runSyncOnce } = await import('@/lib/sync/sync-engine');
-    await runSyncOnce();
+    await tryRunSyncOnce();
     rows = await listSessionsLocal({ userId, limit });
   }
   return rows.map(normalizeSession);
@@ -423,8 +439,7 @@ export async function listCompletedSessionsForStats(args?: { max?: number; pageS
   const userId = await requireUserIdFromCachedSession();
   let rows = await listCompletedSessionsForStatsLocal({ userId, max: args?.max, pageSize: args?.pageSize });
   if (rows.length === 0) {
-    const { runSyncOnce } = await import('@/lib/sync/sync-engine');
-    await runSyncOnce();
+    await tryRunSyncOnce();
     rows = await listCompletedSessionsForStatsLocal({ userId, max: args?.max, pageSize: args?.pageSize });
   }
   return rows.map(normalizeSession);

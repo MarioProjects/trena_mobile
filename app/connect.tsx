@@ -42,6 +42,12 @@ export default function ConnectScreen() {
 
           <Pressable
             accessibilityRole="button"
+            accessibilityState={{ disabled: offline }}
+            accessibilityHint={
+              offline
+                ? 'Disabled. Connect to the internet to continue and sign in for the first time.'
+                : 'Continues to sign in.'
+            }
             disabled={offline}
             onPress={onContinue}
             style={({ pressed }) => [

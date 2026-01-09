@@ -394,7 +394,6 @@ export async function updateSessionFieldsLocal(args: {
   patch: Partial<Pick<WorkoutSessionRow, 'title' | 'started_at' | 'ended_at' | 'tags' | 'snapshot'>>;
 }): Promise<void> {
   await ensureOfflineDbReady();
-  const db = await getDb();
   const now = isoNow();
   const cur = await getSessionLocal({ userId: args.userId, id: args.id });
   if (!cur) return;

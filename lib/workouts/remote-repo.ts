@@ -4,16 +4,16 @@ import { defaultTrackingForExerciseRef } from './exercise-tracking';
 import { applyMethodResult, generatePlannedSets } from './methods';
 import { coerceWorkoutTags } from './tags';
 import type {
-    ExerciseRef,
-    MethodBinding,
-    MethodInstanceRow,
-    MethodKey,
-    PerformedSet,
-    SessionExercise,
-    WorkoutSessionRow,
-    WorkoutSessionSnapshotV1,
-    WorkoutTemplate,
-    WorkoutTemplateItem,
+  ExerciseRef,
+  MethodBinding,
+  MethodInstanceRow,
+  MethodKey,
+  PerformedSet,
+  SessionExercise,
+  WorkoutSessionRow,
+  WorkoutSessionSnapshotV1,
+  WorkoutTemplate,
+  WorkoutTemplateItem,
 } from './types';
 
 function makeLocalId(prefix: string) {
@@ -639,8 +639,6 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
 }
 
 export async function listDistinctFreeExercises() {
-  const user_id = await requireUserId();
-
   // 1. Get from templates
   const { data: templates } = await supabase.from('workout_templates').select('items');
 

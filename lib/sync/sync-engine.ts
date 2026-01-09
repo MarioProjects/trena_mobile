@@ -19,6 +19,11 @@ type SyncSummary = {
   pulled: { method_instances: number; workout_templates: number; workout_sessions: number };
 };
 
+const ZERO_SUMMARY: SyncSummary = {
+  pushed: 0,
+  pulled: { method_instances: 0, workout_templates: 0, workout_sessions: 0 },
+};
+
 function isoNow() {
   return new Date().toISOString();
 }
@@ -35,10 +40,10 @@ async function isOnline(): Promise<boolean> {
   return state.isConnected === true;
 }
 
-export async function runSyncOnce(): Promise<SyncSummary> {
+async function runSyncOnceCore(): Promise<SyncSummary> {
   const userId = await getUserIdFromCachedSession();
-  if (!userId) return { pushed: 0, pulled: { method_instances: 0, workout_templates: 0, workout_sessions: 0 } };
-  if (!(await isOnline())) return { pushed: 0, pulled: { method_instances: 0, workout_templates: 0, workout_sessions: 0 } };
+  if (!userId) return ZERO_SUMMARY;
+  if (!(await isOnline())) return ZERO_SUMMARY;
 
   const uid: string = userId;
   let pushed = 0;
@@ -154,6 +159,57 @@ export async function runSyncOnce(): Promise<SyncSummary> {
   });
 
   return { pushed, pulled };
+}
+
+/**
+ * Simple in-process mutex + coalescing.
+ *
+ * `runSyncOnce()` may be triggered by multiple event sources concurrently.
+ * We ensure only one sync runs at a time. If triggers happen while a sync is
+ * running, we coalesce them into (at most) one additional follow-up sync.
+ */
+let syncInFlight: Promise<SyncSummary> | null = null;
+let syncRequestedWhileRunning = false;
+
+export async function runSyncOnce(): Promise<SyncSummary> {
+  if (syncInFlight) {
+    syncRequestedWhileRunning = true;
+    return syncInFlight;
+  }
+
+  syncInFlight = (async () => {
+    const total: SyncSummary = {
+      pushed: 0,
+      pulled: { method_instances: 0, workout_templates: 0, workout_sessions: 0 },
+    };
+
+    try {
+      // Loop to pick up triggers that arrive during a sync.
+      // We also yield once before exiting to catch same-tick triggers that may
+      // land right as the last run completes.
+      while (true) {
+        syncRequestedWhileRunning = false;
+
+        const s = await runSyncOnceCore();
+        total.pushed += s.pushed;
+        total.pulled.method_instances += s.pulled.method_instances;
+        total.pulled.workout_templates += s.pulled.workout_templates;
+        total.pulled.workout_sessions += s.pulled.workout_sessions;
+
+        if (!syncRequestedWhileRunning) {
+          await Promise.resolve();
+          if (!syncRequestedWhileRunning) break;
+        }
+      }
+
+      return total;
+    } finally {
+      syncInFlight = null;
+      syncRequestedWhileRunning = false;
+    }
+  })();
+
+  return syncInFlight;
 }
 
 let started = false;
