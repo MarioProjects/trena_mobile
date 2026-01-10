@@ -21,6 +21,7 @@ import {
   upsertTemplateLocal,
 } from './local-repo';
 import { applyMethodResult, generatePlannedSets } from './methods';
+import { coerceWorkoutSessionStatus } from './status';
 import { coerceWorkoutTags } from './tags';
 import type {
   ExerciseRef,
@@ -30,6 +31,7 @@ import type {
   PerformedSet,
   SessionExercise,
   WorkoutSessionRow,
+  WorkoutSessionStatus,
   WorkoutSessionSnapshotV1,
   WorkoutTemplate,
   WorkoutTemplateItem,
@@ -126,6 +128,7 @@ function normalizeSession(row: WorkoutSessionRow): WorkoutSessionRow {
     ...row,
     tags: coerceWorkoutTags((row as any).tags),
     snapshot: row.snapshot ?? emptySnapshot(),
+    status: coerceWorkoutSessionStatus((row as any).status),
   };
 }
 
@@ -504,6 +507,7 @@ export async function duplicateSession(id: string) {
       title: next.title,
       started_at: next.started_at,
       ended_at: next.ended_at,
+      status: normalizeSession(next).status,
       tags: next.tags ?? [],
       snapshot: next.snapshot,
     },
@@ -535,11 +539,52 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
       title: normalized.title,
       started_at: normalized.started_at,
       ended_at: normalized.ended_at,
+      status: normalized.status ?? null,
       tags: normalized.tags ?? [],
       snapshot: normalized.snapshot,
     },
   });
   return normalized;
+}
+
+export async function updateSessionStatus(args: { id: string; status: WorkoutSessionStatus }) {
+  const userId = await requireUserIdFromCachedSession();
+  const row = await getSessionLocal({ userId, id: args.id });
+  if (!row) throw new Error('Session not found.');
+  const normalized = normalizeSession(row);
+
+  const patch: Partial<Pick<WorkoutSessionRow, 'status' | 'ended_at'>> = { status: args.status };
+  if (args.status === 'done') {
+    patch.ended_at = normalized.ended_at ?? normalized.started_at;
+  } else {
+    patch.ended_at = null;
+  }
+
+  await updateSessionFieldsLocal({ userId, id: args.id, patch });
+  const updated = await getSessionLocal({ userId, id: args.id });
+  if (!updated) throw new Error('Session not found.');
+  const next = normalizeSession(updated);
+
+  await enqueueOutbox({
+    id: makeUuid(),
+    userId,
+    entity: 'workout_sessions',
+    op: 'upsert',
+    entityId: next.id,
+    payload: {
+      id: next.id,
+      user_id: userId,
+      template_id: next.template_id,
+      title: next.title,
+      started_at: next.started_at,
+      ended_at: next.ended_at,
+      status: next.status ?? null,
+      tags: next.tags ?? [],
+      snapshot: next.snapshot,
+    },
+  });
+
+  return next;
 }
 
 export async function updateSessionTitle(args: { id: string; title: string }) {
@@ -561,6 +606,7 @@ export async function updateSessionTitle(args: { id: string; title: string }) {
       title: normalized.title,
       started_at: normalized.started_at,
       ended_at: normalized.ended_at,
+      status: normalized.status ?? null,
       tags: normalized.tags ?? [],
       snapshot: normalized.snapshot,
     },
@@ -587,6 +633,7 @@ export async function updateSessionTags(args: { id: string; tags: string[] }) {
       title: normalized.title,
       started_at: normalized.started_at,
       ended_at: normalized.ended_at,
+      status: normalized.status ?? null,
       tags: normalized.tags ?? [],
       snapshot: normalized.snapshot,
     },
@@ -697,6 +744,7 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
       title: row.title,
       started_at: row.started_at,
       ended_at: row.ended_at,
+      status: normalizeSession(row).status,
       tags: row.tags ?? [],
       snapshot: row.snapshot,
     },
@@ -734,6 +782,7 @@ export async function startQuickSession(args?: { title?: string }) {
       title: row.title,
       started_at: row.started_at,
       ended_at: row.ended_at,
+      status: normalizeSession(row).status,
       tags: row.tags ?? [],
       snapshot: row.snapshot,
     },
@@ -761,6 +810,7 @@ export async function updateSessionSnapshot(args: { id: string; snapshot: Workou
       title: normalized.title,
       started_at: normalized.started_at,
       ended_at: normalized.ended_at,
+      status: normalized.status ?? null,
       tags: normalized.tags ?? [],
       snapshot: normalized.snapshot,
     },
@@ -779,7 +829,7 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
 
   // 1) Save the finished session locally.
   const endedAt = isoNow();
-  await updateSessionFieldsLocal({ userId, id: args.id, patch: { ended_at: endedAt, snapshot: args.snapshot } });
+  await updateSessionFieldsLocal({ userId, id: args.id, patch: { ended_at: endedAt, snapshot: args.snapshot, status: 'done' } });
   const saved = await getSessionLocal({ userId, id: args.id });
   if (!saved) throw new Error('Session not found.');
 
@@ -867,6 +917,7 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
       title: normalized.title,
       started_at: normalized.started_at,
       ended_at: normalized.ended_at,
+      status: normalized.status ?? null,
       tags: normalized.tags ?? [],
       snapshot: normalized.snapshot,
     },

@@ -117,12 +117,19 @@ export type WorkoutSessionSnapshotV1 = {
   notes?: string;
 };
 
+export type WorkoutSessionStatus = 'pending' | 'in_progress' | 'done' | 'cancelled';
+
 export type WorkoutSessionRow = {
   id: string;
   title: string;
   template_id: string | null;
   started_at: string;
   ended_at: string | null;
+  /**
+   * Optional explicit status (backwards-compatible).
+   * If omitted, UI may derive status from started_at / ended_at.
+   */
+  status?: WorkoutSessionStatus | null;
   tags?: WorkoutTag[];
   snapshot: WorkoutSessionSnapshotV1;
   created_at?: string;

@@ -112,6 +112,13 @@ async function migrateToV1(db: SQLite.SQLiteDatabase): Promise<void> {
   `);
 }
 
+async function migrateToV2(db: SQLite.SQLiteDatabase): Promise<void> {
+  // Add explicit workout status for sessions (nullable for backwards compatibility).
+  await db.execAsync(`
+    ALTER TABLE workout_sessions ADD COLUMN status TEXT NULL;
+  `);
+}
+
 export async function ensureOfflineDbReady(): Promise<void> {
   if (!migrationsPromise) {
     migrationsPromise = (async () => {
@@ -120,6 +127,11 @@ export async function ensureOfflineDbReady(): Promise<void> {
       if (v < 1) {
         await migrateToV1(db);
         await setSchemaVersion(db, 1);
+      }
+      const v2 = await getSchemaVersion(db);
+      if (v2 < 2) {
+        await migrateToV2(db);
+        await setSchemaVersion(db, 2);
       }
     })();
   }

@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 
 import { defaultTrackingForExerciseRef } from './exercise-tracking';
 import { applyMethodResult, generatePlannedSets } from './methods';
+import { coerceWorkoutSessionStatus } from './status';
 import { coerceWorkoutTags } from './tags';
 import type {
   ExerciseRef,
@@ -87,6 +88,7 @@ function coerceSessionRow(row: any): WorkoutSessionRow {
   return {
     ...(row as WorkoutSessionRow),
     tags: coerceWorkoutTags((row as any)?.tags),
+    status: coerceWorkoutSessionStatus((row as any)?.status),
   };
 }
 
@@ -211,7 +213,7 @@ export async function duplicateTemplate(id: string) {
 export async function listSessions(limit = 20) {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .order('started_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
@@ -229,7 +231,7 @@ export async function listCompletedSessionsForStats(args?: { max?: number; pageS
     const to = Math.min(from + pageSize - 1, max - 1);
     const { data, error } = await supabase
       .from('workout_sessions')
-      .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+      .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
       .not('ended_at', 'is', null)
       .order('started_at', { ascending: false })
       .range(from, to);
@@ -244,7 +246,7 @@ export async function listCompletedSessionsForStats(args?: { max?: number; pageS
 export async function getSession(id: string) {
   const { data, error } = await supabase
     .from('workout_sessions')
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .eq('id', id)
     .single();
   if (error) throw error;
@@ -288,7 +290,7 @@ export async function duplicateSession(id: string) {
       started_at: new Date().toISOString(),
       snapshot: newSnapshot,
     })
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
 
   if (error) throw error;
@@ -303,7 +305,7 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
     .from('workout_sessions')
     .update(patch)
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceSessionRow(data);
@@ -314,7 +316,7 @@ export async function updateSessionTitle(args: { id: string; title: string }) {
     .from('workout_sessions')
     .update({ title: args.title })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceSessionRow(data);
@@ -325,7 +327,7 @@ export async function updateSessionTags(args: { id: string; tags: string[] }) {
     .from('workout_sessions')
     .update({ tags: coerceWorkoutTags(args.tags) })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceSessionRow(data);
@@ -527,7 +529,7 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
       started_at: new Date().toISOString(),
       snapshot,
     })
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceSessionRow(data);
@@ -545,7 +547,7 @@ export async function startQuickSession(args?: { title?: string }) {
       started_at: new Date().toISOString(),
       snapshot,
     })
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceSessionRow(data);
@@ -556,7 +558,7 @@ export async function updateSessionSnapshot(args: { id: string; snapshot: Workou
     .from('workout_sessions')
     .update({ snapshot: args.snapshot })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (error) throw error;
   return coerceSessionRow(data);
@@ -581,9 +583,9 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
   // 1) Save the finished session.
   const { data: session, error: sessErr } = await supabase
     .from('workout_sessions')
-    .update({ ended_at: new Date().toISOString(), snapshot: args.snapshot })
+    .update({ ended_at: new Date().toISOString(), snapshot: args.snapshot, status: 'done' })
     .eq('id', args.id)
-    .select('id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at')
+    .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')
     .single();
   if (sessErr) throw sessErr;
 

@@ -22,6 +22,7 @@ export { PlusIcon } from './PlusIcon';
 export { ProfileIcon } from './ProfileIcon';
 export { SearchIcon } from './SearchIcon';
 export { SkipStatusIcon } from './SkipStatusIcon';
+export { StatusIcon } from './StatusIcon';
 export { StickyNoteIcon } from './StickyNoteIcon';
 export { TagIcon } from './TagIcon';
 export { TodayIcon } from './TodayIcon';

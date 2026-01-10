@@ -151,7 +151,7 @@ async function runSyncOnceCore(): Promise<SyncSummary> {
 
   await pullTable({
     entity: 'workout_sessions',
-    select: 'id, title, template_id, started_at, ended_at, tags, snapshot, created_at, updated_at',
+    select: 'id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at',
     apply: async (row) => {
       await applyRemoteSessionLocal({ userId: uid, row, lastSyncedAt });
       pulled.workout_sessions += 1;

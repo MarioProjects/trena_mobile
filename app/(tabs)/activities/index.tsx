@@ -40,15 +40,17 @@ import {
     SkippingRopeIcon,
     SnowIcon,
     StarIcon,
+    StatusIcon,
     TrashIcon,
     VideoIcon,
     XIcon,
     YogaIcon,
 } from '@/components/icons';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
-import { deleteSession, duplicateSession, listSessions, updateSessionTitle } from '@/lib/workouts/repo';
+import { deleteSession, duplicateSession, listSessions, updateSessionStatus, updateSessionTitle } from '@/lib/workouts/repo';
+import { getEffectiveWorkoutSessionStatus } from '@/lib/workouts/status';
 import type { WorkoutTag } from '@/lib/workouts/tags';
-import type { WorkoutSessionRow } from '@/lib/workouts/types';
+import type { WorkoutSessionRow, WorkoutSessionStatus } from '@/lib/workouts/types';
 
 const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.webp');
 
@@ -89,8 +91,6 @@ function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
 
   return { today, future, recent };
 }
-
-const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // keep consistent with session screen
 
 function WorkoutTagIcon({ tag, size = 16, color }: { tag: WorkoutTag; size?: number; color?: string }) {
   switch (tag) {
@@ -298,9 +298,7 @@ export default function ActivitiesIndexScreen() {
   const todaySectionTitle = !isLoading && totalCount === 0 ? 'Your workouts' : 'Today workouts';
 
   const renderSessionCard = (s: WorkoutSessionRow) => {
-    const startedMs = new Date(s.started_at).getTime();
-    const isScheduled = !s.ended_at && !Number.isNaN(startedMs) && startedMs > Date.now() + PROGRAM_THRESHOLD_MS;
-    const inProgress = !s.ended_at && !isScheduled;
+    const status = getEffectiveWorkoutSessionStatus(s);
     const exCount = s.snapshot?.exercises?.length ?? 0;
     const isBusy = deletingId === s.id || duplicatingId === s.id;
     return (
@@ -319,10 +317,24 @@ export default function ActivitiesIndexScreen() {
               <View
                 style={[
                   styles.badge,
-                  isScheduled ? styles.badgeScheduled : inProgress ? styles.badgeInProgress : styles.badgeDone,
+                  status === 'pending'
+                    ? styles.badgeScheduled
+                    : status === 'in_progress'
+                      ? styles.badgeInProgress
+                      : status === 'cancelled'
+                        ? styles.badgeCancelled
+                        : styles.badgeDone,
                 ]}
               >
-                <Text style={styles.badgeText}>{isScheduled ? 'SCHEDULED' : inProgress ? 'IN PROGRESS' : 'DONE'}</Text>
+                <Text style={styles.badgeText}>
+                  {status === 'pending'
+                    ? 'PENDING'
+                    : status === 'in_progress'
+                      ? 'IN PROGRESS'
+                      : status === 'cancelled'
+                        ? 'CANCELLED'
+                        : 'DONE'}
+                </Text>
               </View>
               <Pressable
                 accessibilityRole="button"
@@ -429,6 +441,58 @@ export default function ActivitiesIndexScreen() {
             >
               <CharacterIcon size={20} color={colors.text} />
               <Text style={styles.menuItemText}>Rename Workout</Text>
+            </Pressable>
+
+            <View style={styles.menuSeparator} />
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => {
+                if (!menuTargetId) return;
+                const id = menuTargetId;
+                setMenuTargetId(null);
+
+                const setStatus = async (nextStatus: WorkoutSessionStatus) => {
+                  try {
+                    const updated = await updateSessionStatus({ id, status: nextStatus });
+                    setSessions((cur) => cur.map((x) => (x.id === updated.id ? updated : x)));
+                    showToast('Status updated');
+                  } catch (e: any) {
+                    showToast(e?.message ?? 'Status update failed');
+                  }
+                };
+
+                showActionSheet({
+                  title: 'Modify status',
+                  options: [
+                    {
+                      text: 'Pending',
+                      onPress: () => setStatus('pending'),
+                      tint: { backgroundColor: 'rgba(59, 130, 246, 0.16)', borderColor: 'rgba(59, 130, 246, 0.45)', textColor: colors.text },
+                    },
+                    {
+                      text: 'In progress',
+                      onPress: () => setStatus('in_progress'),
+                      tint: { backgroundColor: 'rgba(255, 214, 0, 0.10)', borderColor: 'rgba(255, 214, 0, 0.35)', textColor: colors.text },
+                    },
+                    {
+                      text: 'Done',
+                      onPress: () => setStatus('done'),
+                      tint: { backgroundColor: 'rgba(70, 255, 150, 0.08)', borderColor: 'rgba(70, 255, 150, 0.25)', textColor: colors.text },
+                    },
+                    {
+                      text: 'Cancelled',
+                      onPress: () => setStatus('cancelled'),
+                      tint: { backgroundColor: rgba(colors.accentRed, 0.12), borderColor: rgba(colors.accentRed, 0.35), textColor: colors.text },
+                    },
+                    { text: 'Cancel', style: 'cancel', onPress: () => {} },
+                  ],
+                });
+              }}
+            >
+              <StatusIcon size={20} color={colors.text} />
+              <Text style={styles.menuItemText}>Modify status</Text>
             </Pressable>
 
             <View style={styles.menuSeparator} />
@@ -706,6 +770,10 @@ const createStyles = (colors: {
   badgeScheduled: {
     borderColor: 'rgba(59, 130, 246, 0.45)',
     backgroundColor: 'rgba(59, 130, 246, 0.16)',
+  },
+  badgeCancelled: {
+    borderColor: rgba(colors.accentRed, 0.35),
+    backgroundColor: rgba(colors.accentRed, 0.12),
   },
   badgeText: {
     fontFamily: Fonts.medium,

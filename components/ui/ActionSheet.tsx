@@ -8,6 +8,11 @@ export interface ActionSheetOption {
   text: string;
   onPress: () => void;
   style?: 'default' | 'cancel' | 'destructive';
+  tint?: {
+    backgroundColor: string;
+    borderColor?: string;
+    textColor?: string;
+  };
 }
 
 interface ActionSheetProps {
@@ -46,6 +51,10 @@ export function ActionSheet({ visible, title, message, options, onClose }: Actio
                   style={({ pressed }) => [
                     styles.option,
                     option.style === 'destructive' ? styles.optionDestructive : styles.optionPrimary,
+                    option.tint && {
+                      backgroundColor: option.tint.backgroundColor,
+                      borderColor: option.tint.borderColor ?? 'transparent',
+                    },
                     pressed && styles.optionPressed,
                   ]}
                   onPress={() => {
@@ -57,6 +66,7 @@ export function ActionSheet({ visible, title, message, options, onClose }: Actio
                     style={[
                       styles.optionText,
                       option.style === 'destructive' ? styles.destructiveText : styles.primaryText,
+                      option.tint?.textColor ? { color: option.tint.textColor } : null,
                     ]}
                   >
                     {option.text}

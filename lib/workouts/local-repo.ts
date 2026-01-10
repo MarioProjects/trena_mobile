@@ -1,5 +1,6 @@
 import { ensureOfflineDbReady, getDb, type SyncEntity, type SyncOp } from '@/lib/offline/db';
 import { safeJsonParse, safeJsonStringify } from '@/lib/offline/json';
+import { coerceWorkoutSessionStatus } from '@/lib/workouts/status';
 import type { MethodInstanceRow, WorkoutSessionRow, WorkoutSessionSnapshotV1, WorkoutTemplate } from '@/lib/workouts/types';
 
 type OutboxItem = {
@@ -271,7 +272,7 @@ export async function listSessionsLocal(args: { userId: string; limit?: number }
   const db = await getDb();
   const limit = Math.max(1, Math.min(200, args.limit ?? 20));
   const rows = await db.getAllAsync<any>(
-    `SELECT id, title, template_id, started_at, ended_at, tags_json, snapshot_json, created_at, updated_at
+    `SELECT id, title, template_id, started_at, ended_at, status, tags_json, snapshot_json, created_at, updated_at
      FROM workout_sessions
      WHERE user_id = ?
        AND deleted_at IS NULL
@@ -286,6 +287,7 @@ export async function listSessionsLocal(args: { userId: string; limit?: number }
     template_id: r.template_id ?? null,
     started_at: r.started_at,
     ended_at: r.ended_at ?? null,
+    status: r.status ?? null,
     tags: safeJsonParse(r.tags_json, undefined as any),
     snapshot: safeJsonParse(r.snapshot_json, { version: 1, exercises: [] } satisfies WorkoutSessionSnapshotV1),
     created_at: r.created_at ?? undefined,
@@ -306,7 +308,7 @@ export async function listCompletedSessionsForStatsLocal(args: {
   const out: WorkoutSessionRow[] = [];
   for (let offset = 0; offset < max; offset += pageSize) {
     const rows = await db.getAllAsync<any>(
-      `SELECT id, title, template_id, started_at, ended_at, tags_json, snapshot_json, created_at, updated_at
+      `SELECT id, title, template_id, started_at, ended_at, status, tags_json, snapshot_json, created_at, updated_at
        FROM workout_sessions
        WHERE user_id = ?
          AND deleted_at IS NULL
@@ -324,6 +326,7 @@ export async function listCompletedSessionsForStatsLocal(args: {
           template_id: r.template_id ?? null,
           started_at: r.started_at,
           ended_at: r.ended_at ?? null,
+          status: r.status ?? null,
           tags: safeJsonParse(r.tags_json, undefined as any),
           snapshot: safeJsonParse(r.snapshot_json, { version: 1, exercises: [] } satisfies WorkoutSessionSnapshotV1),
           created_at: r.created_at ?? undefined,
@@ -342,7 +345,7 @@ export async function getSessionLocal(args: { userId: string; id: string }): Pro
   await ensureOfflineDbReady();
   const db = await getDb();
   const row = await db.getFirstAsync<any>(
-    `SELECT id, title, template_id, started_at, ended_at, tags_json, snapshot_json, created_at, updated_at
+    `SELECT id, title, template_id, started_at, ended_at, status, tags_json, snapshot_json, created_at, updated_at
      FROM workout_sessions
      WHERE user_id = ?
        AND deleted_at IS NULL
@@ -357,6 +360,7 @@ export async function getSessionLocal(args: { userId: string; id: string }): Pro
     template_id: row.template_id ?? null,
     started_at: row.started_at,
     ended_at: row.ended_at ?? null,
+    status: row.status ?? null,
     tags: safeJsonParse(row.tags_json, undefined as any),
     snapshot: safeJsonParse(row.snapshot_json, { version: 1, exercises: [] } satisfies WorkoutSessionSnapshotV1),
     created_at: row.created_at ?? undefined,
@@ -370,8 +374,8 @@ export async function upsertSessionLocal(args: { userId: string; row: WorkoutSes
   const now = isoNow();
   await db.runAsync(
     `INSERT OR REPLACE INTO workout_sessions(
-        id, user_id, title, template_id, started_at, ended_at, tags_json, snapshot_json, created_at, updated_at, deleted_at, last_synced_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, ?), ?, NULL, NULL)`,
+        id, user_id, title, template_id, started_at, ended_at, status, tags_json, snapshot_json, created_at, updated_at, deleted_at, last_synced_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, ?), ?, NULL, NULL)`,
     [
       args.row.id,
       args.userId,
@@ -379,6 +383,7 @@ export async function upsertSessionLocal(args: { userId: string; row: WorkoutSes
       args.row.template_id,
       args.row.started_at,
       args.row.ended_at,
+      args.row.status ?? null,
       args.row.tags ? safeJsonStringify(args.row.tags) : null,
       safeJsonStringify(args.row.snapshot ?? ({ version: 1, exercises: [] } satisfies WorkoutSessionSnapshotV1)),
       args.row.created_at ?? null,
@@ -391,7 +396,7 @@ export async function upsertSessionLocal(args: { userId: string; row: WorkoutSes
 export async function updateSessionFieldsLocal(args: {
   userId: string;
   id: string;
-  patch: Partial<Pick<WorkoutSessionRow, 'title' | 'started_at' | 'ended_at' | 'tags' | 'snapshot'>>;
+  patch: Partial<Pick<WorkoutSessionRow, 'title' | 'started_at' | 'ended_at' | 'status' | 'tags' | 'snapshot'>>;
 }): Promise<void> {
   await ensureOfflineDbReady();
   const now = isoNow();
@@ -422,7 +427,7 @@ export async function listRecentCompletedSessionsLocal(args: { userId: string; l
   const db = await getDb();
   const limit = Math.max(1, Math.min(500, args.limit ?? 200));
   const rows = await db.getAllAsync<any>(
-    `SELECT id, title, template_id, started_at, ended_at, tags_json, snapshot_json, created_at, updated_at
+    `SELECT id, title, template_id, started_at, ended_at, status, tags_json, snapshot_json, created_at, updated_at
      FROM workout_sessions
      WHERE user_id = ?
        AND deleted_at IS NULL
@@ -438,6 +443,7 @@ export async function listRecentCompletedSessionsLocal(args: { userId: string; l
     template_id: r.template_id ?? null,
     started_at: r.started_at,
     ended_at: r.ended_at ?? null,
+    status: r.status ?? null,
     tags: safeJsonParse(r.tags_json, undefined as any),
     snapshot: safeJsonParse(r.snapshot_json, { version: 1, exercises: [] } satisfies WorkoutSessionSnapshotV1),
     created_at: r.created_at ?? undefined,
@@ -521,6 +527,7 @@ export async function applyRemoteSessionLocal(args: {
     template_id: string | null;
     started_at: string;
     ended_at: string | null;
+    status?: unknown;
     tags?: unknown;
     snapshot: unknown;
     created_at?: string;
@@ -532,8 +539,8 @@ export async function applyRemoteSessionLocal(args: {
   const db = await getDb();
   await db.runAsync(
     `INSERT OR REPLACE INTO workout_sessions(
-        id, user_id, title, template_id, started_at, ended_at, tags_json, snapshot_json, created_at, updated_at, deleted_at, last_synced_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
+        id, user_id, title, template_id, started_at, ended_at, status, tags_json, snapshot_json, created_at, updated_at, deleted_at, last_synced_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
     [
       args.row.id,
       args.userId,
@@ -541,6 +548,7 @@ export async function applyRemoteSessionLocal(args: {
       args.row.template_id,
       args.row.started_at,
       args.row.ended_at,
+      coerceWorkoutSessionStatus(args.row.status),
       args.row.tags != null ? safeJsonStringify(args.row.tags) : null,
       safeJsonStringify(args.row.snapshot ?? { version: 1, exercises: [] }),
       args.row.created_at ?? null,
