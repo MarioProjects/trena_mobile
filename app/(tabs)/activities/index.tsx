@@ -1,6 +1,8 @@
+import { ActivitiesFilterSheet, countActiveActivitiesFilters, isActivitiesFilterActive, type ActivitiesFilters } from '@/components/ActivitiesFilterSheet';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba } from '@/constants/theme';
+import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
@@ -21,6 +23,7 @@ import {
     DropIcon,
     DumbbellIcon,
     DuplicateIcon,
+    FilterIcon,
     FireIcon,
     HappyIcon,
     HourglassIcon,
@@ -50,9 +53,24 @@ import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions, updateSessionStatus, updateSessionTitle } from '@/lib/workouts/repo';
 import { getEffectiveWorkoutSessionStatus } from '@/lib/workouts/status';
 import type { WorkoutTag } from '@/lib/workouts/tags';
-import type { WorkoutSessionRow, WorkoutSessionStatus } from '@/lib/workouts/types';
+import type { ExerciseRef, WorkoutSessionRow, WorkoutSessionStatus } from '@/lib/workouts/types';
 
 const DrinkWaterIllustration = require('../../../assets/images/illustrations/activities/drink_water_yellow.webp');
+
+const learnExercises = learnData.filter((x) => x.type === 'exercise');
+const learnExerciseNameById = new Map<string, string>(learnExercises.map((x) => [x.id, x.name]));
+
+const DEFAULT_FILTERS: ActivitiesFilters = {
+  workoutQuery: '',
+  selectedWorkouts: [],
+  selectedExercises: [],
+  notesQuery: '',
+  selectedNotes: [],
+  selectedTags: [],
+  datePreset: 'any',
+  startDate: null,
+  endDate: null,
+};
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -62,6 +80,20 @@ function formatDate(iso: string) {
 
 function startOfLocalDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+function formatExerciseName(ref: ExerciseRef) {
+  if (ref.kind === 'learn') return learnExerciseNameById.get(ref.learnExerciseId) ?? ref.learnExerciseId;
+  return ref.name;
+}
+
+function normalize(s: string) {
+  return s.toLowerCase().trim();
+}
+
+function exerciseKey(ref: ExerciseRef): string {
+  if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
+  return `free:${normalize(ref.name)}`;
 }
 
 function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
@@ -171,6 +203,9 @@ export default function ActivitiesIndexScreen() {
   const [renameValue, setRenameValue] = React.useState('');
   const [isSavingRename, setIsSavingRename] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
+
+  const [filters, setFilters] = React.useState<ActivitiesFilters>(DEFAULT_FILTERS);
+  const [filtersOpen, setFiltersOpen] = React.useState(false);
 
   const menuTarget = React.useMemo(() => (menuTargetId ? sessions.find((s) => s.id === menuTargetId) : null), [menuTargetId, sessions]);
 
@@ -293,9 +328,96 @@ export default function ActivitiesIndexScreen() {
     }
   };
 
-  const { today, future, recent } = React.useMemo(() => bucketSessionsByDay(sessions), [sessions]);
-  const totalCount = sessions.length;
-  const todaySectionTitle = !isLoading && totalCount === 0 ? 'Your workouts' : 'Today workouts';
+  const filterActive = React.useMemo(() => isActivitiesFilterActive(filters), [filters]);
+  const activeFilterCount = React.useMemo(() => countActiveActivitiesFilters(filters), [filters]);
+
+  const filteredSessions = React.useMemo(() => {
+    if (!filterActive) return sessions;
+
+    const qWorkout = filters.workoutQuery.trim().toLowerCase();
+    const selectedWorkoutIds = filters.selectedWorkouts.length > 0 ? new Set(filters.selectedWorkouts.map((w) => w.id)) : null;
+    const qNotes = filters.notesQuery.trim().toLowerCase();
+    const selectedNotes = filters.selectedNotes;
+    const requiredTags = filters.selectedTags;
+    const selectedExercises = filters.selectedExercises;
+    const selectedExerciseKeys = selectedExercises.length > 0 ? new Set(selectedExercises.map(exerciseKey)) : null;
+
+    const now = new Date();
+    const todayStart = startOfLocalDay(now);
+    const tomorrowStart = startOfLocalDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+
+    let startMs: number | null = null;
+    let endExclusiveMs: number | null = null;
+
+    if (filters.datePreset === 'today') {
+      startMs = todayStart;
+      endExclusiveMs = tomorrowStart;
+    } else if (filters.datePreset === 'last7' || filters.datePreset === 'last30') {
+      const days = filters.datePreset === 'last7' ? 7 : 30;
+      const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1));
+      startMs = startOfLocalDay(startDate);
+      endExclusiveMs = tomorrowStart;
+    } else if (filters.datePreset === 'custom') {
+      if (filters.startDate) startMs = startOfLocalDay(filters.startDate);
+      if (filters.endDate) {
+        const d = filters.endDate;
+        endExclusiveMs = startOfLocalDay(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
+      }
+    }
+
+    return sessions.filter((s) => {
+      // Workout name filter: match by selected workouts OR by text query
+      if (selectedWorkoutIds) {
+        if (!selectedWorkoutIds.has(s.id)) return false;
+      } else if (qWorkout) {
+        if (!String(s.title ?? '').toLowerCase().includes(qWorkout)) return false;
+      }
+
+      const tags = s.tags ?? [];
+      if (requiredTags.length > 0) {
+        if (!requiredTags.every((t) => tags.includes(t))) return false;
+      }
+
+      const startedMs = new Date(s.started_at).getTime();
+      if ((startMs != null || endExclusiveMs != null) && Number.isNaN(startedMs)) return false;
+      if (startMs != null && startedMs < startMs) return false;
+      if (endExclusiveMs != null && startedMs >= endExclusiveMs) return false;
+
+      if (selectedExerciseKeys) {
+        let hit = false;
+        for (const ex of s.snapshot?.exercises ?? []) {
+          if (selectedExerciseKeys.has(exerciseKey(ex.exercise))) {
+            hit = true;
+            break;
+          }
+        }
+        if (!hit) return false;
+      }
+
+      // Notes filter: match by selected notes OR by text query
+      if (selectedNotes.length > 0) {
+        // Check if any of the selected notes belong to this session
+        const hasMatchingNote = selectedNotes.some((n) => n.sessionId === s.id);
+        if (!hasMatchingNote) return false;
+      } else if (qNotes) {
+        const notesJoined = [
+          s.snapshot?.notes ?? '',
+          ...(s.snapshot?.exercises ?? []).map((ex) => ex.notes ?? ''),
+        ]
+          .join(' ')
+          .toLowerCase();
+        if (!notesJoined.includes(qNotes)) return false;
+      }
+
+      return true;
+    });
+  }, [sessions, filters, filterActive]);
+
+  const { today, future, recent } = React.useMemo(() => bucketSessionsByDay(filteredSessions), [filteredSessions]);
+  const sourceCount = sessions.length;
+  const filteredCount = filteredSessions.length;
+  const showNoMatches = filterActive && filteredCount === 0;
+  const todaySectionTitle = !isLoading && sourceCount === 0 ? 'Your workouts' : 'Today workouts';
 
   const renderSessionCard = (s: WorkoutSessionRow) => {
     const status = getEffectiveWorkoutSessionStatus(s);
@@ -372,17 +494,45 @@ export default function ActivitiesIndexScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.content}>
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>Activities</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>Activities</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Filter workouts"
+              onPress={() => setFiltersOpen(true)}
+              hitSlop={10}
+              style={({ pressed }) => [styles.filterButton, pressed && { opacity: 0.85 }]}
+            >
+              <View style={styles.filterButtonInner}>
+                <FilterIcon size={22} color={colors.text} strokeWidth={1.7} />
+                {activeFilterCount > 0 ? (
+                  <View style={styles.filterBadge}>
+                    <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+          </View>
 
-          <View style={[styles.section, !isLoading && totalCount === 0 && styles.sectionFill]}>
-            <Text style={styles.sectionTitle}>{todaySectionTitle}</Text>
+          <View style={[styles.section, ((!isLoading && sourceCount === 0) || showNoMatches) && styles.sectionFill]}>
+            {!showNoMatches && <Text style={styles.sectionTitle}>{todaySectionTitle}</Text>}
             {isLoading ? (
               <WorkoutsSkeleton />
-            ) : totalCount === 0 ? (
+            ) : sourceCount === 0 ? (
               <View style={styles.emptyStateContent}>
                 <Text style={styles.body}>No workouts yet. Start your first session to see it here.</Text>
                 <View style={styles.emptyIllustrationWrapper}>
                   <Image source={DrinkWaterIllustration} style={styles.emptyImage} resizeMode="contain" />
+                </View>
+              </View>
+            ) : showNoMatches ? (
+              <View style={styles.noMatchesContent}>
+                <Text style={styles.noMatchesTitle}>No workouts found</Text>
+                <Text style={styles.noMatchesBody}>
+                  No workouts match your current filters. Try adjusting or clearing your filters to see more results.
+                </Text>
+                <View style={styles.noMatchesIllustrationWrapper}>
+                  <Image source={DrinkWaterIllustration} style={styles.noMatchesImage} resizeMode="contain" />
                 </View>
               </View>
             ) : today.length === 0 ? (
@@ -392,7 +542,7 @@ export default function ActivitiesIndexScreen() {
             )}
           </View>
 
-          {!isLoading && totalCount > 0 ? (
+          {!isLoading && sourceCount > 0 && !showNoMatches ? (
             <>
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Future workouts</Text>
@@ -578,6 +728,16 @@ export default function ActivitiesIndexScreen() {
         onClose={() => setActionSheetVisible(false)}
       />
 
+      <ActivitiesFilterSheet
+        visible={filtersOpen}
+        filters={filters}
+        matchCount={filteredCount}
+        sessions={sessions}
+        onChange={(patch) => setFilters((cur) => ({ ...cur, ...patch }))}
+        onClear={() => setFilters(DEFAULT_FILTERS)}
+        onClose={() => setFiltersOpen(false)}
+      />
+
       <Toast 
         message={toast || ''} 
         visible={!!toast} 
@@ -615,6 +775,45 @@ const createStyles = (colors: {
     fontFamily: Fonts.extraBold,
     color: colors.text,
     letterSpacing: -0.3,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  filterButton: {
+    padding: 6,
+  },
+  filterButtonInner: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: rgba(colors.text, 0.12),
+    backgroundColor: rgba(colors.text, 0.04),
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 999,
+    paddingHorizontal: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.25)',
+  },
+  filterBadgeText: {
+    fontFamily: Fonts.black,
+    fontSize: 11,
+    color: colors.onPrimary,
+    lineHeight: 12,
   },
   section: {
     gap: 10,
@@ -655,6 +854,35 @@ const createStyles = (colors: {
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 8,
+  },
+  noMatchesContent: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 8,
+  },
+  noMatchesTitle: {
+    fontFamily: Fonts.bold,
+    fontSize: 16,
+    color: colors.text,
+  },
+  noMatchesBody: {
+    color: rgba(colors.text, 0.7),
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  noMatchesIllustrationWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 8,
+    marginTop: 8,
+  },
+  noMatchesImage: {
+    width: '100%',
+    maxWidth: 320,
+    height: 260,
   },
   ctaRow: {
     flexDirection: 'row',

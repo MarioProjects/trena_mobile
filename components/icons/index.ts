@@ -20,6 +20,7 @@ export { MoreHorizIcon } from './MoreHorizIcon';
 export { NotebookIcon } from './NotebookIcon';
 export { PlusIcon } from './PlusIcon';
 export { ProfileIcon } from './ProfileIcon';
+export { FilterIcon } from './FilterIcon';
 export { SearchIcon } from './SearchIcon';
 export { SkipStatusIcon } from './SkipStatusIcon';
 export { StatusIcon } from './StatusIcon';
