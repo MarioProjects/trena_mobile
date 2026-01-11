@@ -6,48 +6,48 @@ import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
-    AppleIcon,
-    BackpackIcon,
-    BallIcon,
-    BatteryIcon,
-    BicycleIcon,
-    BrainIcon,
-    BugIcon,
-    CarIcon,
-    CharacterIcon,
-    ChessIcon,
-    DropIcon,
-    DumbbellIcon,
-    DuplicateIcon,
-    FilterIcon,
-    FireIcon,
-    HappyIcon,
-    HourglassIcon,
-    LeafIcon,
-    LegIcon,
-    MoreHorizIcon,
-    MountainIcon,
-    MuscleIcon,
-    NeutralIcon,
-    PinIcon,
-    PizzaIcon,
-    PlusIcon,
-    RainIcon,
-    RollerskateIcon,
-    SadIcon,
-    ShoeIcon,
-    SkippingRopeIcon,
-    SnowIcon,
-    StarIcon,
-    StatusIcon,
-    TrashIcon,
-    VideoIcon,
-    XIcon,
-    YogaIcon,
+  AppleIcon,
+  BackpackIcon,
+  BallIcon,
+  BatteryIcon,
+  BicycleIcon,
+  BrainIcon,
+  BugIcon,
+  CarIcon,
+  CharacterIcon,
+  ChessIcon,
+  DropIcon,
+  DumbbellIcon,
+  DuplicateIcon,
+  FilterIcon,
+  FireIcon,
+  HappyIcon,
+  HourglassIcon,
+  LeafIcon,
+  LegIcon,
+  MoreHorizIcon,
+  MountainIcon,
+  MuscleIcon,
+  NeutralIcon,
+  PinIcon,
+  PizzaIcon,
+  PlusIcon,
+  RainIcon,
+  RollerskateIcon,
+  SadIcon,
+  ShoeIcon,
+  SkippingRopeIcon,
+  SnowIcon,
+  StarIcon,
+  StatusIcon,
+  TrashIcon,
+  VideoIcon,
+  XIcon,
+  YogaIcon,
 } from '@/components/icons';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions, updateSessionStatus, updateSessionTitle } from '@/lib/workouts/repo';
@@ -196,6 +196,7 @@ export default function ActivitiesIndexScreen() {
 
   const [sessions, setSessions] = React.useState<WorkoutSessionRow[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = React.useState<string | null>(null);
   const [menuTargetId, setMenuTargetId] = React.useState<string | null>(null);
@@ -236,6 +237,26 @@ export default function ActivitiesIndexScreen() {
     }
   }, []);
 
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Run sync (pushes outbox, pulls remote changes)
+      try {
+        const { runSyncOnce } = await import('@/lib/sync/sync-engine');
+        await runSyncOnce();
+      } catch (e) {
+        // Sync failed (likely offline) - non-fatal, log warning
+        console.warn('[activities] sync failed:', e);
+      }
+      // Always reload from local DB (source of truth)
+      await load({ silent: true });
+    } catch (e: any) {
+      showToast(e?.message ?? 'Refresh failed');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [load, showToast]);
+
   useFocusEffect(
     React.useCallback(() => {
       load();
@@ -250,10 +271,10 @@ export default function ActivitiesIndexScreen() {
     }
   }, [params.toast]);
 
-  const showToast = (message: string) => {
+  const showToast = React.useCallback((message: string) => {
     setToast(message);
     setTimeout(() => setToast(null), 2200);
-  };
+  }, []);
 
   const onDelete = (id: string) => {
     setMenuTargetId(null);
@@ -493,7 +514,19 @@ export default function ActivitiesIndexScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.content}>
-        <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+              colors={[colors.onPrimary]}
+              progressBackgroundColor={colors.primary}
+            />
+          }
+        >
           <View style={styles.titleRow}>
             <Text style={styles.title}>Activities</Text>
             <Pressable
