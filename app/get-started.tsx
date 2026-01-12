@@ -1,7 +1,8 @@
 import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
+  ActivityIndicator,
+  Keyboard,
   Pressable,
   StyleSheet,
   Text,
@@ -14,6 +15,7 @@ import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { signInWithGoogle } from '@/lib/google-oauth';
+import { sendMagicLinkOrOTP } from '@/lib/email-auth';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -27,6 +29,7 @@ export default function GetStartedScreen() {
   const { isLoggedIn } = useAuthContext();
   const [email, setEmail] = useState('');
   const [showError, setShowError] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const { colors } = useTrenaTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -42,7 +45,7 @@ export default function GetStartedScreen() {
     setActionSheetVisible(true);
   };
 
-  const canSendMagicLink = useMemo(() => isProbablyEmail(email), [email]);
+  const canSendMagicLink = useMemo(() => isProbablyEmail(email) && !isSending, [email, isSending]);
 
   const onGoogle = async () => {
     try {
@@ -62,17 +65,32 @@ export default function GetStartedScreen() {
     options: [{ text: 'OK', onPress: () => {} }],
   });
 
-  const onLogin = () => {
-    if (!canSendMagicLink) {
+  const onLogin = async () => {
+    if (!isProbablyEmail(email)) {
       setShowError(true);
       return;
     }
     setShowError(false);
-    showActionSheet({
-      title: 'Not implemented',
-      message: 'Email magic-link login is not wired yet.',
-      options: [{ text: 'OK', onPress: () => {} }],
-    });
+    setIsSending(true);
+
+    const result = await sendMagicLinkOrOTP(email);
+
+    setIsSending(false);
+
+    if (result.success) {
+      Keyboard.dismiss();
+      showActionSheet({
+        title: 'Check your email',
+        message: `We sent a magic link to ${email.trim().toLowerCase()}. Click the link in your email to sign in.`,
+        options: [{ text: 'Got it', onPress: () => {} }],
+      });
+    } else {
+      showActionSheet({
+        title: 'Sign-in error',
+        message: result.error ?? 'Failed to send verification email. Please try again.',
+        options: [{ text: 'OK', onPress: () => {} }],
+      });
+    }
   };
 
   const onEmailChange = (text: string) => {
@@ -125,13 +143,19 @@ export default function GetStartedScreen() {
             <Pressable
               accessibilityRole="button"
               onPress={onLogin}
+              disabled={isSending}
               style={({ pressed }) => [
                 styles.loginButton,
                 !canSendMagicLink && styles.loginButtonDisabled,
                 pressed && canSendMagicLink && styles.pressed,
               ]}>
-              <Text style={styles.loginButtonText}>Login</Text>
+              {isSending ? (
+                <ActivityIndicator color={colors.onPrimary} />
+              ) : (
+                <Text style={styles.loginButtonText}>Login</Text>
+              )}
             </Pressable>
+            <Text style={styles.emailHint}>We'll send a magic link to your inbox</Text>
           </View>
 
           {/* Divider */}
@@ -159,8 +183,6 @@ export default function GetStartedScreen() {
               <Text style={[styles.socialButtonText, styles.socialButtonTextLight]}>Connect with Facebook</Text>
             </Pressable>
           </View>
-
-          <Text style={styles.footnote}>Dummy auth for now — wiring real sign-in next.</Text>
         </View>
       </SafeAreaView>
       <ActionSheet
@@ -262,6 +284,13 @@ const createStyles = (colors: { background: string; primary: string; text: strin
       fontFamily: Fonts.black,
       letterSpacing: 0.3,
     },
+    emailHint: {
+      color: rgba(colors.text, 0.5),
+      textAlign: 'center',
+      fontSize: 13,
+      fontFamily: Fonts.regular,
+      marginTop: 4,
+    },
     dividerContainer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -307,13 +336,6 @@ const createStyles = (colors: { background: string; primary: string; text: strin
     },
     socialButtonTextLight: {
       color: '#fff',
-    },
-    footnote: {
-      color: rgba(colors.text, 0.5),
-      textAlign: 'center',
-      fontSize: 12,
-      fontFamily: Fonts.regular,
-      marginTop: 8,
     },
     pressed: {
       transform: [{ scale: 0.98 }],

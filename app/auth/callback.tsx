@@ -1,6 +1,7 @@
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
+import { verifyMagicLinkHash } from '@/lib/email-auth';
 import { supabase } from '@/lib/supabase';
 import * as Linking from 'expo-linking';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
@@ -24,12 +25,16 @@ export default function AuthCallbackScreen() {
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{
     code?: string;
+    token_hash?: string;
+    type?: string;
     error?: string;
     error_description?: string;
   }>();
   const url = Linking.useURL();
   const [message, setMessage] = useState('Completing sign-in…');
   const code = params.code;
+  const token_hash = params.token_hash;
+  const type = params.type;
   const error = params.error;
   const error_description = params.error_description;
 
@@ -45,26 +50,45 @@ export default function AuthCallbackScreen() {
         return;
       }
 
+      // Handle magic link with token_hash (PKCE flow)
+      const tokenHashFromUrl = url ? getParamFromUrl(url, 'token_hash') : undefined;
+      const tokenHashValue = token_hash ?? tokenHashFromUrl;
+      const typeFromUrl = url ? getParamFromUrl(url, 'type') : undefined;
+      const typeValue = type ?? typeFromUrl;
+
+      if (tokenHashValue && typeValue === 'email') {
+        const result = await verifyMagicLinkHash(tokenHashValue);
+        if (result.success) {
+          router.replace('/today');
+          return;
+        }
+        setMessage(`Auth error: ${result.error ?? 'Magic link verification failed.'}`);
+        return;
+      }
+
+      // Handle OAuth code exchange
       const codeFromUrl = url ? getParamFromUrl(url, 'code') : undefined;
       const codeValue = code ?? codeFromUrl;
-      if (!codeValue) {
-        setMessage('Missing OAuth code. You can go back and try again.');
+      if (!codeValue && !tokenHashValue) {
+        setMessage('Missing authentication data. You can go back and try again.');
         return;
       }
 
-      const exchanged = await supabase.auth.exchangeCodeForSession(codeValue);
-      if (exchanged.error) {
-        setMessage(`Auth error: ${exchanged.error.message}`);
-        return;
-      }
+      if (codeValue) {
+        const exchanged = await supabase.auth.exchangeCodeForSession(codeValue);
+        if (exchanged.error) {
+          setMessage(`Auth error: ${exchanged.error.message}`);
+          return;
+        }
 
-      router.replace('/today');
+        router.replace('/today');
+      }
     };
 
     run().catch((e: unknown) => {
       setMessage(e instanceof Error ? `Auth error: ${e.message}` : 'Auth error: Unknown error');
     });
-  }, [code, error, error_description, url]);
+  }, [code, token_hash, type, error, error_description, url]);
 
   if (isLoggedIn) {
     return <Redirect href="/today" />;
