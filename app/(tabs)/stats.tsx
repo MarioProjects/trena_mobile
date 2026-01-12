@@ -159,7 +159,7 @@ export default function StatsScreen() {
 
   const chartW = Math.max(0, containerWidth - 32);
   const histH = 170;
-  const amrapH = amrapChartModel ? Math.min(520, 60 + amrapChartModel.yLabels.length * 40) : 240;
+  const amrapH = amrapChartModel ? 60 + amrapChartModel.yLabels.length * 40 : 240;
   const todayIdx = (new Date().getDay() + 6) % 7; // monday-first 0..6
 
   function formatDateRelative(iso: string) {
@@ -372,19 +372,15 @@ export default function StatsScreen() {
                         <Text style={styles.legendHint}>last 4 cycles</Text>
                       </View>
 
-                      <View style={{ maxHeight: 420 }}>
-                        <ScrollView nestedScrollEnabled>
-                          <GroupedHorizontalBars
-                            width={chartW}
-                            height={amrapH}
-                            yLabels={amrapChartModel.yLabels}
-                            series={amrapChartModel.series}
-                            maxValue={amrapChartModel.maxValue}
-                            xTickCount={4}
-                            referenceValue={selectedAmrap?.resetAtReps}
-                          />
-                        </ScrollView>
-                      </View>
+                      <GroupedHorizontalBars
+                        width={chartW}
+                        height={amrapH}
+                        yLabels={amrapChartModel.yLabels}
+                        series={amrapChartModel.series}
+                        maxValue={amrapChartModel.maxValue}
+                        xTickCount={4}
+                        referenceValue={selectedAmrap?.resetAtReps}
+                      />
                     </>
                   ) : null}
                 </>
