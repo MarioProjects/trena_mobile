@@ -69,17 +69,28 @@ export function formatExerciseName(ref: ExerciseRef): string {
   if (ref.kind === 'learn') {
     return learnData.find((x) => x.id === ref.learnExerciseId)?.name ?? 'Unknown exercise';
   }
-  return ref.name;
+  if (ref.kind === 'method') {
+    return 'Method instance'; // We don't have methods list here easily, but this is a fallback
+  }
+  if (ref.kind === 'free') {
+    return ref.name;
+  }
+  return 'Unknown';
 }
 
 export function getExerciseKey(ref: ExerciseRef): string {
   if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
-  return `free:${ref.name}`;
+  if (ref.kind === 'method') return `method:${ref.methodInstanceId}`;
+  if (ref.kind === 'free') return `free:${ref.name}`;
+  return 'unknown';
 }
 
 export function keyToRef(key: string): ExerciseRef {
   if (key.startsWith('learn:')) {
     return { kind: 'learn', learnExerciseId: key.replace('learn:', '') };
+  }
+  if (key.startsWith('method:')) {
+    return { kind: 'method', methodInstanceId: key.replace('method:', '') };
   }
   return { kind: 'free', name: key.replace('free:', '') };
 }

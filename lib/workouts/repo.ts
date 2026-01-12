@@ -81,6 +81,9 @@ function coerceExerciseRef(x: unknown): ExerciseRef {
   if (obj.kind === 'free' && typeof obj.name === 'string') {
     return { kind: 'free', name: obj.name };
   }
+  if (obj.kind === 'method' && typeof obj.methodInstanceId === 'string') {
+    return { kind: 'method', methodInstanceId: obj.methodInstanceId };
+  }
   return { kind: 'free', name: 'Unknown exercise' };
 }
 

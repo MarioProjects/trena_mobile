@@ -18,7 +18,12 @@ export type FreeExerciseRef = {
   name: string;
 };
 
-export type ExerciseRef = LearnExerciseRef | FreeExerciseRef;
+export type MethodExerciseRef = {
+  kind: 'method';
+  methodInstanceId: string;
+};
+
+export type ExerciseRef = LearnExerciseRef | FreeExerciseRef | MethodExerciseRef;
 
 export type WendlerLiftKey = 'squat' | 'bench' | 'deadlift' | 'press';
 

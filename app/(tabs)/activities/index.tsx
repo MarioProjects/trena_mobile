@@ -84,7 +84,9 @@ function startOfLocalDay(d: Date) {
 
 function formatExerciseName(ref: ExerciseRef) {
   if (ref.kind === 'learn') return learnExerciseNameById.get(ref.learnExerciseId) ?? ref.learnExerciseId;
-  return ref.name;
+  if (ref.kind === 'method') return 'Method';
+  if (ref.kind === 'free') return ref.name;
+  return 'Unknown';
 }
 
 function normalize(s: string) {
@@ -93,7 +95,9 @@ function normalize(s: string) {
 
 function exerciseKey(ref: ExerciseRef): string {
   if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
-  return `free:${normalize(ref.name)}`;
+  if (ref.kind === 'method') return `method:${ref.methodInstanceId}`;
+  if (ref.kind === 'free') return `free:${normalize(ref.name)}`;
+  return 'unknown';
 }
 
 function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
@@ -224,6 +228,11 @@ export default function ActivitiesIndexScreen() {
     setActionSheetVisible(true);
   };
 
+  const showToast = React.useCallback((message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 2200);
+  }, []);
+
   const load = React.useCallback(async (opts?: { silent?: boolean }) => {
     const shouldLoad = !opts?.silent && !hasLoaded.current;
     if (shouldLoad) setIsLoading(true);
@@ -270,11 +279,6 @@ export default function ActivitiesIndexScreen() {
       router.setParams({ toast: undefined } as any);
     }
   }, [params.toast]);
-
-  const showToast = React.useCallback((message: string) => {
-    setToast(message);
-    setTimeout(() => setToast(null), 2200);
-  }, []);
 
   const onDelete = (id: string) => {
     setMenuTargetId(null);
@@ -408,6 +412,10 @@ export default function ActivitiesIndexScreen() {
         let hit = false;
         for (const ex of s.snapshot?.exercises ?? []) {
           if (selectedExerciseKeys.has(exerciseKey(ex.exercise))) {
+            hit = true;
+            break;
+          }
+          if (ex.source.type === 'method' && selectedExerciseKeys.has(`method:${ex.source.methodInstanceId}`)) {
             hit = true;
             break;
           }

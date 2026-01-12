@@ -41,9 +41,9 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
-import { listDistinctFreeExercises } from '@/lib/workouts/repo';
+import { listDistinctFreeExercises, listMethodInstances } from '@/lib/workouts/repo';
 import { WORKOUT_TAGS, type WorkoutTag } from '@/lib/workouts/tags';
-import type { ExerciseRef, WorkoutSessionRow } from '@/lib/workouts/types';
+import type { ExerciseRef, MethodInstanceRow, WorkoutSessionRow } from '@/lib/workouts/types';
 
 export type ActivitiesDatePreset = 'any' | 'today' | 'last7' | 'last30' | 'custom';
 
@@ -114,7 +114,9 @@ function normalize(s: string) {
 
 function formatExerciseName(ref: ExerciseRef): string {
   if (ref.kind === 'learn') return learnExerciseNameById.get(ref.learnExerciseId) ?? ref.learnExerciseId;
-  return ref.name;
+  if (ref.kind === 'method') return 'Method';
+  if (ref.kind === 'free') return ref.name;
+  return 'Unknown';
 }
 
 type NoteSearchResult = {
@@ -128,11 +130,17 @@ type NoteSearchResult = {
 
 function exerciseKey(ref: ExerciseRef): string {
   if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
-  return `free:${normalize(ref.name)}`;
+  if (ref.kind === 'method') return `method:${ref.methodInstanceId}`;
+  if (ref.kind === 'free') return `free:${normalize(ref.name)}`;
+  return 'unknown';
 }
 
-function labelForExercise(ref: ExerciseRef): string {
+function labelForExercise(ref: ExerciseRef, methods: MethodInstanceRow[] = []): string {
   if (ref.kind === 'free') return ref.name;
+  if (ref.kind === 'method') {
+    const hit = methods.find((m) => m.id === ref.methodInstanceId);
+    return hit?.name ?? 'Unknown method';
+  }
   const hit = learnExercises.find((x) => x.id === ref.learnExerciseId);
   return hit?.name ?? 'Unknown exercise';
 }
@@ -219,6 +227,7 @@ export function ActivitiesFilterSheet(props: {
   const [exPickerOpen, setExPickerOpen] = React.useState(false);
   const [exTerm, setExTerm] = React.useState('');
   const [customExercises, setCustomExercises] = React.useState<string[]>([]);
+  const [methods, setMethods] = React.useState<MethodInstanceRow[]>([]);
 
   const [tagsPickerOpen, setTagsPickerOpen] = React.useState(false);
 
@@ -303,6 +312,9 @@ export function ActivitiesFilterSheet(props: {
     listDistinctFreeExercises()
       .then((list) => setCustomExercises(list))
       .catch(() => setCustomExercises([]));
+    listMethodInstances()
+      .then((list) => setMethods(list))
+      .catch(() => setMethods([]));
   }, [exPickerOpen]);
 
   const [androidPickerVisible, setAndroidPickerVisible] = React.useState(false);
@@ -359,9 +371,16 @@ export function ActivitiesFilterSheet(props: {
     return customExercises.filter((x) => normalize(x).includes(t));
   }, [exTerm, customExercises]);
 
+  const filteredMethods = React.useMemo(() => {
+    const t = normalize(exTerm);
+    if (!t) return methods;
+    return methods.filter((m) => normalize(m.name).includes(t) || normalize(m.method_key).includes(t));
+  }, [exTerm, methods]);
+
   const exactMatch =
     filteredLearn.some((x) => normalize(x.name) === normalize(exTerm)) ||
-    filteredCustom.some((x) => normalize(x) === normalize(exTerm));
+    filteredCustom.some((x) => normalize(x) === normalize(exTerm)) ||
+    filteredMethods.some((m) => normalize(m.name) === normalize(exTerm));
 
   return (
     <>
@@ -461,11 +480,11 @@ export function ActivitiesFilterSheet(props: {
                       return (
                         <View key={key} style={styles.chip}>
                           <Text style={styles.chipText} numberOfLines={1}>
-                            {labelForExercise(ref)}
+                            {labelForExercise(ref, methods)}
                           </Text>
                           <Pressable
                             accessibilityRole="button"
-                            accessibilityLabel={`Remove ${labelForExercise(ref)}`}
+                            accessibilityLabel={`Remove ${labelForExercise(ref, methods)}`}
                             onPress={() =>
                               props.onChange({
                                 selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key),
@@ -724,31 +743,6 @@ export function ActivitiesFilterSheet(props: {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {exTerm && !exactMatch ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Add custom exercise ${exTerm.trim()}`}
-                style={({ pressed }) => [styles.exRow, pressed && styles.rowPressed]}
-                onPress={() => {
-                  const nextName = exTerm.trim();
-                  if (!nextName) return;
-                  const ref: ExerciseRef = { kind: 'free', name: nextName };
-                  const key = exerciseKey(ref);
-                  if (selectedExerciseKeys.has(key)) return;
-                  props.onChange({ selectedExercises: [...filters.selectedExercises, ref] });
-                  setExTerm('');
-                }}
-              >
-                <View style={[styles.exIconBox, { backgroundColor: colors.primary }]}>
-                  <Text style={{ fontFamily: Fonts.black, color: colors.onPrimary, fontSize: 16 }}>+</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.exRowTitle}>Create “{exTerm.trim()}”</Text>
-                  <Text style={styles.exRowMeta}>Custom exercise</Text>
-                </View>
-              </Pressable>
-            ) : null}
-
             {filteredCustom.length > 0 ? (
               <View style={{ gap: 8 }}>
                 <Text style={styles.exSectionHeader}>Custom</Text>
@@ -778,8 +772,42 @@ export function ActivitiesFilterSheet(props: {
               </View>
             ) : null}
 
-            {filteredLearn.length > 0 ? (
+            {filteredMethods.length > 0 ? (
               <View style={{ gap: 8, marginTop: filteredCustom.length > 0 ? 14 : 0 }}>
+                <Text style={styles.exSectionHeader}>Programs</Text>
+                {filteredMethods.slice(0, 30).map((m) => {
+                  const ref: ExerciseRef = { kind: 'method', methodInstanceId: m.id };
+                  const key = exerciseKey(ref);
+                  const selected = selectedExerciseKeys.has(key);
+                  return (
+                    <Pressable
+                      key={key}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${m.name}`}
+                      style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
+                      onPress={() => {
+                        if (selected) {
+                          props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
+                        } else {
+                          props.onChange({ selectedExercises: [...filters.selectedExercises, ref] });
+                        }
+                      }}
+                    >
+                      <View style={[styles.exIconBox, { backgroundColor: rgba(colors.primary, 0.1) }]}>
+                        <Text style={[styles.exIconText, { color: colors.primary }]}>{m.method_key.slice(0, 1).toUpperCase()}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.exRowTitle}>{m.name}</Text>
+                        <Text style={styles.exRowMeta}>{m.method_key === 'amrap' ? 'AMRAP' : m.method_key === 'wendler_531' ? 'Wendler 5/3/1' : m.method_key}</Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+
+            {filteredLearn.length > 0 ? (
+              <View style={{ gap: 8, marginTop: (filteredCustom.length > 0 || filteredMethods.length > 0) ? 14 : 0 }}>
                 <Text style={styles.exSectionHeader}>Library</Text>
                 {filteredLearn.slice(0, 60).map((ex) => {
                   const ref: ExerciseRef = { kind: 'learn', learnExerciseId: ex.id };
@@ -812,7 +840,7 @@ export function ActivitiesFilterSheet(props: {
               </View>
             ) : null}
 
-            {filteredLearn.length === 0 && filteredCustom.length === 0 && !!exTerm ? (
+            {filteredLearn.length === 0 && filteredCustom.length === 0 && filteredMethods.length === 0 && !!exTerm ? (
               <Text style={styles.exEmpty}>No matching exercises found.</Text>
             ) : null}
           </ScrollView>
