@@ -4,38 +4,38 @@ import { FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, Tex
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
-  AppleIcon,
-  BackpackIcon,
-  BallIcon,
-  BatteryIcon,
-  BicycleIcon,
-  BrainIcon,
-  BugIcon,
-  CarIcon,
-  ChessIcon,
-  DropIcon,
-  DumbbellIcon,
-  FireIcon,
-  HappyIcon,
-  HourglassIcon,
-  LeafIcon,
-  LegIcon,
-  MountainIcon,
-  MuscleIcon,
-  NeutralIcon,
-  PinIcon,
-  PizzaIcon,
-  RainIcon,
-  RollerskateIcon,
-  SadIcon,
-  ShoeIcon,
-  SkippingRopeIcon,
-  SnowIcon,
-  StarIcon,
-  StickyNoteIcon,
-  VideoIcon,
-  XIcon,
-  YogaIcon,
+    AppleIcon,
+    BackpackIcon,
+    BallIcon,
+    BatteryIcon,
+    BicycleIcon,
+    BrainIcon,
+    BugIcon,
+    CarIcon,
+    ChessIcon,
+    DropIcon,
+    DumbbellIcon,
+    FireIcon,
+    HappyIcon,
+    HourglassIcon,
+    LeafIcon,
+    LegIcon,
+    MountainIcon,
+    MuscleIcon,
+    NeutralIcon,
+    PinIcon,
+    PizzaIcon,
+    RainIcon,
+    RollerskateIcon,
+    SadIcon,
+    ShoeIcon,
+    SkippingRopeIcon,
+    SnowIcon,
+    StarIcon,
+    StickyNoteIcon,
+    VideoIcon,
+    XIcon,
+    YogaIcon,
 } from '@/components/icons';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Fonts, rgba } from '@/constants/theme';
@@ -112,6 +112,24 @@ function normalize(s: string) {
   return s.toLowerCase().trim();
 }
 
+function levenshtein(a: string, b: string): number {
+  if (a.length < b.length) return levenshtein(b, a);
+  if (b.length === 0) return a.length;
+
+  let prevRow = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 0; i < a.length; i++) {
+    const currRow = [i + 1];
+    for (let j = 0; j < b.length; j++) {
+      const insertions = prevRow[j + 1] + 1;
+      const deletions = currRow[j] + 1;
+      const substitutions = prevRow[j] + (a[i] === b[j] ? 0 : 1);
+      currRow.push(Math.min(insertions, deletions, substitutions));
+    }
+    prevRow = currRow;
+  }
+  return prevRow[b.length];
+}
+
 function formatExerciseName(ref: ExerciseRef): string {
   if (ref.kind === 'learn') return learnExerciseNameById.get(ref.learnExerciseId) ?? ref.learnExerciseId;
   if (ref.kind === 'method') return 'Method';
@@ -133,6 +151,57 @@ function exerciseKey(ref: ExerciseRef): string {
   if (ref.kind === 'method') return `method:${ref.methodInstanceId}`;
   if (ref.kind === 'free') return `free:${normalize(ref.name)}`;
   return 'unknown';
+}
+
+function fuzzyMatch(target: string, query: string): { matched: boolean; score: number } {
+  const t = target.toLowerCase();
+  const q = query.toLowerCase();
+
+  // 1. Exact substring match is perfect
+  if (t.includes(q)) return { matched: true, score: 0 };
+
+  const words = t.split(/\s+/);
+  let bestScore = 100;
+
+  for (const word of words) {
+    if (word.length === 0) continue;
+
+    // 2. Exact prefix match (e.g., "bi" matches "bilbo")
+    if (word.startsWith(q)) {
+      bestScore = Math.min(bestScore, 1);
+      continue;
+    }
+
+    // 3. Fuzzy prefix match (e.g., "bu" matches "bilbo" prefix "bi")
+    if (q.length >= 2) {
+      const prefix = word.slice(0, q.length);
+      const pd = levenshtein(prefix, q);
+      if (pd <= 1) {
+        bestScore = Math.min(bestScore, pd + 1);
+      }
+    }
+
+    // 4. General word fuzzy match
+    const d = levenshtein(word, q);
+    // Use a very generous threshold as per user request
+    const wordThreshold = Math.max(3, Math.floor(q.length * 0.8) + 1);
+    if (d <= wordThreshold) {
+      bestScore = Math.min(bestScore, d + 2);
+    }
+  }
+
+  // 5. Whole string fuzzy match
+  const wholeDist = levenshtein(t, q);
+  const wholeThreshold = Math.max(4, q.length);
+  if (wholeDist <= wholeThreshold) {
+    bestScore = Math.min(bestScore, wholeDist + 5);
+  }
+
+  if (bestScore < 100) {
+    return { matched: true, score: bestScore };
+  }
+
+  return { matched: false, score: 0 };
 }
 
 function labelForExercise(ref: ExerciseRef, methods: MethodInstanceRow[] = []): string {
@@ -251,9 +320,20 @@ export function ActivitiesFilterSheet(props: {
   // Search results for workout name filter - show all by default, filter as user types
   const filteredWorkoutsByName = React.useMemo(() => {
     if (sessions.length === 0) return [];
-    const q = normalize(nameTerm);
-    if (!q) return sessions; // Show all when no search term
-    return sessions.filter((s) => normalize(s.title ?? '').includes(q));
+    if (!nameTerm.trim()) return sessions; // Show all when no search term
+
+    const scored = sessions.map((s) => {
+      const fuzzy = fuzzyMatch(s.title ?? '', nameTerm);
+      return { s, ...fuzzy };
+    });
+
+    return scored
+      .filter((x) => x.matched)
+      .sort((a, b) => {
+        if (a.score !== b.score) return a.score - b.score;
+        return new Date(b.s.started_at).getTime() - new Date(a.s.started_at).getTime();
+      })
+      .map((x) => x.s);
   }, [nameTerm, sessions]);
 
   // All notes from sessions - built once
@@ -300,11 +380,26 @@ export function ActivitiesFilterSheet(props: {
 
   // Search results for notes filter - show all by default, filter as user types
   const filteredByNotes = React.useMemo((): NoteSearchResult[] => {
-    const q = normalize(notesTerm);
-    if (!q) return allNotes; // Show all when no search term
-    return allNotes.filter(
-      (r) => normalize(r.noteContent).includes(q) || normalize(r.noteContext).includes(q) || normalize(r.sessionTitle).includes(q)
-    );
+    if (!notesTerm.trim()) return allNotes; // Show all when no search term
+
+    const scored = allNotes.map((r) => {
+      const fuzzyContent = fuzzyMatch(r.noteContent, notesTerm);
+      const fuzzyContext = fuzzyMatch(r.noteContext, notesTerm);
+      const fuzzyTitle = fuzzyMatch(r.sessionTitle, notesTerm);
+
+      const bestScore = Math.min(
+        fuzzyContent.matched ? fuzzyContent.score : 100,
+        fuzzyContext.matched ? fuzzyContext.score : 100,
+        fuzzyTitle.matched ? fuzzyTitle.score : 100
+      );
+
+      return { r, matched: bestScore < 100, score: bestScore };
+    });
+
+    return scored
+      .filter((x) => x.matched)
+      .sort((a, b) => a.score - b.score)
+      .map((x) => x.r);
   }, [notesTerm, allNotes]);
 
   React.useEffect(() => {
@@ -920,7 +1015,10 @@ export function ActivitiesFilterSheet(props: {
               placeholderTextColor={rgba(colors.text, 0.5)}
               style={styles.exSearchInput}
               value={nameTerm}
-              onChangeText={setNameTerm}
+              onChangeText={(t) => {
+                setNameTerm(t);
+                props.onChange({ workoutQuery: t });
+              }}
               autoFocus
             />
           </View>
@@ -1004,7 +1102,10 @@ export function ActivitiesFilterSheet(props: {
               placeholderTextColor={rgba(colors.text, 0.5)}
               style={styles.exSearchInput}
               value={notesTerm}
-              onChangeText={setNotesTerm}
+              onChangeText={(t) => {
+                setNotesTerm(t);
+                props.onChange({ notesQuery: t });
+              }}
               autoFocus
             />
           </View>

@@ -11,6 +11,7 @@ import {
   BicycleIcon,
   BrainIcon,
   BugIcon,
+  CalendarIcon,
   CarIcon,
   ChessIcon,
   DropIcon,
@@ -35,11 +36,12 @@ import {
   VideoIcon,
   YogaIcon,
 } from '@/components/icons';
+import { PlayIcon } from '@/components/icons/PlayIcon';
 import { Fonts, rgba } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { listSessions } from '@/lib/workouts/repo';
-import type { WorkoutTag } from '@/lib/workouts/tags';
 import { countCompletedSessionsThisWeek } from '@/lib/workouts/stats';
+import type { WorkoutTag } from '@/lib/workouts/tags';
 import type { WorkoutSessionRow } from '@/lib/workouts/types';
 
 const PROGRAM_THRESHOLD_MS = 15 * 60 * 1000; // keep consistent with Activities / session screen
@@ -315,14 +317,22 @@ export default function TodayScreen() {
           <>
             <View style={styles.cardsRow}>
               <View style={[styles.card, { backgroundColor: colors.tertiary }]}>
-                <Text style={[styles.cardLabel, styles.cardTextOnTertiary]}>Workouts</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <CalendarIcon size={14} color={colors.onTertiary} />
+                  <Text style={[styles.cardLabel, styles.cardTextOnTertiary]}>Workouts</Text>
+                </View>
                 <Text style={[styles.cardValue, styles.cardTextOnTertiary]}>{derived.workoutsThisWeek}</Text>
                 <Text style={[styles.cardHint, styles.cardTextOnTertiary]}>this week</Text>
               </View>
               <View style={[styles.card, { backgroundColor: colors.secondary }]}>
-                <Text style={[styles.cardLabel, styles.cardTextOnSecondary]}>Streak</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <FireIcon size={14} color={colors.onSecondary} />
+                  <Text style={[styles.cardLabel, styles.cardTextOnSecondary]}>Streak</Text>
+                </View>
                 <Text style={[styles.cardValue, styles.cardTextOnSecondary]}>{derived.streakWeeks}</Text>
-                <Text style={[styles.cardHint, styles.cardTextOnSecondary]}>week{derived.streakWeeks === 1 ? '' : 's'}</Text>
+                <Text style={[styles.cardHint, styles.cardTextOnSecondary]}>
+                  week{derived.streakWeeks === 1 ? '' : 's'}
+                </Text>
               </View>
             </View>
 
@@ -356,7 +366,10 @@ export default function TodayScreen() {
                 onPress={nextUp.onPress}
                 style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
               >
-                <Text style={styles.primaryButtonText}>{nextUp.cta}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <PlayIcon size={16} color={colors.onPrimary} />
+                  <Text style={styles.primaryButtonText}>{nextUp.cta}</Text>
+                </View>
               </Pressable>
             </View>
 

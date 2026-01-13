@@ -93,6 +93,24 @@ function normalize(s: string) {
   return s.toLowerCase().trim();
 }
 
+function levenshtein(a: string, b: string): number {
+  if (a.length < b.length) return levenshtein(b, a);
+  if (b.length === 0) return a.length;
+
+  let prevRow = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 0; i < a.length; i++) {
+    const currRow = [i + 1];
+    for (let j = 0; j < b.length; j++) {
+      const insertions = prevRow[j + 1] + 1;
+      const deletions = currRow[j] + 1;
+      const substitutions = prevRow[j] + (a[i] === b[j] ? 0 : 1);
+      currRow.push(Math.min(insertions, deletions, substitutions));
+    }
+    prevRow = currRow;
+  }
+  return prevRow[b.length];
+}
+
 function exerciseKey(ref: ExerciseRef): string {
   if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
   if (ref.kind === 'method') return `method:${ref.methodInstanceId}`;
@@ -100,7 +118,58 @@ function exerciseKey(ref: ExerciseRef): string {
   return 'unknown';
 }
 
-function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
+function fuzzyMatch(target: string, query: string): { matched: boolean; score: number } {
+  const t = target.toLowerCase();
+  const q = query.toLowerCase();
+
+  // 1. Exact substring match is perfect
+  if (t.includes(q)) return { matched: true, score: 0 };
+
+  const words = t.split(/\s+/);
+  let bestScore = 100;
+
+  for (const word of words) {
+    if (word.length === 0) continue;
+
+    // 2. Exact prefix match (e.g., "bi" matches "bilbo")
+    if (word.startsWith(q)) {
+      bestScore = Math.min(bestScore, 1);
+      continue;
+    }
+
+    // 3. Fuzzy prefix match (e.g., "bu" matches "bilbo" prefix "bi")
+    if (q.length >= 2) {
+      const prefix = word.slice(0, q.length);
+      const pd = levenshtein(prefix, q);
+      if (pd <= 1) {
+        bestScore = Math.min(bestScore, pd + 1);
+      }
+    }
+
+    // 4. General word fuzzy match
+    const d = levenshtein(word, q);
+    // Use a very generous threshold as per user request
+    const wordThreshold = Math.max(3, Math.floor(q.length * 0.8) + 1);
+    if (d <= wordThreshold) {
+      bestScore = Math.min(bestScore, d + 2);
+    }
+  }
+
+  // 5. Whole string fuzzy match
+  const wholeDist = levenshtein(t, q);
+  const wholeThreshold = Math.max(4, q.length);
+  if (wholeDist <= wholeThreshold) {
+    bestScore = Math.min(bestScore, wholeDist + 5);
+  }
+
+  if (bestScore < 100) {
+    return { matched: true, score: bestScore };
+  }
+
+  return { matched: false, score: 0 };
+}
+
+function bucketSessionsByDay(sessions: WorkoutSessionRow[], skipSort = false) {
   const now = new Date();
   const todayStart = startOfLocalDay(now);
   const tomorrowStart = startOfLocalDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
@@ -121,9 +190,11 @@ function bucketSessionsByDay(sessions: WorkoutSessionRow[]) {
   }
 
   // Keep UX sensible: today/recent are usually newest-first, future earliest-first.
-  today.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
-  recent.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
-  future.sort((a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime());
+  if (!skipSort) {
+    today.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+    recent.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+    future.sort((a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime());
+  }
 
   return { today, future, recent };
 }
@@ -390,23 +461,37 @@ export default function ActivitiesIndexScreen() {
       }
     }
 
-    return sessions.filter((s) => {
+    const scored = sessions.map((s) => {
+      let score = 0;
+      let matched = true;
+
       // Workout name filter: match by selected workouts OR by text query
       if (selectedWorkoutIds) {
-        if (!selectedWorkoutIds.has(s.id)) return false;
+        if (!selectedWorkoutIds.has(s.id)) matched = false;
       } else if (qWorkout) {
-        if (!String(s.title ?? '').toLowerCase().includes(qWorkout)) return false;
+        const fuzzy = fuzzyMatch(s.title ?? '', qWorkout);
+        if (fuzzy.matched) {
+          score += fuzzy.score;
+        } else {
+          matched = false;
+        }
       }
+
+      if (!matched) return { s, matched: false, score: 0 };
 
       const tags = s.tags ?? [];
       if (requiredTags.length > 0) {
-        if (!requiredTags.every((t) => tags.includes(t))) return false;
+        if (!requiredTags.every((t) => tags.includes(t))) matched = false;
       }
 
+      if (!matched) return { s, matched: false, score: 0 };
+
       const startedMs = new Date(s.started_at).getTime();
-      if ((startMs != null || endExclusiveMs != null) && Number.isNaN(startedMs)) return false;
-      if (startMs != null && startedMs < startMs) return false;
-      if (endExclusiveMs != null && startedMs >= endExclusiveMs) return false;
+      if ((startMs != null || endExclusiveMs != null) && Number.isNaN(startedMs)) matched = false;
+      if (startMs != null && startedMs < startMs) matched = false;
+      if (endExclusiveMs != null && startedMs >= endExclusiveMs) matched = false;
+
+      if (!matched) return { s, matched: false, score: 0 };
 
       if (selectedExerciseKeys) {
         let hit = false;
@@ -420,29 +505,48 @@ export default function ActivitiesIndexScreen() {
             break;
           }
         }
-        if (!hit) return false;
+        if (!hit) matched = false;
       }
+
+      if (!matched) return { s, matched: false, score: 0 };
 
       // Notes filter: match by selected notes OR by text query
       if (selectedNotes.length > 0) {
         // Check if any of the selected notes belong to this session
         const hasMatchingNote = selectedNotes.some((n) => n.sessionId === s.id);
-        if (!hasMatchingNote) return false;
+        if (!hasMatchingNote) matched = false;
       } else if (qNotes) {
         const notesJoined = [
           s.snapshot?.notes ?? '',
           ...(s.snapshot?.exercises ?? []).map((ex) => ex.notes ?? ''),
-        ]
-          .join(' ')
-          .toLowerCase();
-        if (!notesJoined.includes(qNotes)) return false;
+        ].join(' ');
+
+        const fuzzy = fuzzyMatch(notesJoined, qNotes);
+        if (fuzzy.matched) {
+          score += fuzzy.score;
+        } else {
+          matched = false;
+        }
       }
 
-      return true;
+      return { s, matched, score };
     });
+
+    const filtered = scored.filter((x) => x.matched);
+
+    if (qWorkout || qNotes) {
+      filtered.sort((a, b) => {
+        if (a.score !== b.score) return a.score - b.score;
+        // Fallback to recency
+        return new Date(b.s.started_at).getTime() - new Date(a.s.started_at).getTime();
+      });
+    }
+
+    return filtered.map((x) => x.s);
   }, [sessions, filters, filterActive]);
 
-  const { today, future, recent } = React.useMemo(() => bucketSessionsByDay(filteredSessions), [filteredSessions]);
+  const queryActive = !!(filters.workoutQuery.trim() || filters.notesQuery.trim());
+  const { today, future, recent } = React.useMemo(() => bucketSessionsByDay(filteredSessions, queryActive), [filteredSessions, queryActive]);
   const sourceCount = sessions.length;
   const filteredCount = filteredSessions.length;
   const showNoMatches = filterActive && filteredCount === 0;
@@ -556,7 +660,7 @@ export default function ActivitiesIndexScreen() {
           </View>
 
           <View style={[styles.section, ((!isLoading && sourceCount === 0) || showNoMatches) && styles.sectionFill]}>
-            {!showNoMatches && <Text style={styles.sectionTitle}>{todaySectionTitle}</Text>}
+            {!showNoMatches && <Text style={styles.sectionTitle}>{queryActive ? 'Search results' : todaySectionTitle}</Text>}
             {isLoading ? (
               <WorkoutsSkeleton />
             ) : sourceCount === 0 ? (
@@ -576,6 +680,8 @@ export default function ActivitiesIndexScreen() {
                   <Image source={DrinkWaterIllustration} style={styles.noMatchesImage} resizeMode="contain" />
                 </View>
               </View>
+            ) : queryActive ? (
+              <View style={styles.list}>{filteredSessions.map(renderSessionCard)}</View>
             ) : today.length === 0 ? (
               <Text style={styles.body}>No workouts logged today.</Text>
             ) : (
@@ -583,7 +689,7 @@ export default function ActivitiesIndexScreen() {
             )}
           </View>
 
-          {!isLoading && sourceCount > 0 && !showNoMatches ? (
+          {!isLoading && sourceCount > 0 && !showNoMatches && !queryActive ? (
             <>
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Future workouts</Text>
