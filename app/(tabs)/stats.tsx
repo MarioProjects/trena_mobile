@@ -1,5 +1,5 @@
 import { ExercisePicker } from '@/components/ExercisePicker';
-import { ViewIcon } from '@/components/icons';
+import { CalendarIcon, RocketIcon, ViewIcon } from '@/components/icons';
 import { ExerciseProgressChart } from '@/components/stats/ExerciseProgressChart';
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
 import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
@@ -201,14 +201,20 @@ export default function StatsScreen() {
           <>
             <View style={styles.cardsRow}>
               <View style={[styles.card, { backgroundColor: colors.tertiary }]}>
-                <Text style={[styles.cardLabel, styles.cardTextOnTertiary]}>Workouts</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <CalendarIcon size={14} color={colors.onTertiary} />
+                  <Text style={[styles.cardLabel, styles.cardTextOnTertiary]}>Workouts</Text>
+                </View>
                 <Text style={[styles.cardValue, styles.cardTextOnTertiary]}>{workoutsThisWeek}</Text>
                 <Text style={[styles.cardHint, styles.cardTextOnTertiary]}>this week</Text>
               </View>
               <View style={[styles.card, { backgroundColor: colors.secondary }]}>
-                <Text style={styles.cardLabel}>Total</Text>
-                <Text style={styles.cardValue}>{totalWorkouts}</Text>
-                <Text style={styles.cardHint}>workouts done</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <RocketIcon size={14} color={colors.onSecondary} />
+                  <Text style={[styles.cardLabel, styles.cardTextOnSecondary]}>Total</Text>
+                </View>
+                <Text style={[styles.cardValue, styles.cardTextOnSecondary]}>{totalWorkouts}</Text>
+                <Text style={[styles.cardHint, styles.cardTextOnSecondary]}>workouts done</Text>
               </View>
             </View>
 
@@ -476,6 +482,9 @@ const createStyles = (colors: {
   },
   cardTextOnTertiary: {
     color: colors.onPrimary,
+  },
+  cardTextOnSecondary: {
+    color: colors.onSecondary,
   },
   sectionCard: {
     backgroundColor: rgba(colors.text, 0.08),
