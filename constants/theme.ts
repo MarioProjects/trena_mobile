@@ -19,7 +19,12 @@ export const TrenaDarkColors = {
   tertiary: 'rgb(242, 137, 201)',
   accentRed: 'rgb(255, 67, 88)',
   custom: {
-    // Reserve for specific UI element overrides
+    cardFree: 'rgb(163, 220, 64)', // primary
+    onCardFree: 'rgb(20, 20, 17)', // onPrimary
+    cardTemplate: 'rgb(91, 79, 243)', // secondary
+    onCardTemplate: 'rgb(236, 235, 228)', // onSecondary
+    cardAI: 'rgb(242, 137, 201)', // tertiary
+    onCardAI: 'rgb(20, 20, 17)', // onTertiary
   },
 } as const;
 
@@ -37,7 +42,12 @@ export const TrenaLightColors = {
   tertiary: 'rgb(242, 137, 201)',
   accentRed: 'rgb(255, 67, 88)',
   custom: {
-    // Reserve for specific UI element overrides
+    cardFree: 'rgb(166, 205, 49)', // primary
+    onCardFree: 'rgb(20, 20, 17)', // onPrimary
+    cardTemplate: 'rgb(70, 62, 210)', // secondary
+    onCardTemplate: 'rgb(236, 235, 228)', // onSecondary
+    cardAI: 'rgb(242, 137, 201)', // tertiary
+    onCardAI: 'rgb(20, 20, 17)', // onTertiary
   },
 } as const;
 
@@ -54,7 +64,12 @@ export const TrenaMonoBlueColors = {
   tertiary: 'rgb(100, 100, 100)',
   accentRed: 'rgb(255, 67, 88)',
   custom: {
-    // Reserve for specific UI element overrides
+    cardFree: 'rgb(19, 68, 173)',      // primary
+    onCardFree: 'rgb(255, 255, 255)',  // onPrimary
+    cardTemplate: 'rgb(27, 27, 27)', // Pure White
+    onCardTemplate: 'rgb(255, 255, 255)',  // Deep Black
+    cardAI: 'rgb(234, 234, 234)',      // surface (Light Gray)
+    onCardAI: 'rgb(18, 18, 18)',       // text
   },
 } as const;
 
@@ -142,4 +157,24 @@ export const Fonts = {
   bold: 'WorkSans_700Bold',
   extraBold: 'WorkSans_800ExtraBold',
   black: 'WorkSans_900Black',
+} as const;
+
+/**
+ * Shared shadow styles for cards and elevated elements.
+ */
+export const Shadows = {
+  small: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  medium: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
 } as const;

@@ -1,7 +1,7 @@
 import { ActivitiesFilterSheet, countActiveActivitiesFilters, isActivitiesFilterActive, type ActivitiesFilters } from '@/components/ActivitiesFilterSheet';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Toast } from '@/components/ui/Toast';
-import { Fonts, rgba } from '@/constants/theme';
+import { Fonts, rgba, Shadows, TrenaColorPalette } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -894,14 +894,7 @@ export default function ActivitiesIndexScreen() {
   );
 }
 
-const createStyles = (colors: {
-  background: string;
-  surface: string;
-  primary: string;
-  text: string;
-  accentRed: string;
-  onPrimary: string;
-}) =>
+const createStyles = (colors: TrenaColorPalette) =>
   StyleSheet.create({
   safe: {
     flex: 1,
@@ -1081,11 +1074,12 @@ const createStyles = (colors: {
     position: 'relative',
     borderWidth: 1,
     borderColor: rgba(colors.text, 0.12),
-    backgroundColor: rgba(colors.text, 0.04),
+    backgroundColor: colors.surface,
     padding: 12,
     borderRadius: 14,
     flexDirection: 'row',
     gap: 12,
+    ...Shadows.small,
   },
   cardPressable: {
     flex: 1,

@@ -1,5 +1,5 @@
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
-import { Fonts, rgba } from '@/constants/theme';
+import { Fonts, rgba, Shadows, TrenaColorPalette } from '@/constants/theme';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router } from 'expo-router';
@@ -144,15 +144,7 @@ export default function StartWorkoutScreen() {
   );
 }
 
-const createStyles = (colors: {
-  background: string;
-  primary: string;
-  secondary: string;
-  tertiary: string;
-  onPrimary: string;
-  onSecondary: string;
-  onTertiary: string;
-}) =>
+const createStyles = (colors: TrenaColorPalette) =>
   StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 0, paddingBottom: 16, gap: 12 },
@@ -160,8 +152,9 @@ const createStyles = (colors: {
   bigCard: {
     flex: 1,
     borderRadius: 22,
-    overflow: 'hidden',
+    overflow: 'visible', // Changed from 'hidden' to show shadow
     borderWidth: StyleSheet.hairlineWidth,
+    ...Shadows.medium,
   },
   pressed: { transform: [{ scale: 0.99 }], opacity: 0.96 },
 
@@ -171,6 +164,8 @@ const createStyles = (colors: {
     paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'stretch',
+    borderRadius: 22,
+    overflow: 'hidden', // Inner clipping
   },
   templateRow: {
     paddingHorizontal: 14,
@@ -207,17 +202,18 @@ const createStyles = (colors: {
   },
 
   freeCard: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.custom.cardFree,
     borderColor: 'rgba(0, 0, 0, 0.25)',
   },
-  freeTitle: { color: colors.onPrimary, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
-  freeSubtitle: { color: rgba(colors.onPrimary, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium, width: '80%' },
+  freeTitle: { color: colors.custom.onCardFree, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  freeSubtitle: { color: rgba(colors.custom.onCardFree, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium, width: '80%' },
 
   templateCard: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.custom.cardTemplate,
+    borderColor: rgba(colors.text, 0.1),
   },
   templateTitle: {
-    color: colors.onSecondary,
+    color: colors.custom.onCardTemplate,
     fontSize: 32,
     lineHeight: 30,
     fontFamily: Fonts.extraBold,
@@ -225,7 +221,7 @@ const createStyles = (colors: {
     textAlign: 'right',
   },
   templateSubtitle: {
-    color: rgba(colors.onSecondary, 0.92),
+    color: rgba(colors.custom.onCardTemplate, 0.92),
     fontSize: 16,
     lineHeight: 22,
     fontFamily: Fonts.medium,
@@ -233,10 +229,10 @@ const createStyles = (colors: {
   },
 
   aiCard: {
-    backgroundColor: colors.tertiary,
+    backgroundColor: colors.custom.cardAI,
   },
-  aiTitle: { color: colors.onTertiary, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
-  aiSubtitle: { color: rgba(colors.onTertiary, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
+  aiTitle: { color: colors.custom.onCardAI, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
+  aiSubtitle: { color: rgba(colors.custom.onCardAI, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
 
   comingSoonBadge: {
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -247,7 +243,7 @@ const createStyles = (colors: {
     marginBottom: 6,
   },
   comingSoonText: {
-    color: colors.onTertiary,
+    color: colors.custom.onCardAI,
     fontSize: 11,
     fontFamily: Fonts.extraBold,
     letterSpacing: 0.5,

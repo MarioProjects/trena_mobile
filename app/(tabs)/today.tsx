@@ -37,7 +37,7 @@ import {
   YogaIcon,
 } from '@/components/icons';
 import { PlayIcon } from '@/components/icons/PlayIcon';
-import { Fonts, rgba } from '@/constants/theme';
+import { Fonts, rgba, Shadows, TrenaColorPalette } from '@/constants/theme';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { listSessions } from '@/lib/workouts/repo';
@@ -438,17 +438,7 @@ export default function TodayScreen() {
   );
 }
 
-const createStyles = (colors: {
-  background: string;
-  primary: string;
-  secondary: string;
-  tertiary: string;
-  text: string;
-  onPrimary: string;
-  onSecondary: string;
-  onTertiary: string;
-  onSurface: string;
-}) =>
+const createStyles = (colors: TrenaColorPalette) =>
   StyleSheet.create({
     safe: {
       flex: 1,
@@ -503,6 +493,7 @@ const createStyles = (colors: {
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: rgba(colors.onSurface, 0.2),
       gap: 6,
+      ...Shadows.small,
     },
     cardLabel: {
       color: colors.text,
@@ -547,11 +538,12 @@ const createStyles = (colors: {
       position: 'relative',
       borderWidth: 1,
       borderColor: rgba(colors.text, 0.12),
-      backgroundColor: rgba(colors.text, 0.04),
+      backgroundColor: colors.surface,
       padding: 12,
       borderRadius: 14,
       flexDirection: 'row',
       gap: 12,
+      ...Shadows.small,
     },
     sessionCardPressable: {
       flex: 1,
@@ -605,12 +597,13 @@ const createStyles = (colors: {
       color: rgba(colors.text, 0.85),
     },
     nextUpCard: {
-      backgroundColor: rgba(colors.text, 0.08),
+      backgroundColor: colors.surface,
       borderRadius: 18,
       padding: 16,
       gap: 10,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: rgba(colors.text, 0.12),
+      ...Shadows.small,
     },
     nextUpHeaderRow: {
       flexDirection: 'row',

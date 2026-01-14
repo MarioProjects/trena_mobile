@@ -4,7 +4,7 @@ import { ExerciseProgressChart } from '@/components/stats/ExerciseProgressChart'
 import { GroupedHorizontalBars } from '@/components/stats/GroupedHorizontalBars';
 import { StatsSkeleton } from '@/components/stats/StatsSkeleton';
 import { WeekdayHistogram } from '@/components/stats/WeekdayHistogram';
-import { Fonts, rgba } from '@/constants/theme';
+import { Fonts, rgba, Shadows, TrenaColorPalette } from '@/constants/theme';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { getMethodInstancesByIds, listCompletedSessionsForStats } from '@/lib/workouts/repo';
 import { amrapCyclesSeries, computeExerciseStats, countCompletedSessions, countCompletedSessionsThisWeek, getExerciseKey, keyToRef, weekdayHistogram } from '@/lib/workouts/stats';
@@ -399,15 +399,7 @@ export default function StatsScreen() {
   );
 }
 
-const createStyles = (colors: {
-  background: string;
-  primary: string;
-  secondary: string;
-  tertiary: string;
-  text: string;
-  accentRed: string;
-  onPrimary: string;
-}) =>
+const createStyles = (colors: TrenaColorPalette) =>
   StyleSheet.create({
   safe: {
     flex: 1,
@@ -461,6 +453,7 @@ const createStyles = (colors: {
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: rgba(colors.text, 0.2),
     gap: 6,
+    ...Shadows.small,
   },
   cardLabel: {
     color: colors.text,
@@ -487,12 +480,13 @@ const createStyles = (colors: {
     color: colors.onSecondary,
   },
   sectionCard: {
-    backgroundColor: rgba(colors.text, 0.08),
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 16,
     gap: 10,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: rgba(colors.text, 0.12),
+    ...Shadows.small,
   },
   sectionTitle: {
     color: colors.text,
