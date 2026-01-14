@@ -1,7 +1,8 @@
-import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
 import { Fonts, rgba } from '@/constants/theme';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
+import React from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export interface ActionSheetOption {
@@ -25,7 +26,14 @@ interface ActionSheetProps {
 
 export function ActionSheet({ visible, title, message, options, onClose }: ActionSheetProps) {
   const { colors } = useTrenaTheme();
+  const haptics = useHaptics();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+
+  React.useEffect(() => {
+    if (visible) {
+      haptics.light();
+    }
+  }, [visible, haptics]);
 
   const cancelOption = options.find((o) => o.style === 'cancel');
   const otherOptions = options.filter((o) => o.style !== 'cancel');
@@ -58,6 +66,7 @@ export function ActionSheet({ visible, title, message, options, onClose }: Actio
                     pressed && styles.optionPressed,
                   ]}
                   onPress={() => {
+                    haptics.selection();
                     onClose();
                     option.onPress();
                   }}

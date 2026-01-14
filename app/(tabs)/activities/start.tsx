@@ -1,15 +1,17 @@
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router } from 'expo-router';
 import React from 'react';
-import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { startQuickSession } from '@/lib/workouts/repo';
 
 export default function StartWorkoutScreen() {
   const { colors } = useTrenaTheme();
+  const haptics = useHaptics();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const [isStarting, setIsStarting] = React.useState(false);
 
@@ -31,6 +33,7 @@ export default function StartWorkoutScreen() {
 
   const onQuickWorkout = async () => {
     if (isStarting) return;
+    haptics.selection();
     setIsStarting(true);
     try {
       const session = await startQuickSession();
@@ -47,6 +50,7 @@ export default function StartWorkoutScreen() {
   };
 
   const onAIWorkout = () => {
+    haptics.selection();
     showActionSheet({
       title: 'AI workout',
       message: 'Coming soon.',
@@ -78,7 +82,10 @@ export default function StartWorkoutScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Template"
-          onPress={() => router.push('/activities/templates' as any)}
+          onPress={() => {
+            haptics.selection();
+            router.push('/activities/templates' as any);
+          }}
           style={({ pressed }) => [styles.bigCard, styles.templateCard, pressed && styles.pressed]}
         >
           <View style={[styles.cardContentRow, styles.templateRow]}>

@@ -1,8 +1,8 @@
-import * as Haptics from 'expo-haptics';
 import React from 'react';
 import { FlatList, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Fonts, rgba } from '@/constants/theme';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 
 const ITEM_HEIGHT = 44;
@@ -47,6 +47,7 @@ function WheelColumn({
   const listRef = React.useRef<FlatList<number> | null>(null);
   const data = React.useMemo(() => buildLoopData(values), [values]);
   const baseLen = values.length;
+  const haptics = useHaptics();
 
   const initialIndex = React.useMemo(() => {
     const baseIndex = Math.max(0, values.indexOf(value));
@@ -150,14 +151,15 @@ export function DurationWheelModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, initialSeconds, maxHours]);
 
+  const haptics = useHaptics();
   const lastHapticRef = React.useRef(0);
   const haptic = React.useCallback(() => {
     const now = Date.now();
     if (now - lastHapticRef.current < 40) return;
     lastHapticRef.current = now;
     if (Platform.OS === 'web') return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-  }, []);
+    haptics.light();
+  }, [haptics]);
 
   const hours = React.useMemo(() => Array.from({ length: maxHours + 1 }, (_, i) => i), [maxHours]);
   const mins = React.useMemo(() => Array.from({ length: 60 }, (_, i) => i), []);

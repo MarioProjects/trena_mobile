@@ -1,11 +1,11 @@
 import {
-  useFonts,
-  WorkSans_400Regular,
-  WorkSans_500Medium,
-  WorkSans_600SemiBold,
-  WorkSans_700Bold,
-  WorkSans_800ExtraBold,
-  WorkSans_900Black,
+    useFonts,
+    WorkSans_400Regular,
+    WorkSans_500Medium,
+    WorkSans_600SemiBold,
+    WorkSans_700Bold,
+    WorkSans_800ExtraBold,
+    WorkSans_900Black,
 } from '@expo-google-fonts/work-sans';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -20,9 +20,10 @@ import { SvgUri } from 'react-native-svg';
 import { rgba } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
-import AuthProvider from '@/providers/auth-provider';
-import TrenaThemeProvider from '@/providers/theme-provider';
 import { hasSupabaseConfig } from '@/lib/supabase';
+import AuthProvider from '@/providers/auth-provider';
+import SettingsProvider from '@/providers/settings-provider';
+import TrenaThemeProvider from '@/providers/theme-provider';
 
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
@@ -116,11 +117,13 @@ function RootLayoutWithProviders() {
 
   return (
     <AuthProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <NavigationThemeProvider value={navTheme}>
-          <AppNavigator />
-        </NavigationThemeProvider>
-      </GestureHandlerRootView>
+      <SettingsProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <NavigationThemeProvider value={navTheme}>
+            <AppNavigator />
+          </NavigationThemeProvider>
+        </GestureHandlerRootView>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { ActivitiesIcon, EnergyIcon, LearnIcon, ProfileIcon, TodayIcon } from '@/components/icons';
-import { useAuthContext } from '@/hooks/use-auth-context';
 import { rgba } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { Redirect, router, Tabs } from 'expo-router';
 import React from 'react';
@@ -9,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function TabsLayout() {
   const { isLoading, isLoggedIn } = useAuthContext();
   const { colors } = useTrenaTheme();
+  const haptics = useHaptics();
   const insets = useSafeAreaInsets();
 
   // Avoid flashing the tabs while auth is loading.
@@ -38,6 +40,11 @@ export default function TabsLayout() {
           },
           tabBarLabelStyle: {
             fontSize: 12,
+          },
+        }}
+        screenListeners={{
+          tabPress: () => {
+            haptics.selection();
           },
         }}
       >

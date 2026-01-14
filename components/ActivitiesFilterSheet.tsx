@@ -40,6 +40,7 @@ import {
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { listDistinctFreeExercises, listMethodInstances } from '@/lib/workouts/repo';
 import { WORKOUT_TAGS, type WorkoutTag } from '@/lib/workouts/tags';
@@ -289,6 +290,7 @@ export function ActivitiesFilterSheet(props: {
   onClose: () => void;
 }) {
   const { colors } = useTrenaTheme();
+  const haptics = useHaptics();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   const { filters, sessions = [] } = props;
@@ -442,6 +444,7 @@ export function ActivitiesFilterSheet(props: {
   };
 
   const setPreset = (preset: ActivitiesDatePreset) => {
+    haptics.selection();
     if (preset === 'custom') {
       props.onChange({ datePreset: 'custom' });
       return;
@@ -499,7 +502,10 @@ export function ActivitiesFilterSheet(props: {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Clear filters"
-                onPress={props.onClear}
+                onPress={() => {
+                  haptics.selection();
+                  props.onClear();
+                }}
                 hitSlop={10}
                 style={({ pressed }) => [styles.headerAction, pressed && styles.pressed]}
               >
@@ -508,7 +514,10 @@ export function ActivitiesFilterSheet(props: {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Apply filters"
-                onPress={props.onClose}
+                onPress={() => {
+                  haptics.selection();
+                  props.onClose();
+                }}
                 hitSlop={10}
                 style={({ pressed }) => [styles.headerPrimaryAction, pressed && styles.pressed]}
               >
@@ -852,6 +861,7 @@ export function ActivitiesFilterSheet(props: {
                       accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${name}`}
                       style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
                       onPress={() => {
+                        haptics.selection();
                         if (selected) {
                           props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
                         } else {
@@ -881,6 +891,7 @@ export function ActivitiesFilterSheet(props: {
                       accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${m.name}`}
                       style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
                       onPress={() => {
+                        haptics.selection();
                         if (selected) {
                           props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
                         } else {
@@ -915,6 +926,7 @@ export function ActivitiesFilterSheet(props: {
                       accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${ex.name}`}
                       style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
                       onPress={() => {
+                        haptics.selection();
                         if (selected) {
                           props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
                         } else {
@@ -972,6 +984,7 @@ export function ActivitiesFilterSheet(props: {
                       accessibilityRole="button"
                       accessibilityLabel={selected ? `Remove ${tag}` : `Add ${tag}`}
                       onPress={() => {
+                        haptics.selection();
                         if (selected) props.onChange({ selectedTags: filters.selectedTags.filter((x) => x !== tag) });
                         else props.onChange({ selectedTags: [...filters.selectedTags, tag] });
                       }}
@@ -1042,6 +1055,7 @@ export function ActivitiesFilterSheet(props: {
                       accessibilityRole="button"
                       accessibilityLabel={`${isSelected ? 'Remove' : 'Add'} ${s.title}`}
                       onPress={() => {
+                        haptics.selection();
                         if (isSelected) {
                           props.onChange({ selectedWorkouts: filters.selectedWorkouts.filter((w) => w.id !== s.id) });
                         } else {
@@ -1132,6 +1146,7 @@ export function ActivitiesFilterSheet(props: {
                       accessibilityRole="button"
                       accessibilityLabel={`${isSelected ? 'Remove' : 'Add'} note`}
                       onPress={() => {
+                        haptics.selection();
                         if (isSelected) {
                           props.onChange({
                             selectedNotes: filters.selectedNotes.filter(

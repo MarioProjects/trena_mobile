@@ -1,8 +1,9 @@
+import { useHaptics } from '@/hooks/use-haptics';
 import React from 'react';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type BottomSheetProps = {
   visible: boolean;
@@ -46,6 +47,7 @@ export function BottomSheet({
 }: BottomSheetProps) {
   const { height: screenH } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const haptics = useHaptics();
   const maxPct = maxHeightPct;
   const initialPct = Math.min(initialHeightPct, maxPct);
 
@@ -60,8 +62,11 @@ export function BottomSheet({
 
   // Keep modal mounted while animating out.
   React.useEffect(() => {
-    if (visible) setIsPresented(true);
-  }, [visible]);
+    if (visible) {
+      setIsPresented(true);
+      haptics.light();
+    }
+  }, [visible, haptics]);
 
   React.useEffect(() => {
     if (!isPresented) return;

@@ -38,6 +38,7 @@ import {
 } from '@/components/icons';
 import { PlayIcon } from '@/components/icons/PlayIcon';
 import { Fonts, rgba } from '@/constants/theme';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { listSessions } from '@/lib/workouts/repo';
 import { countCompletedSessionsThisWeek } from '@/lib/workouts/stats';
@@ -201,6 +202,7 @@ function computeWorkoutStreakWeeks(completed: Array<Pick<WorkoutSessionRow, 'end
 
 export default function TodayScreen() {
   const { colors } = useTrenaTheme();
+  const haptics = useHaptics();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [sessions, setSessions] = useState<WorkoutSessionRow[]>([]);
@@ -209,8 +211,9 @@ export default function TodayScreen() {
 
   const openSessionFromToday = useCallback((id: string) => {
     // Back handling is done by the Activities stack header for the session screen.
+    haptics.light();
     router.push(`/activities/session/${id}` as any);
-  }, []);
+  }, [haptics]);
 
   const load = useCallback(async () => {
     try {
@@ -287,9 +290,12 @@ export default function TodayScreen() {
       title: 'Start a workout',
       subtitle: derived.total === 0 ? 'Your first one can be simple.' : 'Ready when you are.',
       cta: 'Start workout',
-      onPress: () => router.push('/activities/start' as any),
+      onPress: () => {
+        haptics.light();
+        router.push('/activities/start' as any);
+      },
     };
-  }, [derived.inProgress, derived.nextScheduled, derived.total, openSessionFromToday]);
+  }, [derived.inProgress, derived.nextScheduled, derived.total, openSessionFromToday, haptics]);
 
   return (
     <SafeAreaView style={styles.safe}>

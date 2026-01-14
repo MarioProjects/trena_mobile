@@ -1,24 +1,25 @@
 import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Keyboard,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
-import { useAuthContext } from '@/hooks/use-auth-context';
-import { signInWithGoogle } from '@/lib/google-oauth';
-import { sendMagicLinkOrOTP } from '@/lib/email-auth';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
+import { sendMagicLinkOrOTP } from '@/lib/email-auth';
+import { signInWithGoogle } from '@/lib/google-oauth';
 
 function isProbablyEmail(email: string) {
   const v = email.trim();
@@ -27,6 +28,7 @@ function isProbablyEmail(email: string) {
 
 export default function GetStartedScreen() {
   const { isLoggedIn } = useAuthContext();
+  const haptics = useHaptics();
   const [email, setEmail] = useState('');
   const [showError, setShowError] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -48,6 +50,7 @@ export default function GetStartedScreen() {
   const canSendMagicLink = useMemo(() => isProbablyEmail(email) && !isSending, [email, isSending]);
 
   const onGoogle = async () => {
+    haptics.light();
     try {
       await signInWithGoogle();
     } catch (e) {
@@ -59,13 +62,17 @@ export default function GetStartedScreen() {
       });
     }
   };
-  const onFacebook = () => showActionSheet({
-    title: 'Not implemented',
-    message: 'Facebook auth is not wired yet.',
-    options: [{ text: 'OK', onPress: () => {} }],
-  });
+  const onFacebook = () => {
+    haptics.light();
+    showActionSheet({
+      title: 'Not implemented',
+      message: 'Facebook auth is not wired yet.',
+      options: [{ text: 'OK', onPress: () => {} }],
+    });
+  };
 
   const onLogin = async () => {
+    haptics.light();
     if (!isProbablyEmail(email)) {
       setShowError(true);
       return;
@@ -111,7 +118,10 @@ export default function GetStartedScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back"
-            onPress={() => router.back()}
+            onPress={() => {
+              haptics.selection();
+              router.back();
+            }}
             hitSlop={16}
             style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
             <ChevronLeftIcon size={36} color={colors.primary} strokeWidth={2} />

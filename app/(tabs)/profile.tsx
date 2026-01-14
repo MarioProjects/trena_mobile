@@ -2,10 +2,13 @@ import { CalendarIcon, ChevronLeftIcon, EditIcon, EnergyIcon, ViewIcon } from '@
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useSettings } from '@/hooks/use-settings';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
 import Constants from 'expo-constants';
+import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
@@ -30,12 +33,9 @@ export default function ProfileScreen() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { colors, mode, setMode } = useTrenaTheme();
+  const { settings, updateSetting } = useSettings();
+  const haptics = useHaptics();
   const styles = useMemo(() => createStyles(colors), [colors]);
-
-  const [settings, setSettings] = useState({
-    notifications: true,
-    haptics: true,
-  });
 
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
   const [actionSheetConfig, setActionSheetConfig] = useState<{
@@ -163,10 +163,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
   const onSignOut = async () => {
     if (isSigningOut) return;
     setIsSigningOut(true);
@@ -236,7 +232,10 @@ export default function ProfileScreen() {
             </View>
             <Switch
               value={mode === 'dark'}
-              onValueChange={(v) => setMode(v ? 'dark' : 'light')}
+              onValueChange={(v) => {
+                setMode(v ? 'dark' : 'light');
+                haptics.selection();
+              }}
               trackColor={{ false: rgba(colors.text, 0.1), true: rgba(colors.primary, 0.5) }}
               thumbColor={mode === 'dark' ? colors.primary : '#f4f3f4'}
             />
@@ -253,7 +252,10 @@ export default function ProfileScreen() {
             </View>
             <Switch
               value={settings.notifications}
-              onValueChange={() => toggleSetting('notifications')}
+              onValueChange={(v) => {
+                updateSetting('notifications', v);
+                haptics.light();
+              }}
               trackColor={{ false: rgba(colors.text, 0.1), true: rgba(colors.secondary, 0.5) }}
               thumbColor={settings.notifications ? colors.secondary : '#f4f3f4'}
             />
@@ -270,7 +272,12 @@ export default function ProfileScreen() {
             </View>
             <Switch
               value={settings.haptics}
-              onValueChange={() => toggleSetting('haptics')}
+              onValueChange={(v) => {
+                updateSetting('haptics', v);
+                // Fire haptic directly if turning on, to confirm it works
+                if (v) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                else haptics.light();
+              }}
               trackColor={{ false: rgba(colors.tertiary, 0.1), true: rgba(colors.tertiary, 0.5) }}
               thumbColor={settings.haptics ? colors.tertiary : '#f4f3f4'}
             />

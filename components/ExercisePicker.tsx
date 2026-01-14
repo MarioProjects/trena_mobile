@@ -1,6 +1,7 @@
 import { SearchIcon } from '@/components/icons';
 import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { listDistinctFreeExercises } from '@/lib/workouts/repo';
 import type { ExerciseRef } from '@/lib/workouts/types';
@@ -26,6 +27,7 @@ export function ExercisePicker({
     placeholderIcon?: React.ReactNode;
 }) {
     const { colors } = useTrenaTheme();
+    const haptics = useHaptics();
     const styles = React.useMemo(() => createStyles(colors), [colors]);
 
     const [open, setOpen] = React.useState(initialOpen);
@@ -72,6 +74,7 @@ export function ExercisePicker({
     };
 
     const onSelect = (ref: ExerciseRef) => {
+        haptics.selection();
         onChange(ref);
         handleClose();
     };
@@ -86,7 +89,13 @@ export function ExercisePicker({
     return (
         <>
             {!initialOpen && (
-                <Pressable onPress={() => setOpen(true)} style={styles.trigger}>
+                <Pressable
+                    onPress={() => {
+                        haptics.selection();
+                        setOpen(true);
+                    }}
+                    style={styles.trigger}
+                >
                     <View style={styles.triggerContent}>
                         {!value ? placeholderIcon : null}
                         <Text style={[styles.triggerText, !value && styles.placeholder]} numberOfLines={1}>
@@ -100,7 +109,13 @@ export function ExercisePicker({
                 <SafeAreaView style={styles.safe}>
                     <View style={styles.header}>
                         <Text style={styles.title}>Pick exercise</Text>
-                        <Pressable onPress={handleClose} style={styles.closeBtn}>
+                        <Pressable
+                            onPress={() => {
+                                haptics.selection();
+                                handleClose();
+                            }}
+                            style={styles.closeBtn}
+                        >
                             <Text style={styles.closeText}>Close</Text>
                         </Pressable>
                     </View>

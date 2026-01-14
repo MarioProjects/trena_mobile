@@ -2,10 +2,11 @@ import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba, type TrenaColorPalette } from '@/constants/theme';
 import { learnData } from '@/data/learn';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Alert, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Gesture, GestureDetector, GestureType } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,74 +15,74 @@ import { AddExerciseModal, type AddExerciseSelection } from '@/components/AddExe
 import { DurationWheelModal } from '@/components/DurationWheelModal';
 import { ExercisePicker } from '@/components/ExercisePicker';
 import {
-  AppleIcon,
-  BackpackIcon,
-  BallIcon,
-  BatteryIcon,
-  BicycleIcon,
-  BrainIcon,
-  BugIcon,
-  CalendarIcon,
-  CarIcon,
-  CheckIcon,
-  ChessIcon,
-  DragHandleIcon,
-  DropIcon,
-  DumbbellIcon,
-  DuplicateIcon,
-  EditIcon,
-  EnergyIcon,
-  ExpandIcon,
-  FireIcon,
-  FloppyIcon,
-  HappyIcon,
-  HourglassIcon,
-  InfoIcon,
-  LeafIcon,
-  LegIcon,
-  MoreHorizIcon,
-  MountainIcon,
-  MuscleIcon,
-  NeutralIcon,
-  NotebookIcon,
-  PinIcon,
-  PizzaIcon,
-  RainIcon,
-  RollerskateIcon,
-  SadIcon,
-  ShoeIcon,
-  ShrinkIcon,
-  SkippingRopeIcon,
-  SkipStatusIcon,
-  SnowIcon,
-  StarIcon,
-  StickyNoteIcon,
-  TagIcon,
-  TrashIcon,
-  VideoIcon,
-  XIcon,
-  YogaIcon,
+    AppleIcon,
+    BackpackIcon,
+    BallIcon,
+    BatteryIcon,
+    BicycleIcon,
+    BrainIcon,
+    BugIcon,
+    CalendarIcon,
+    CarIcon,
+    CheckIcon,
+    ChessIcon,
+    DragHandleIcon,
+    DropIcon,
+    DumbbellIcon,
+    DuplicateIcon,
+    EditIcon,
+    EnergyIcon,
+    ExpandIcon,
+    FireIcon,
+    FloppyIcon,
+    HappyIcon,
+    HourglassIcon,
+    InfoIcon,
+    LeafIcon,
+    LegIcon,
+    MoreHorizIcon,
+    MountainIcon,
+    MuscleIcon,
+    NeutralIcon,
+    NotebookIcon,
+    PinIcon,
+    PizzaIcon,
+    RainIcon,
+    RollerskateIcon,
+    SadIcon,
+    ShoeIcon,
+    ShrinkIcon,
+    SkippingRopeIcon,
+    SkipStatusIcon,
+    SnowIcon,
+    StarIcon,
+    StickyNoteIcon,
+    TagIcon,
+    TrashIcon,
+    VideoIcon,
+    XIcon,
+    YogaIcon,
 } from '@/components/icons';
 import { defaultTrackingForExerciseRef } from '@/lib/workouts/exercise-tracking';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
 import {
-  buildSessionExerciseFromMethodSelection,
-  deleteSession,
-  finishSessionAndAdvanceMethods,
-  getSession,
-  updateSessionSnapshot,
-  updateSessionTags,
-  updateSessionTimes,
-  updateSessionTitle,
+    buildSessionExerciseFromMethodSelection,
+    deleteSession,
+    finishSessionAndAdvanceMethods,
+    getSession,
+    updateSessionSnapshot,
+    updateSessionTags,
+    updateSessionTimes,
+    updateSessionTitle,
 } from '@/lib/workouts/repo';
 import { MAX_WORKOUT_TAGS, sortWorkoutTags, WORKOUT_TAGS, type WorkoutTag } from '@/lib/workouts/tags';
 import type {
-  ExerciseRef,
-  PerformedSet,
-  PlannedSet,
-  SessionExercise,
-  WorkoutSessionRow,
-  WorkoutSessionSnapshotV1,
+    ExerciseRef,
+    PerformedSet,
+    PlannedSet,
+    SessionExercise,
+    WorkoutSessionRow,
+    WorkoutSessionSnapshotV1,
 } from '@/lib/workouts/types';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -322,6 +323,7 @@ function pad2(n: number) {
 
 export default function SessionScreen() {
   const { colors } = useTrenaTheme();
+  const haptics = useHaptics();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id?: string }>();
   const sessionId = typeof id === 'string' ? id : undefined;
@@ -782,6 +784,7 @@ export default function SessionScreen() {
         const nextSet = { ...existing, reps: safeReps };
         if (shouldAutoComplete(existing, nextSet, tracking.type, isAmrap)) {
           nextSet.done = true;
+          haptics.success();
         }
         return {
           ...ex,
@@ -792,6 +795,7 @@ export default function SessionScreen() {
       const nextSet: PerformedSet = { id: plannedSet.id, reps: safeReps, weightKg: plannedSet.weightKg, done: false };
       if (shouldAutoComplete(undefined, nextSet, tracking.type, isAmrap)) {
         nextSet.done = true;
+        haptics.success();
       }
 
       return {
@@ -871,6 +875,7 @@ export default function SessionScreen() {
         const isAmrap = isAmrapExercise(ex);
         if (shouldAutoComplete(oldSet, nextSet, tracking.type, isAmrap)) {
           nextSet.done = true;
+          haptics.success();
         }
       }
 
@@ -973,6 +978,7 @@ export default function SessionScreen() {
     );
 
     setSnapshot((cur) => ({ ...cur, exercises: [...cur.exercises, ...newExercises] }));
+    haptics.light();
     setAddOpen(false);
   };
 
@@ -1001,6 +1007,7 @@ export default function SessionScreen() {
         return;
       }
       setRow(finished);
+      haptics.success();
       router.replace('/activities?toast=Workout saved' as any);
     } catch (e: any) {
       didFinishRef.current = false; // Reset if finish failed
@@ -1024,6 +1031,7 @@ export default function SessionScreen() {
       await flushAutosave();
       const updated = await updateSessionSnapshot({ id: sessionId, snapshot });
       setRow(updated);
+      haptics.success();
       router.replace('/activities?toast=Workout saved' as any);
     } catch (e: any) {
       didFinishRef.current = false;
@@ -1499,7 +1507,10 @@ export default function SessionScreen() {
                                 accessibilityRole="button"
                                 onPress={() => {
                                   const allDone = ex.plannedSets.every(ps => (ex.performedSets ?? []).find(s => s.id === ps.id)?.done);
-                                  ex.plannedSets.forEach(ps => setPlannedMeta(ex.id, ps, { done: !allDone }));
+                                  const nextDone = !allDone;
+                                  ex.plannedSets.forEach(ps => setPlannedMeta(ex.id, ps, { done: nextDone }));
+                                  if (nextDone) haptics.success();
+                                  else haptics.selection();
                                 }}
                                 style={({ pressed }) => [
                                   styles.donePill,
@@ -1574,7 +1585,12 @@ export default function SessionScreen() {
                                     <Text style={styles.setWeight}>{`${ps.weightKg} kg`}</Text>
                                     <Pressable
                                       accessibilityRole="button"
-                                      onPress={() => setPlannedMeta(ex.id, ps, { done: !getDone(cur) })}
+                                      onPress={() => {
+                                        const nextDone = !getDone(cur);
+                                        setPlannedMeta(ex.id, ps, { done: nextDone });
+                                        if (nextDone) haptics.success();
+                                        else haptics.selection();
+                                      }}
                                       style={({ pressed }) => [
                                         styles.donePill,
                                         getDone(cur) ? styles.donePillOn : styles.donePillOff,
@@ -1668,7 +1684,12 @@ export default function SessionScreen() {
                                 />
                                 <Pressable
                                   accessibilityRole="button"
-                                  onPress={() => setPlannedMeta(ex.id, ps, { done: !getDone(cur) })}
+                                  onPress={() => {
+                                    const nextDone = !getDone(cur);
+                                    setPlannedMeta(ex.id, ps, { done: nextDone });
+                                    if (nextDone) haptics.success();
+                                    else haptics.selection();
+                                  }}
                                   style={({ pressed }) => [
                                     styles.donePill,
                                     getDone(cur) ? styles.donePillOn : styles.donePillOff,
@@ -1741,7 +1762,12 @@ export default function SessionScreen() {
                                   </Text>
                                   <Pressable
                                     accessibilityRole="button"
-                                    onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                    onPress={() => {
+                                      const nextDone = !s.done;
+                                      setFreeSetValue(ex.id, idx, { done: nextDone });
+                                      if (nextDone) haptics.success();
+                                      else haptics.selection();
+                                    }}
                                     style={({ pressed }) => [
                                       styles.donePill,
                                       s.done ? styles.donePillOn : styles.donePillOff,
@@ -1838,7 +1864,12 @@ export default function SessionScreen() {
 
                                   <Pressable
                                     accessibilityRole="button"
-                                    onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                    onPress={() => {
+                                      const nextDone = !s.done;
+                                      setFreeSetValue(ex.id, idx, { done: nextDone });
+                                      if (nextDone) haptics.success();
+                                      else haptics.selection();
+                                    }}
                                     style={({ pressed }) => [
                                       styles.donePill,
                                       s.done ? styles.donePillOn : styles.donePillOff,
@@ -1901,8 +1932,11 @@ export default function SessionScreen() {
                                     accessibilityRole="button"
                                     onPress={() => {
                                       const allDone = (ex.performedSets ?? []).length > 0 && (ex.performedSets ?? []).every(s => s.done);
-                                      const nextPerformed = (ex.performedSets ?? []).map(s => ({ ...s, done: !allDone }));
+                                      const nextDone = !allDone;
+                                      const nextPerformed = (ex.performedSets ?? []).map(s => ({ ...s, done: nextDone }));
                                       updateExercise(ex.id, e => ({ ...e, performedSets: nextPerformed }));
+                                      if (nextDone) haptics.success();
+                                      else haptics.selection();
                                     }}
                                     style={({ pressed }) => [
                                       styles.donePill,
@@ -2017,7 +2051,12 @@ export default function SessionScreen() {
                                 />
                                 <Pressable
                                   accessibilityRole="button"
-                                  onPress={() => setFreeSetValue(ex.id, idx, { done: !s.done })}
+                                  onPress={() => {
+                                    const nextDone = !s.done;
+                                    setFreeSetValue(ex.id, idx, { done: nextDone });
+                                    if (nextDone) haptics.success();
+                                    else haptics.selection();
+                                  }}
                                   style={({ pressed }) => [
                                     styles.donePill,
                                     s.done ? styles.donePillOn : styles.donePillOff,
