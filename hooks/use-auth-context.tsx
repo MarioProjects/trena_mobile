@@ -8,6 +8,8 @@ export type AuthData = {
   signInDemo: () => Promise<void>;
   signOutDemo: () => void;
   isDemo: boolean;
+  profile: { avatar_url?: string; display_name?: string } | null;
+  refreshProfile: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthData>({
@@ -17,6 +19,8 @@ export const AuthContext = createContext<AuthData>({
   signInDemo: async () => {},
   signOutDemo: () => {},
   isDemo: false,
+  profile: null,
+  refreshProfile: async () => {},
 });
 
 export function useAuthContext() {

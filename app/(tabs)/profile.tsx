@@ -13,7 +13,7 @@ import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -31,7 +31,7 @@ function getDisplayNameAndAvatar(meta: Record<string, unknown>) {
 }
 
 export default function ProfileScreen() {
-  const { isLoading, isLoggedIn, session, isDemo, signOutDemo } = useAuthContext();
+  const { isLoading, isLoggedIn, session, profile, refreshProfile, isDemo, signOutDemo } = useAuthContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { colors, mode, setMode } = useTrenaTheme();
@@ -45,7 +45,6 @@ export default function ProfileScreen() {
     message?: string;
     options: ActionSheetOption[];
   }>({ options: [] });
-  const [profile, setProfile] = useState<{ avatar_url?: string; display_name?: string } | null>(null);
 
   const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
     setActionSheetConfig(config);
@@ -59,24 +58,6 @@ export default function ProfileScreen() {
   // Favor the profiles table but fall back to Auth metadata
   const avatarUrl = profile?.avatar_url || metaAvatar;
   const displayName = profile?.display_name || metaName;
-
-  useEffect(() => {
-    if (user?.id && !isDemo) {
-      const fetchProfile = async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('avatar_url, display_name')
-          .eq('id', user.id)
-          .single();
-        if (data) {
-          setProfile(data);
-        } else if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching profile:', error.message);
-        }
-      };
-      fetchProfile();
-    }
-  }, [user?.id, isDemo]);
 
   const memberSince = useMemo(() => {
     if (!user?.created_at) return '';
@@ -184,7 +165,7 @@ export default function ProfileScreen() {
 
       if (profileError) throw profileError;
 
-      setProfile((prev) => (prev ? { ...prev, avatar_url: publicUrl } : { avatar_url: publicUrl }));
+      await refreshProfile();
 
       // 4. Clean up OLD files ONLY after successful upload and profile update
       if (existingFiles && existingFiles.length > 0) {

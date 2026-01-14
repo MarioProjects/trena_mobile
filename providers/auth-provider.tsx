@@ -30,7 +30,37 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | undefined | null>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
+  const [profile, setProfile] = useState<{ avatar_url?: string; display_name?: string } | null>(null);
   const lastUserIdRef = useRef<string | null>(null);
+
+  const refreshProfile = async () => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url, display_name')
+        .eq('id', userId)
+        .single();
+      
+      if (data) {
+        setProfile(data);
+      } else if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', error.message);
+      }
+    } catch (e) {
+      console.error('Failed to refresh profile:', e);
+    }
+  };
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      refreshProfile();
+    } else {
+      setProfile(null);
+    }
+  }, [session?.user?.id]);
 
   const signInDemo = async () => {
     setIsDemo(true);
@@ -110,6 +140,8 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         signInDemo,
         signOutDemo,
         isDemo,
+        profile,
+        refreshProfile,
       }}
     >
       {children}
