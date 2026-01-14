@@ -1,13 +1,15 @@
-import { CalendarIcon, ChevronLeftIcon, EnergyIcon, ViewIcon } from '@/components/icons';
+import { CalendarIcon, ChevronLeftIcon, EditIcon, EnergyIcon, ViewIcon } from '@/components/icons';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { supabase } from '@/lib/supabase';
+import { decode } from 'base64-arraybuffer';
 import Constants from 'expo-constants';
+import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function getDisplayNameAndAvatar(meta: Record<string, unknown>) {
@@ -26,6 +28,7 @@ function getDisplayNameAndAvatar(meta: Record<string, unknown>) {
 export default function ProfileScreen() {
   const { isLoading, isLoggedIn, session } = useAuthContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { colors, mode, setMode } = useTrenaTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -59,6 +62,106 @@ export default function ProfileScreen() {
   if (!isLoading && !isLoggedIn) {
     return <Redirect href="/" />;
   }
+
+  const onEditAvatar = () => {
+    showActionSheet({
+      title: 'Change Profile Picture',
+      options: [
+        {
+          text: 'Take Photo',
+          onPress: () => pickImage(true),
+        },
+        {
+          text: 'Choose from Gallery',
+          onPress: () => pickImage(false),
+        },
+      ],
+    });
+  };
+
+  const pickImage = async (useCamera: boolean) => {
+    try {
+      const permission = useCamera
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert(
+          'Permission required',
+          `We need access to your ${useCamera ? 'camera' : 'gallery'} to change your profile picture.`
+        );
+        return;
+      }
+
+      const result = useCamera
+        ? await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+            base64: true,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+            base64: true,
+          });
+
+      if (!result.canceled && result.assets[0].base64) {
+        await uploadAvatar(result.assets[0].base64, result.assets[0].uri);
+      }
+    } catch (error: any) {
+      Alert.alert('Selection error', error.message);
+    }
+  };
+
+  const uploadAvatar = async (base64: string, uri: string) => {
+    if (!user) return;
+    try {
+      setIsUploading(true);
+      const fileExt = uri.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const folderPath = user.id;
+      const fileName = `${folderPath}/${Date.now()}.${fileExt}`;
+
+      // 1. Clean up existing files in the user's folder to save space
+      const { data: existingFiles } = await supabase.storage.from('avatars').list(folderPath);
+
+      // 2. Upload the new file
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, decode(base64), {
+        contentType: `image/${fileExt}`,
+        upsert: true,
+      });
+
+      if (uploadError) throw uploadError;
+
+      // 3. Update the user's profile with the new URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('avatars').getPublicUrl(fileName);
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl },
+      });
+
+      if (updateError) throw updateError;
+
+      // 4. Clean up OLD files ONLY after successful upload and profile update
+      if (existingFiles && existingFiles.length > 0) {
+        const pathsToDelete = existingFiles.map((f) => `${folderPath}/${f.name}`);
+        const { error: deleteError } = await supabase.storage.from('avatars').remove(pathsToDelete);
+
+        if (deleteError) {
+          console.error('Cleanup failed (check DELETE permissions):', deleteError.message);
+        }
+      }
+    } catch (error: any) {
+      Alert.alert('Upload failed', error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -95,7 +198,7 @@ export default function ProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
+          <Pressable onPress={onEditAvatar} disabled={isUploading} style={styles.avatarContainer}>
             <View style={styles.avatarBorder}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
@@ -104,8 +207,16 @@ export default function ProfileScreen() {
                   <ViewIcon size={64} color={rgba(colors.text, 0.2)} />
                 </View>
               )}
+              {isUploading && (
+                <View style={styles.uploadOverlay}>
+                  <ActivityIndicator color={colors.primary} />
+                </View>
+              )}
             </View>
-          </View>
+            <View style={styles.editBadge}>
+              <EditIcon size={16} color={colors.text} strokeWidth={2.5} />
+            </View>
+          </Pressable>
 
           <Text style={styles.displayName}>{displayName}</Text>
           {memberSince ? <Text style={styles.memberSince}>Member since {memberSince}</Text> : null}
@@ -250,6 +361,7 @@ const createStyles = (colors: {
       justifyContent: 'center',
       alignItems: 'center',
       overflow: 'hidden',
+      position: 'relative',
     },
     avatarImage: {
       width: '100%',
@@ -263,6 +375,31 @@ const createStyles = (colors: {
       backgroundColor: rgba(colors.text, 0.05),
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    uploadOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: rgba('#000000', 0.4),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    editBadge: {
+      position: 'absolute',
+      bottom: 4,
+      right: 4,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.surface,
+      borderWidth: 3,
+      borderColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      // Subtle shadow matching the cards
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     displayName: {
       fontSize: 32,
