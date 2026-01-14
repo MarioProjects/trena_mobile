@@ -1,40 +1,41 @@
+import { cancelAllReminders, cancelWorkoutReminder, scheduleWorkoutReminder } from '@/lib/notifications';
 import { makeUuid } from '@/lib/offline/uuid';
 import { supabase } from '@/lib/supabase';
 
 import { defaultTrackingForExerciseRef } from './exercise-tracking';
 import {
-  enqueueOutbox,
-  getMethodInstancesByIdsLocal,
-  getSessionLocal,
-  getTemplateLocal,
-  listCompletedSessionsForStatsLocal,
-  listMethodInstancesLocal,
-  listRecentCompletedSessionsLocal,
-  listSessionsLocal,
-  listTemplatesLocal,
-  markMethodInstanceDeletedLocal,
-  markSessionDeletedLocal,
-  markTemplateDeletedLocal,
-  updateSessionFieldsLocal,
-  upsertMethodInstanceLocal,
-  upsertSessionLocal,
-  upsertTemplateLocal,
+    enqueueOutbox,
+    getMethodInstancesByIdsLocal,
+    getSessionLocal,
+    getTemplateLocal,
+    listCompletedSessionsForStatsLocal,
+    listMethodInstancesLocal,
+    listRecentCompletedSessionsLocal,
+    listSessionsLocal,
+    listTemplatesLocal,
+    markMethodInstanceDeletedLocal,
+    markSessionDeletedLocal,
+    markTemplateDeletedLocal,
+    updateSessionFieldsLocal,
+    upsertMethodInstanceLocal,
+    upsertSessionLocal,
+    upsertTemplateLocal,
 } from './local-repo';
 import { applyMethodResult, generatePlannedSets } from './methods';
 import { coerceWorkoutSessionStatus } from './status';
 import { coerceWorkoutTags } from './tags';
 import type {
-  ExerciseRef,
-  MethodBinding,
-  MethodInstanceRow,
-  MethodKey,
-  PerformedSet,
-  SessionExercise,
-  WorkoutSessionRow,
-  WorkoutSessionStatus,
-  WorkoutSessionSnapshotV1,
-  WorkoutTemplate,
-  WorkoutTemplateItem,
+    ExerciseRef,
+    MethodBinding,
+    MethodInstanceRow,
+    MethodKey,
+    PerformedSet,
+    SessionExercise,
+    WorkoutSessionRow,
+    WorkoutSessionSnapshotV1,
+    WorkoutSessionStatus,
+    WorkoutTemplate,
+    WorkoutTemplateItem,
 } from './types';
 
 /**
@@ -460,6 +461,10 @@ export async function getSession(id: string) {
 
 export async function deleteSession(id: string) {
   const userId = await requireUserIdFromCachedSession();
+
+  // Handle reminder
+  await cancelWorkoutReminder(id);
+
   await markSessionDeletedLocal({ userId, id });
   await enqueueOutbox({
     id: makeUuid(),
@@ -529,6 +534,19 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
   const row = await getSessionLocal({ userId, id: args.id });
   if (!row) throw new Error('Session not found.');
   const normalized = normalizeSession(row);
+
+  // Handle reminder
+  if (normalized.started_at && (normalized.status === 'pending' || !normalized.status)) {
+    const startTime = new Date(normalized.started_at);
+    if (startTime > new Date()) {
+      await scheduleWorkoutReminder(normalized.id, normalized.title, startTime);
+    } else {
+      await cancelWorkoutReminder(normalized.id);
+    }
+  } else {
+    await cancelWorkoutReminder(normalized.id);
+  }
+
   await enqueueOutbox({
     id: makeUuid(),
     userId,
@@ -568,6 +586,18 @@ export async function updateSessionStatus(args: { id: string; status: WorkoutSes
   if (!updated) throw new Error('Session not found.');
   const next = normalizeSession(updated);
 
+  // Handle reminder
+  if (next.started_at && next.status === 'pending') {
+    const startTime = new Date(next.started_at);
+    if (startTime > new Date()) {
+      await scheduleWorkoutReminder(next.id, next.title, startTime);
+    } else {
+      await cancelWorkoutReminder(next.id);
+    }
+  } else {
+    await cancelWorkoutReminder(next.id);
+  }
+
   await enqueueOutbox({
     id: makeUuid(),
     userId,
@@ -596,6 +626,15 @@ export async function updateSessionTitle(args: { id: string; title: string }) {
   const row = await getSessionLocal({ userId, id: args.id });
   if (!row) throw new Error('Session not found.');
   const normalized = normalizeSession(row);
+
+  // Handle reminder
+  if (normalized.started_at && normalized.status === 'pending') {
+    const startTime = new Date(normalized.started_at);
+    if (startTime > new Date()) {
+      await scheduleWorkoutReminder(normalized.id, normalized.title, startTime);
+    }
+  }
+
   await enqueueOutbox({
     id: makeUuid(),
     userId,
@@ -956,3 +995,22 @@ export async function listDistinctFreeExercises() {
   return Array.from(names).sort();
 }
 
+
+export async function rescheduleAllReminders() {
+  const userId = await requireUserIdFromCachedSession();
+  const sessions = await listSessionsLocal({ userId });
+  const now = new Date();
+
+  // Cancel all first
+  await cancelAllReminders();
+
+  for (const row of sessions) {
+    const norm = normalizeSession(row);
+    if (norm.started_at && norm.status === 'pending') {
+      const startTime = new Date(norm.started_at);
+      if (startTime > now) {
+        await scheduleWorkoutReminder(norm.id, norm.title, startTime, true);
+      }
+    }
+  }
+}

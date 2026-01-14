@@ -8,8 +8,33 @@ import {
     WorkSans_900Black,
 } from '@expo-google-fonts/work-sans';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { Platform } from 'react-native';
+
+function setupNotifications() {
+  // SDK 53+ Android Expo Go doesn't support expo-notifications and will throw a blocking error overlay
+  if (Constants.appOwnership === 'expo' && Platform.OS === 'android') {
+    return;
+  }
+
+  try {
+    const Notifications = require('expo-notifications');
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  } catch (e) {
+    // Silent fail if not available
+  }
+}
+
+setupNotifications();
+
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';

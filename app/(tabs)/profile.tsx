@@ -5,7 +5,9 @@ import { useAuthContext } from '@/hooks/use-auth-context';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useSettings } from '@/hooks/use-settings';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
+import { cancelAllReminders, requestNotificationPermissions } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
+import { rescheduleAllReminders } from '@/lib/workouts/repo';
 import { decode } from 'base64-arraybuffer';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
@@ -286,9 +288,24 @@ export default function ProfileScreen() {
             </View>
             <Switch
               value={settings.notifications}
-              onValueChange={(v) => {
-                updateSetting('notifications', v);
+              onValueChange={async (v) => {
                 haptics.light();
+                if (v) {
+                  const hasPermission = await requestNotificationPermissions();
+                  if (!hasPermission) {
+                    Alert.alert(
+                      'Notifications Disabled',
+                      'Please enable notification permissions in your device settings to receive workout reminders.',
+                      [{ text: 'OK' }]
+                    );
+                    return;
+                  }
+                  updateSetting('notifications', true);
+                  await rescheduleAllReminders();
+                } else {
+                  updateSetting('notifications', false);
+                  await cancelAllReminders();
+                }
               }}
               trackColor={{ false: rgba(colors.text, 0.1), true: rgba(colors.secondary, 0.5) }}
               thumbColor={settings.notifications ? colors.secondary : '#f4f3f4'}
