@@ -13,7 +13,7 @@ import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -45,6 +45,7 @@ export default function ProfileScreen() {
     message?: string;
     options: ActionSheetOption[];
   }>({ options: [] });
+  const [profile, setProfile] = useState<{ avatar_url?: string; display_name?: string } | null>(null);
 
   const showActionSheet = (config: { title?: string; message?: string; options: ActionSheetOption[] }) => {
     setActionSheetConfig(config);
@@ -53,7 +54,29 @@ export default function ProfileScreen() {
 
   const user = session?.user;
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
-  const { avatarUrl, displayName } = getDisplayNameAndAvatar(meta);
+  const { avatarUrl: metaAvatar, displayName: metaName } = getDisplayNameAndAvatar(meta);
+
+  // Favor the profiles table but fall back to Auth metadata
+  const avatarUrl = profile?.avatar_url || metaAvatar;
+  const displayName = profile?.display_name || metaName;
+
+  useEffect(() => {
+    if (user?.id) {
+      const fetchProfile = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url, display_name')
+          .eq('id', user.id)
+          .single();
+        if (data) {
+          setProfile(data);
+        } else if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error.message);
+        }
+      };
+      fetchProfile();
+    }
+  }, [user?.id]);
 
   const memberSince = useMemo(() => {
     if (!user?.created_at) return '';
@@ -143,11 +166,25 @@ export default function ProfileScreen() {
         data: { publicUrl },
       } = supabase.storage.from('avatars').getPublicUrl(fileName);
 
+      // Update both User Metadata AND the profiles table for permanence.
+      // OAuth logins can sometimes overwrite or mask user_metadata.
       const { error: updateError } = await supabase.auth.updateUser({
         data: { avatar_url: publicUrl },
       });
 
       if (updateError) throw updateError;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) throw profileError;
+
+      setProfile((prev) => (prev ? { ...prev, avatar_url: publicUrl } : { avatar_url: publicUrl }));
 
       // 4. Clean up OLD files ONLY after successful upload and profile update
       if (existingFiles && existingFiles.length > 0) {
