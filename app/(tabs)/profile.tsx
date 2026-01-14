@@ -1,11 +1,13 @@
+import { CalendarIcon, ChevronLeftIcon, EnergyIcon, ViewIcon } from '@/components/icons';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 import { supabase } from '@/lib/supabase';
+import Constants from 'expo-constants';
 import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Alert, Image, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function getDisplayNameAndAvatar(meta: Record<string, unknown>) {
@@ -27,6 +29,11 @@ export default function ProfileScreen() {
   const { colors, mode, setMode } = useTrenaTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  const [settings, setSettings] = useState({
+    notifications: true,
+    haptics: true,
+  });
+
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
   const [actionSheetConfig, setActionSheetConfig] = useState<{
     title?: string;
@@ -43,15 +50,24 @@ export default function ProfileScreen() {
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
   const { avatarUrl, displayName } = getDisplayNameAndAvatar(meta);
 
+  const memberSince = useMemo(() => {
+    if (!user?.created_at) return '';
+    const date = new Date(user.created_at);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }, [user?.created_at]);
+
   if (!isLoading && !isLoggedIn) {
     return <Redirect href="/" />;
   }
+
+  const toggleSetting = (key: keyof typeof settings) => {
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const onSignOut = async () => {
     if (isSigningOut) return;
     setIsSigningOut(true);
     try {
-      // Local sign-out (this device/session only).
       const { error } = await supabase.auth.signOut({ scope: 'local' });
       if (error) {
         showActionSheet({
@@ -68,62 +84,104 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Profile</Text>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <ChevronLeftIcon size={24} color={colors.text} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Athlete Profile</Text>
+        <View style={styles.backButton} />
+      </View>
 
-        <View style={styles.profileCard}>
-          <View style={styles.settingRow}>
-            <View style={styles.settingText}>
-              <Text style={styles.settingLabel}>Dark mode</Text>
-              <Text style={styles.settingHint}>Switch between light and dark.</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.profileSection}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarBorder}>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <ViewIcon size={64} color={rgba(colors.text, 0.2)} />
+                </View>
+              )}
+            </View>
+          </View>
+
+          <Text style={styles.displayName}>{displayName}</Text>
+          {memberSince ? <Text style={styles.memberSince}>Member since {memberSince}</Text> : null}
+        </View>
+
+        <Text style={styles.sectionTitle}>Account Settings</Text>
+
+        <View style={styles.settingsList}>
+          {/* Theme/Appearance */}
+          <View style={styles.settingItem}>
+            <View style={[styles.iconWrapper, { backgroundColor: rgba(colors.primary, 0.15) }]}>
+              <ViewIcon size={22} color={colors.primary} />
+            </View>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingTitle}>Dark Mode</Text>
+              <Text style={styles.settingSubtitle}>Switch appearance</Text>
             </View>
             <Switch
               value={mode === 'dark'}
               onValueChange={(v) => setMode(v ? 'dark' : 'light')}
-              trackColor={{
-                false: rgba(colors.text, 0.18),
-                true: rgba(colors.primary, 0.65),
-              }}
-              thumbColor={mode === 'dark' ? colors.primary : colors.surface}
+              trackColor={{ false: rgba(colors.text, 0.1), true: rgba(colors.primary, 0.5) }}
+              thumbColor={mode === 'dark' ? colors.primary : '#f4f3f4'}
             />
           </View>
 
-          <View style={styles.divider} />
-
-          <View style={styles.row}>
-            <View style={styles.avatar}>
-              {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
-              ) : (
-                <View style={styles.avatarPlaceholder} />
-              )}
+          {/* Notifications */}
+          <View style={styles.settingItem}>
+            <View style={[styles.iconWrapper, { backgroundColor: rgba(colors.secondary, 0.15) }]}>
+              <CalendarIcon size={22} color={colors.secondary} strokeWidth={2} />
             </View>
-
-            <View style={styles.info}>
-              <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
-                {displayName ?? 'Signed in'}
-              </Text>
-              <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">
-                {user?.email ?? ''}
-              </Text>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingTitle}>Workout Reminders</Text>
+              <Text style={styles.settingSubtitle}>Notify when a plan is due</Text>
             </View>
+            <Switch
+              value={settings.notifications}
+              onValueChange={() => toggleSetting('notifications')}
+              trackColor={{ false: rgba(colors.text, 0.1), true: rgba(colors.secondary, 0.5) }}
+              thumbColor={settings.notifications ? colors.secondary : '#f4f3f4'}
+            />
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            onPress={onSignOut}
-            disabled={isSigningOut}
-            style={({ pressed }) => [
-              styles.signOutButton,
-              isSigningOut && styles.signOutButtonDisabled,
-              pressed && !isSigningOut && styles.pressed,
-            ]}
-          >
-            <Text style={styles.signOutButtonText}>{isSigningOut ? 'Signing out…' : 'Sign out'}</Text>
-          </Pressable>
+          {/* Haptics */}
+          <View style={styles.settingItem}>
+            <View style={[styles.iconWrapper, { backgroundColor: rgba(colors.tertiary, 0.15) }]}>
+              <EnergyIcon size={22} color={colors.tertiary} />
+            </View>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingTitle}>Haptic Feedback</Text>
+              <Text style={styles.settingSubtitle}>Vibrate on interactions</Text>
+            </View>
+            <Switch
+              value={settings.haptics}
+              onValueChange={() => toggleSetting('haptics')}
+              trackColor={{ false: rgba(colors.tertiary, 0.1), true: rgba(colors.tertiary, 0.5) }}
+              thumbColor={settings.haptics ? colors.tertiary : '#f4f3f4'}
+            />
+          </View>
         </View>
-      </View>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={onSignOut}
+          disabled={isSigningOut}
+          style={({ pressed }) => [
+            styles.signOutButton,
+            isSigningOut && styles.signOutButtonDisabled,
+            pressed && !isSigningOut && styles.pressed,
+          ]}
+        >
+          <Text style={styles.signOutButtonText}>{isSigningOut ? 'Logging Out…' : 'Log Out'}</Text>
+        </Pressable>
+
+        <Text style={styles.versionText}>VERSION {Constants.expoConfig?.version ?? '1.0.0'}</Text>
+      </ScrollView>
+
       <ActionSheet
         visible={actionSheetVisible}
         title={actionSheetConfig.title}
@@ -139,119 +197,176 @@ const createStyles = (colors: {
   background: string;
   surface: string;
   primary: string;
+  secondary: string;
+  tertiary: string;
+  accentRed: string;
   text: string;
   onSurface: string;
+  onSecondary: string;
 }) =>
   StyleSheet.create({
     safe: {
       flex: 1,
       backgroundColor: colors.background,
     },
-    container: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingVertical: 24,
-      gap: 16,
-    },
-    title: {
-      fontSize: 34,
-      lineHeight: 40,
-      fontFamily: Fonts.extraBold,
-      color: colors.text,
-      letterSpacing: -0.3,
-    },
-    profileCard: {
-      backgroundColor: rgba(colors.text, 0.08),
-      borderRadius: 18,
-      padding: 16,
-      gap: 16,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: rgba(colors.text, 0.12),
-    },
-    settingRow: {
+    header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: 12,
+      paddingHorizontal: 16,
+      height: 56,
     },
-    settingText: {
-      flex: 1,
-      minWidth: 0,
-      gap: 4,
-    },
-    settingLabel: {
-      color: colors.text,
-      fontSize: 16,
-      fontFamily: Fonts.extraBold,
-    },
-    settingHint: {
-      color: rgba(colors.text, 0.72),
-      fontSize: 12,
-      fontFamily: Fonts.regular,
-    },
-    divider: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: rgba(colors.text, 0.12),
-    },
-    row: {
-      flexDirection: 'row',
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
       alignItems: 'center',
-      gap: 12,
     },
-    avatar: {
-      width: 54,
-      height: 54,
-      borderRadius: 27,
+    headerTitle: {
+      fontSize: 20,
+      fontFamily: Fonts.extraBold,
+      color: colors.text,
+      textAlign: 'center',
+    },
+    scrollContent: {
+      paddingHorizontal: 24,
+      paddingBottom: 40,
+    },
+    profileSection: {
+      alignItems: 'center',
+      marginTop: 20,
+      marginBottom: 32,
+    },
+    avatarContainer: {
+      marginBottom: 20,
+    },
+    avatarBorder: {
+      width: 140,
+      height: 140,
+      borderRadius: 70,
+      borderWidth: 4,
+      borderColor: colors.primary,
+      padding: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
       overflow: 'hidden',
-      backgroundColor: rgba(colors.text, 0.1),
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: rgba(colors.text, 0.18),
-      flexShrink: 0,
     },
     avatarImage: {
       width: '100%',
       height: '100%',
+      borderRadius: 66,
     },
     avatarPlaceholder: {
-      flex: 1,
-      backgroundColor: rgba(colors.text, 0.08),
+      width: '100%',
+      height: '100%',
+      borderRadius: 66,
+      backgroundColor: rgba(colors.text, 0.05),
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    info: {
-      flex: 1,
-      minWidth: 0,
-      gap: 4,
-    },
-    name: {
-      color: colors.text,
-      fontSize: 18,
-      lineHeight: 24,
+    displayName: {
+      fontSize: 32,
       fontFamily: Fonts.extraBold,
+      color: colors.text,
+      textAlign: 'center',
+      marginBottom: 8,
     },
-    email: {
-      color: rgba(colors.text, 0.75),
-      fontSize: 13,
-      lineHeight: 18,
+    badge: {
+      paddingHorizontal: 16,
+      paddingVertical: 4,
+      borderRadius: 20,
+      borderWidth: 1.5,
+      borderColor: rgba(colors.primary, 0.4),
+      backgroundColor: rgba(colors.primary, 0.05),
+      marginBottom: 12,
+    },
+    badgeText: {
+      fontSize: 14,
+      fontFamily: Fonts.bold,
+      color: colors.primary,
+      letterSpacing: 1,
+    },
+    memberSince: {
+      fontSize: 16,
       fontFamily: Fonts.regular,
+      color: rgba(colors.text, 0.5),
     },
-    signOutButton: {
-      borderRadius: 14,
-      paddingVertical: 14,
+    sectionTitle: {
+      fontSize: 22,
+      fontFamily: Fonts.extraBold,
+      color: colors.text,
+      marginBottom: 16,
+    },
+    settingsList: {
+      gap: 12,
+      marginBottom: 40,
+    },
+    settingItem: {
+      flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.surface,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: rgba(colors.text, 0.12),
+      padding: 16,
+      borderRadius: 16,
+      gap: 16,
+      borderWidth: 1,
+      borderColor: rgba(colors.text, 0.05),
+      // Shadow for iOS
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      // Elevation for Android
+      elevation: 2,
+    },
+    iconWrapper: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    settingInfo: {
+      flex: 1,
+      gap: 2,
+    },
+    settingTitle: {
+      fontSize: 17,
+      fontFamily: Fonts.bold,
+      color: colors.text,
+    },
+    settingSubtitle: {
+      fontSize: 14,
+      fontFamily: Fonts.regular,
+      color: rgba(colors.text, 0.4),
+    },
+    signOutButton: {
+      backgroundColor: rgba(colors.accentRed, 0.1),
+      paddingVertical: 18,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+      borderWidth: 1.5,
+      borderColor: rgba(colors.accentRed, 0.2),
     },
     signOutButtonDisabled: {
-      opacity: 0.6,
+      opacity: 0.5,
     },
     signOutButtonText: {
-      color: colors.onSurface,
-      fontSize: 16,
-      fontFamily: Fonts.black,
+      color: colors.accentRed,
+      fontSize: 18,
+      fontFamily: Fonts.bold,
     },
     pressed: {
-      transform: [{ scale: 0.99 }],
-      opacity: 0.95,
+      opacity: 0.8,
+      transform: [{ scale: 0.98 }],
+    },
+    versionText: {
+      fontSize: 12,
+      fontFamily: Fonts.bold,
+      color: rgba(colors.text, 0.3),
+      textAlign: 'center',
+      letterSpacing: 1,
     },
   });
 
