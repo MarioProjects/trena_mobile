@@ -57,7 +57,14 @@ async function tryRunSyncOnce(): Promise<void> {
   }
 }
 
+// Private override for demo mode
+let overrideUserId: string | null = null;
+export function setOverrideUserId(id: string | null) {
+  overrideUserId = id;
+}
+
 async function requireUserIdFromCachedSession() {
+  if (overrideUserId) return overrideUserId;
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   const userId = data.session?.user?.id;

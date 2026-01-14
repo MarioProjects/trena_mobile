@@ -111,6 +111,18 @@ In Supabase Dashboard → **Authentication → URL Configuration → Redirect UR
 
 This is where Supabase will redirect after the hosted callback, so the app can finish sign-in.
 
+## Demo / Test Mode
+
+For testing purposes (e.g. App Store review or offline development), the app supports a special "Demo Mode" that bypasses Supabase authentication.
+
+- **Email**: `test@google.com`
+- **Behavior**:
+  - Does **not** send magic links or emails.
+  - Logs you in immediately without a password.
+  - Seeds the local database with sample data (workouts, templates, history).
+  - **Disables sync**: Data created in this mode stays local and is never pushed to Supabase.
+  - Persists across app restarts until you sign out.
+
 ## Android (debug keystore + SHA fingerprints)
 
 Some Android integrations (Google Sign-In, Firebase, deep links, etc.) require **SHA-1/SHA-256** fingerprints.

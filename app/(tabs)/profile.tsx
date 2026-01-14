@@ -31,7 +31,7 @@ function getDisplayNameAndAvatar(meta: Record<string, unknown>) {
 }
 
 export default function ProfileScreen() {
-  const { isLoading, isLoggedIn, session } = useAuthContext();
+  const { isLoading, isLoggedIn, session, isDemo, signOutDemo } = useAuthContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { colors, mode, setMode } = useTrenaTheme();
@@ -61,7 +61,7 @@ export default function ProfileScreen() {
   const displayName = profile?.display_name || metaName;
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && !isDemo) {
       const fetchProfile = async () => {
         const { data, error } = await supabase
           .from('profiles')
@@ -76,7 +76,7 @@ export default function ProfileScreen() {
       };
       fetchProfile();
     }
-  }, [user?.id]);
+  }, [user?.id, isDemo]);
 
   const memberSince = useMemo(() => {
     if (!user?.created_at) return '';
@@ -206,6 +206,11 @@ export default function ProfileScreen() {
     if (isSigningOut) return;
     setIsSigningOut(true);
     try {
+      if (isDemo) {
+        signOutDemo();
+        router.replace('/');
+        return;
+      }
       const { error } = await supabase.auth.signOut({ scope: 'local' });
       if (error) {
         showActionSheet({

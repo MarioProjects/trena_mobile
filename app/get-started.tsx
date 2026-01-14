@@ -27,7 +27,7 @@ function isProbablyEmail(email: string) {
 }
 
 export default function GetStartedScreen() {
-  const { isLoggedIn } = useAuthContext();
+  const { isLoggedIn, signInDemo } = useAuthContext();
   const haptics = useHaptics();
   const [email, setEmail] = useState('');
   const [showError, setShowError] = useState(false);
@@ -73,6 +73,10 @@ export default function GetStartedScreen() {
 
   const onLogin = async () => {
     haptics.light();
+    if (email.trim().toLowerCase() === 'test@google.com') {
+      await signInDemo();
+      return;
+    }
     if (!isProbablyEmail(email)) {
       setShowError(true);
       return;
