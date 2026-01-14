@@ -35,7 +35,6 @@ import {
   NeutralIcon,
   PinIcon,
   PizzaIcon,
-  PlusIcon,
   RainIcon,
   RollerskateIcon,
   SadIcon,
@@ -47,8 +46,9 @@ import {
   TrashIcon,
   VideoIcon,
   XIcon,
-  YogaIcon,
+  YogaIcon
 } from '@/components/icons';
+import { PlayIcon } from '@/components/icons/PlayIcon';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { deleteSession, duplicateSession, listSessions, updateSessionStatus, updateSessionTitle } from '@/lib/workouts/repo';
 import { getEffectiveWorkoutSessionStatus } from '@/lib/workouts/status';
@@ -718,7 +718,7 @@ export default function ActivitiesIndexScreen() {
             onPress={() => router.push('/activities/start' as any)}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
           >
-            <PlusIcon size={20} color="#141B34" strokeWidth={1.5} />
+            <PlayIcon size={20} color={colors.onPrimary} strokeWidth={1.5} />
             <Text style={styles.primaryButtonText}>Start workout</Text>
           </Pressable>
         </View>

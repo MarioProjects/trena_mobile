@@ -3,7 +3,7 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-export type TrenaThemeMode = 'dark' | 'light';
+export type TrenaThemeMode = 'dark' | 'light' | 'mono-blue';
 
 export const TrenaDarkColors = {
   background: 'rgb(26, 26, 26)',
@@ -18,6 +18,9 @@ export const TrenaDarkColors = {
   // Fosfi accent colors
   tertiary: 'rgb(242, 137, 201)',
   accentRed: 'rgb(255, 67, 88)',
+  custom: {
+    // Reserve for specific UI element overrides
+  },
 } as const;
 
 export const TrenaLightColors = {
@@ -33,12 +36,40 @@ export const TrenaLightColors = {
   // Fosfi accent colors
   tertiary: 'rgb(242, 137, 201)',
   accentRed: 'rgb(255, 67, 88)',
+  custom: {
+    // Reserve for specific UI element overrides
+  },
 } as const;
 
-export type TrenaColorPalette = typeof TrenaDarkColors | typeof TrenaLightColors;
+export const TrenaMonoBlueColors = {
+  background: 'rgb(255, 255, 255)', // #FFFFFF
+  surface: 'rgb(245, 245, 247)',    // #F5F5F7
+  primary: 'rgb(19, 68, 173)',      // #1344AD
+  secondary: 'rgb(19, 68, 173)',    // Signature blue
+  text: 'rgb(18, 18, 18)',         // #121212
+  onSurface: 'rgb(18, 18, 18)',
+  onPrimary: 'rgb(255, 255, 255)',
+  onSecondary: 'rgb(255, 255, 255)',
+  onTertiary: 'rgb(255, 255, 255)',
+  tertiary: 'rgb(100, 100, 100)',
+  accentRed: 'rgb(255, 67, 88)',
+  custom: {
+    // Reserve for specific UI element overrides
+  },
+} as const;
+
+export type TrenaColorPalette = typeof TrenaDarkColors;
 
 export function getTrenaColors(mode: TrenaThemeMode): TrenaColorPalette {
-  return mode === 'light' ? TrenaLightColors : TrenaDarkColors;
+  switch (mode) {
+    case 'light':
+      return TrenaLightColors;
+    case 'mono-blue':
+      return TrenaMonoBlueColors;
+    case 'dark':
+    default:
+      return TrenaDarkColors;
+  }
 }
 
 /**

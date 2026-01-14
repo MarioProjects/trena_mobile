@@ -1,6 +1,6 @@
 import { CalendarIcon, ChevronLeftIcon, EditIcon, EnergyIcon, ViewIcon } from '@/components/icons';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
-import { Fonts, rgba } from '@/constants/theme';
+import { Fonts, rgba, TrenaDarkColors, TrenaLightColors, TrenaMonoBlueColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useSettings } from '@/hooks/use-settings';
@@ -222,24 +222,58 @@ export default function ProfileScreen() {
 
         <View style={styles.settingsList}>
           {/* Theme/Appearance */}
-          <View style={styles.settingItem}>
+          <Pressable
+            style={styles.settingItem}
+            onPress={() => {
+              showActionSheet({
+                title: 'Select Appearance',
+                options: [
+                  {
+                    text: 'Dark',
+                    onPress: () => setMode('dark'),
+                    tint: {
+                      backgroundColor: TrenaDarkColors.background,
+                      textColor: TrenaDarkColors.text,
+                      borderColor: rgba(TrenaDarkColors.text, 0.1),
+                    },
+                  },
+                  {
+                    text: 'Light',
+                    onPress: () => setMode('light'),
+                    tint: {
+                      backgroundColor: TrenaLightColors.background,
+                      textColor: TrenaLightColors.text,
+                      borderColor: rgba(TrenaLightColors.text, 0.1),
+                    },
+                  },
+                  {
+                    text: 'Mono Blue',
+                    onPress: () => setMode('mono-blue'),
+                    tint: {
+                      backgroundColor: TrenaMonoBlueColors.primary,
+                      textColor: TrenaMonoBlueColors.onPrimary,
+                    },
+                  },
+                ],
+              });
+              haptics.light();
+            }}
+          >
             <View style={[styles.iconWrapper, { backgroundColor: rgba(colors.primary, 0.15) }]}>
               <ViewIcon size={22} color={colors.primary} />
             </View>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Dark Mode</Text>
-              <Text style={styles.settingSubtitle}>Switch appearance</Text>
+              <Text style={styles.settingTitle}>Appearance</Text>
+              <Text style={styles.settingSubtitle}>
+                {mode === 'dark' ? 'Dark theme' : mode === 'light' ? 'Light theme' : 'Mono Blue theme'}
+              </Text>
             </View>
-            <Switch
-              value={mode === 'dark'}
-              onValueChange={(v) => {
-                setMode(v ? 'dark' : 'light');
-                haptics.selection();
-              }}
-              trackColor={{ false: rgba(colors.text, 0.1), true: rgba(colors.primary, 0.5) }}
-              thumbColor={mode === 'dark' ? colors.primary : '#f4f3f4'}
+            <ChevronLeftIcon
+              size={20}
+              color={rgba(colors.text, 0.3)}
+              style={{ transform: [{ rotate: '180deg' }] }}
             />
-          </View>
+          </Pressable>
 
           {/* Notifications */}
           <View style={styles.settingItem}>
