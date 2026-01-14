@@ -117,6 +117,9 @@ export default function StartWorkoutScreen() {
         >
           <View style={styles.cardContentRow}>
             <View style={styles.textCol}>
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>COMING SOON</Text>
+              </View>
               <Text style={styles.aiTitle}>AI Plan</Text>
               <Text style={styles.aiSubtitle}>Generate a workout from your goal</Text>
             </View>
@@ -234,6 +237,21 @@ const createStyles = (colors: {
   },
   aiTitle: { color: colors.onTertiary, fontSize: 32, lineHeight: 30, fontFamily: Fonts.extraBold, letterSpacing: -0.3 },
   aiSubtitle: { color: rgba(colors.onTertiary, 0.92), fontSize: 16, lineHeight: 22, fontFamily: Fonts.medium },
+
+  comingSoonBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  comingSoonText: {
+    color: colors.onTertiary,
+    fontSize: 11,
+    fontFamily: Fonts.extraBold,
+    letterSpacing: 0.5,
+  },
 
   illustration: {
     position: 'absolute',
