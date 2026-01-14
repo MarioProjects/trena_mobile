@@ -1,62 +1,49 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { rgba } from '@/constants/theme';
+import { useTrenaTheme } from '@/hooks/use-theme-context';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { SkeletonBlock, usePulseOpacity } from './ui/Skeleton';
 
-const SkeletonItem = () => {
-    const opacity = useRef(new Animated.Value(0.3)).current;
-
-    useEffect(() => {
-        const loop = Animated.loop(
-            Animated.sequence([
-                Animated.timing(opacity, {
-                    toValue: 0.6,
-                    duration: 800,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(opacity, {
-                    toValue: 0.3,
-                    duration: 800,
-                    useNativeDriver: true,
-                }),
-            ])
-        );
-        loop.start();
-        return () => loop.stop();
-    }, [opacity]);
-
+const SkeletonItem = ({ opacity, colors }: { opacity: any; colors: any }) => {
+    const themedStyles = styles(colors);
     return (
-        <View style={styles.card}>
+        <View style={themedStyles.card}>
             <View style={{ flex: 1, gap: 10 }}>
-                <View style={styles.cardHeaderRow}>
+                <View style={themedStyles.cardHeaderRow}>
                     {/* Title Stub */}
-                    <Animated.View style={[styles.skeletonBlock, { width: '40%', height: 20, opacity }]} />
+                    <SkeletonBlock opacity={opacity} width="40%" height={20} radius={4} />
                     {/* Badge Stub */}
-                    <Animated.View style={[styles.skeletonBlock, { width: 70, height: 22, borderRadius: 11, opacity }]} />
+                    <SkeletonBlock opacity={opacity} width={70} height={22} radius={11} />
                 </View>
                 {/* Meta Stub */}
-                <Animated.View style={[styles.skeletonBlock, { width: '60%', height: 16, opacity }]} />
+                <SkeletonBlock opacity={opacity} width="60%" height={16} radius={4} />
             </View>
         </View>
     );
 };
 
 export const WorkoutsSkeleton = () => {
+    const opacity = usePulseOpacity();
+    const { colors } = useTrenaTheme();
+    const themedStyles = styles(colors);
+
     return (
-        <View style={styles.container}>
+        <View style={themedStyles.container}>
             {Array.from({ length: 5 }).map((_, i) => (
-                <SkeletonItem key={i} />
+                <SkeletonItem key={i} opacity={opacity} colors={colors} />
             ))}
         </View>
     );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
     container: {
         gap: 12,
     },
     card: {
         borderWidth: 1,
-        borderColor: 'rgba(236, 235, 228, 0.12)',
-        backgroundColor: 'rgba(236, 235, 228, 0.04)',
+        borderColor: rgba(colors.text, 0.12),
+        backgroundColor: rgba(colors.text, 0.04),
         padding: 12,
         borderRadius: 14,
         flexDirection: 'row',
@@ -67,9 +54,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 10,
-    },
-    skeletonBlock: {
-        backgroundColor: 'rgba(236, 235, 228, 0.15)',
-        borderRadius: 4,
     },
 });

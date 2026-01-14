@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -37,6 +37,7 @@ import {
   YogaIcon,
 } from '@/components/icons';
 import { PlayIcon } from '@/components/icons/PlayIcon';
+import { TodaySkeleton } from '@/components/TodaySkeleton';
 import { Fonts, rgba, Shadows, TrenaColorPalette } from '@/constants/theme';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
@@ -303,10 +304,7 @@ export default function TodayScreen() {
         <Text style={styles.title}>Today</Text>
 
         {isLoading ? (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator color={colors.primary} />
-            <Text style={styles.body}>Loading…</Text>
-          </View>
+          <TodaySkeleton />
         ) : error ? (
           <View style={styles.notice}>
             <Text style={styles.noticeTitle}>Couldn’t load Today</Text>
