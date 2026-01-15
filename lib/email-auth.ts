@@ -1,21 +1,18 @@
-import * as Linking from 'expo-linking';
 import { supabase } from './supabase';
 
 /**
- * Send a magic link email to the user.
- * The user will receive an email with a link to sign in.
+ * Send an OTP (One-Time Password) email to the user.
+ * The user will receive a 6-digit code to enter in the app.
  */
-export async function sendMagicLinkOrOTP(
+export async function sendOTP(
   email: string,
   options?: { shouldCreateUser?: boolean }
 ): Promise<{ success: boolean; error?: string }> {
-  const redirectTo = Linking.createURL('auth/callback');
-
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
     options: {
       shouldCreateUser: options?.shouldCreateUser ?? true,
-      emailRedirectTo: redirectTo,
+      // No emailRedirectTo - this tells Supabase to send OTP code instead of magic link
     },
   });
 
@@ -27,14 +24,17 @@ export async function sendMagicLinkOrOTP(
 }
 
 /**
- * Verify a magic link token hash (used when user clicks the magic link).
- * This is for PKCE flow where the email template uses {{ .TokenHash }}.
+ * Verify the OTP code entered by the user.
+ * @param email - The email address the OTP was sent to
+ * @param token - The 6-digit OTP code
  */
-export async function verifyMagicLinkHash(
-  tokenHash: string
+export async function verifyOTP(
+  email: string,
+  token: string
 ): Promise<{ success: boolean; error?: string }> {
   const { data, error } = await supabase.auth.verifyOtp({
-    token_hash: tokenHash,
+    email: email.trim().toLowerCase(),
+    token: token.trim(),
     type: 'email',
   });
 

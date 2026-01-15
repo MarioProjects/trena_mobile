@@ -1,13 +1,13 @@
 import { Redirect, router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-    ActivityIndicator,
-    Keyboard,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,7 +18,7 @@ import { Fonts, rgba } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
-import { sendMagicLinkOrOTP } from '@/lib/email-auth';
+import { sendOTP } from '@/lib/email-auth';
 import { signInWithGoogle } from '@/lib/google-oauth';
 
 function isProbablyEmail(email: string) {
@@ -47,7 +47,7 @@ export default function GetStartedScreen() {
     setActionSheetVisible(true);
   };
 
-  const canSendMagicLink = useMemo(() => isProbablyEmail(email) && !isSending, [email, isSending]);
+  const canSendOTP = useMemo(() => isProbablyEmail(email) && !isSending, [email, isSending]);
 
   const onGoogle = async () => {
     haptics.light();
@@ -76,21 +76,21 @@ export default function GetStartedScreen() {
     setShowError(false);
     setIsSending(true);
 
-    const result = await sendMagicLinkOrOTP(email);
+    const result = await sendOTP(email);
 
     setIsSending(false);
 
     if (result.success) {
       Keyboard.dismiss();
-      showActionSheet({
-        title: 'Check your email',
-        message: `We sent a magic link to ${email.trim().toLowerCase()}. Click the link in your email to sign in.`,
-        options: [{ text: 'Got it', onPress: () => {} }],
+      // Navigate to OTP verification screen
+      router.push({
+        pathname: '/verify-otp',
+        params: { email: email.trim().toLowerCase() },
       });
     } else {
       showActionSheet({
         title: 'Sign-in error',
-        message: result.error ?? 'Failed to send verification email. Please try again.',
+        message: result.error ?? 'Failed to send verification code. Please try again.',
         options: [{ text: 'OK', onPress: () => {} }],
       });
     }
@@ -152,16 +152,16 @@ export default function GetStartedScreen() {
               disabled={isSending}
               style={({ pressed }) => [
                 styles.loginButton,
-                !canSendMagicLink && styles.loginButtonDisabled,
-                pressed && canSendMagicLink && styles.pressed,
+                !canSendOTP && styles.loginButtonDisabled,
+                pressed && canSendOTP && styles.pressed,
               ]}>
               {isSending ? (
                 <ActivityIndicator color={colors.onPrimary} />
               ) : (
-                <Text style={styles.loginButtonText}>Login</Text>
+                <Text style={styles.loginButtonText}>Continue</Text>
               )}
             </Pressable>
-            <Text style={styles.emailHint}>We'll send a magic link to your inbox</Text>
+            <Text style={styles.emailHint}>We'll send a verification code to your inbox</Text>
           </View>
 
           {/* Divider */}

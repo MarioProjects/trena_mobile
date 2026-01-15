@@ -53,11 +53,22 @@ export default function ProfileScreen() {
 
   const user = session?.user;
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+  const appMeta = (user?.app_metadata ?? {}) as Record<string, unknown>;
   const { avatarUrl: metaAvatar, displayName: metaName } = getDisplayNameAndAvatar(meta);
 
   // Favor the profiles table but fall back to Auth metadata
   const avatarUrl = profile?.avatar_url || metaAvatar;
   const displayName = profile?.display_name || metaName;
+  const email = user?.email;
+
+  // Determine login method from app_metadata.provider
+  const loginMethod = useMemo(() => {
+    if (isDemo) return 'Demo';
+    const provider = appMeta.provider as string | undefined;
+    if (provider === 'google') return 'Google';
+    if (provider === 'email') return 'Email (OTP)';
+    return provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'Unknown';
+  }, [appMeta.provider, isDemo]);
 
   const memberSince = useMemo(() => {
     if (!user?.created_at) return '';
@@ -239,7 +250,8 @@ export default function ProfileScreen() {
             </View>
           </Pressable>
 
-          <Text style={styles.displayName}>{displayName}</Text>
+          {displayName ? <Text style={styles.displayName}>{displayName}</Text> : null}
+          {email ? <Text style={styles.emailText}>{email}</Text> : null}
           {memberSince ? <Text style={styles.memberSince}>Member since {memberSince}</Text> : null}
         </View>
 
@@ -362,6 +374,7 @@ export default function ProfileScreen() {
           <Text style={styles.signOutButtonText}>{isSigningOut ? 'Logging Out…' : 'Log Out'}</Text>
         </Pressable>
 
+        <Text style={styles.loginMethodText}>Logged in via {loginMethod}</Text>
         <Text style={styles.versionText}>VERSION {Constants.expoConfig?.version ?? '1.0.0'}</Text>
       </ScrollView>
 
@@ -477,6 +490,20 @@ const createStyles = (colors: {
       fontSize: 32,
       fontFamily: Fonts.extraBold,
       color: colors.text,
+      textAlign: 'center',
+      marginBottom: 4,
+    },
+    emailText: {
+      fontSize: 15,
+      fontFamily: Fonts.medium,
+      color: rgba(colors.text, 0.6),
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    loginMethodText: {
+      fontSize: 12,
+      fontFamily: Fonts.regular,
+      color: rgba(colors.text, 0.35),
       textAlign: 'center',
       marginBottom: 8,
     },

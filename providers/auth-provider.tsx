@@ -7,7 +7,7 @@ import { setOverrideUserId } from '@/lib/workouts/repo'; // Import override
 import type { Session, User } from '@supabase/supabase-js';
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 
-const DEMO_USER_ID = 'demo-user-id';
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000000';
 const DEMO_EMAIL = 'test@google.com';
 
 const DEMO_SESSION: Session = {
