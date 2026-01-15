@@ -292,21 +292,24 @@ const createStyles = (colors: {
     container: {
       flex: 1,
       paddingHorizontal: 24,
-      paddingTop: 8,
+      paddingVertical: 32,
+      justifyContent: 'center',
+      gap: 24,
     },
     backButton: {
-      alignSelf: 'flex-start',
-      marginLeft: -10,
-      padding: 4,
-      borderRadius: 12,
+      position: 'absolute',
+      top: 8,
+      left: 8,
+      padding: 8,
+      zIndex: 10,
     },
     backButtonPressed: {
-      opacity: 0.7,
+      opacity: 0.85,
+      transform: [{ scale: 0.98 }],
     },
     header: {
-      marginTop: 32,
-      marginBottom: 40,
       alignItems: 'center',
+      gap: 10,
     },
     title: {
       fontSize: 28,
@@ -330,7 +333,6 @@ const createStyles = (colors: {
       flexDirection: 'row',
       justifyContent: 'center',
       gap: 12,
-      marginBottom: 32,
     },
     otpInput: {
       width: 48,
@@ -357,7 +359,6 @@ const createStyles = (colors: {
       borderRadius: 14,
       paddingVertical: 16,
       alignItems: 'center',
-      marginBottom: 24,
     },
     verifyButtonDisabled: {
       opacity: 0.5,
