@@ -9,7 +9,6 @@ export { EditIcon } from './EditIcon';
 export { EnergyIcon } from './EnergyIcon';
 export { ExercisesIcon } from './ExercisesIcon';
 export { ExpandIcon } from './ExpandIcon';
-export { FacebookIcon } from './FacebookIcon';
 export { FilterIcon } from './FilterIcon';
 export { FloppyIcon } from './FloppyIcon';
 export { GoogleIcon } from './GoogleIcon';

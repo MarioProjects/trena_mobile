@@ -84,7 +84,8 @@ function EmbeddableVideo({ uri }: { uri: string }) {
   const { height: screenHeight } = useWindowDimensions();
   const videoHeight = Math.round(Math.min(Math.max(screenHeight * 0.35, 220), 460));
 
-  const player = useVideoPlayer({ uri }, (p) => {
+  const source = React.useMemo(() => ({ uri }), [uri]);
+  const player = useVideoPlayer(source, (p) => {
     p.loop = false;
     p.muted = false;
   });
@@ -96,6 +97,7 @@ function EmbeddableVideo({ uri }: { uri: string }) {
 
   return (
     <VideoView
+      key={uri}
       player={player}
       style={[styles.video, { height: videoHeight }]}
       contentFit="cover"

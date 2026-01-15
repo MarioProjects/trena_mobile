@@ -1,6 +1,6 @@
 import { CalendarIcon, ChevronLeftIcon, EditIcon, EnergyIcon, ViewIcon } from '@/components/icons';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
-import { Fonts, rgba, TrenaDarkColors, TrenaLightColors, TrenaMonoBlueColors } from '@/constants/theme';
+import { Fonts, rgba, TrenaDarkColors, TrenaMonoBlueColors } from '@/constants/theme';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useSettings } from '@/hooks/use-settings';
@@ -263,15 +263,6 @@ export default function ProfileScreen() {
                     },
                   },
                   {
-                    text: 'Light',
-                    onPress: () => setMode('light'),
-                    tint: {
-                      backgroundColor: TrenaLightColors.background,
-                      textColor: TrenaLightColors.text,
-                      borderColor: rgba(TrenaLightColors.text, 0.1),
-                    },
-                  },
-                  {
                     text: 'Mono Blue',
                     onPress: () => setMode('mono-blue'),
                     tint: {
@@ -290,7 +281,7 @@ export default function ProfileScreen() {
             <View style={styles.settingInfo}>
               <Text style={styles.settingTitle}>Appearance</Text>
               <Text style={styles.settingSubtitle}>
-                {mode === 'dark' ? 'Dark theme' : mode === 'light' ? 'Light theme' : 'Mono Blue theme'}
+                {mode === 'dark' ? 'Dark theme' : 'Mono Blue theme'}
               </Text>
             </View>
             <ChevronLeftIcon

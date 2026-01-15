@@ -1,15 +1,15 @@
+import { useNetInfo } from '@react-native-community/netinfo';
 import { useEvent } from 'expo';
 import { Redirect, router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect } from 'react';
-import { useNetInfo } from '@react-native-community/netinfo';
 import { Image, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
 
 import { TrenaLogo } from '@/components/TrenaLogo';
-import { useAuthContext } from '@/hooks/use-auth-context';
 import { Fonts, rgba } from '@/constants/theme';
+import { useAuthContext } from '@/hooks/use-auth-context';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
 
 const splashSvgUri = Image.resolveAssetSource(require('@/assets/images/splash-letter.svg')).uri;
@@ -38,6 +38,7 @@ function HeroContent() {
   return (
     <View style={styles.root}>
       <VideoView
+        key="hero-video"
         player={player}
         style={styles.video}
         contentFit="cover"

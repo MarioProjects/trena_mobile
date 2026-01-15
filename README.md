@@ -16,7 +16,7 @@ Optional: verify your Expo-managed dependency versions match the current SDK:
 npx expo install --check
 ```
 
-2. Start the app
+1. Start the app
 
 ```bash
 npx expo start
@@ -34,11 +34,11 @@ You can start developing by editing the files inside the **app** directory. This
 ## Current screens
 
 - `app/index.tsx`: Hero screen
-- `app/get-started.tsx`: Login (Supabase magic link + Google + Facebook)
+- `app/get-started.tsx`: Login (Supabase magic link + Google)
 - `app/home.tsx`: Home stub
 - `app/auth/callback.tsx`: Auth callback (handles magic link + OAuth redirects)
 
-## Supabase Auth (magic link + Google + Facebook)
+## Supabase Auth (magic link + Google)
 
 ### Environment variables
 
@@ -95,11 +95,10 @@ If you see a Supabase error like **“missing oauth secret”**, it means the pr
 In Supabase Dashboard → **Authentication → Providers**:
 
 - **Google**: set **Client ID** + **Client Secret**
-- **Facebook**: set **App ID** + **App Secret**
 
-### Required OAuth callback URL (Google/Facebook)
+### Required OAuth callback URL (Google)
 
-In your provider console (Google/Facebook), you must whitelist Supabase’s callback URL:
+In your provider console (Google), you must whitelist Supabase’s callback URL:
 
 - `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
 
@@ -190,6 +189,7 @@ npx eas-cli@latest build -p android --profile production
 ```
 
 Notes:
+
 - If EAS asks about Android credentials/keystore, choose **EAS-managed credentials** unless you already have your own.
 - If EAS CLI prompts for **app version source**, choose **remote (recommended)** so EAS auto-increments Android `versionCode` for each build without editing local files.
 
@@ -244,7 +244,6 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
 
 ## Resources
 

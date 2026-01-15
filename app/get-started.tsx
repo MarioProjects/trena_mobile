@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ChevronLeftIcon, FacebookIcon, GoogleIcon } from '@/components/icons';
+import { ChevronLeftIcon, GoogleIcon } from '@/components/icons';
 import { TrenaLogo } from '@/components/TrenaLogo';
 import { ActionSheet, ActionSheetOption } from '@/components/ui/ActionSheet';
 import { Fonts, rgba } from '@/constants/theme';
@@ -61,14 +61,6 @@ export default function GetStartedScreen() {
         options: [{ text: 'OK', onPress: () => {} }],
       });
     }
-  };
-  const onFacebook = () => {
-    haptics.light();
-    showActionSheet({
-      title: 'Not implemented',
-      message: 'Facebook auth is not wired yet.',
-      options: [{ text: 'OK', onPress: () => {} }],
-    });
   };
 
   const onLogin = async () => {
@@ -187,14 +179,6 @@ export default function GetStartedScreen() {
               style={({ pressed }) => [styles.socialButton, styles.buttonGoogle, pressed && styles.pressed]}>
               <GoogleIcon size={22} color="#000" />
               <Text style={styles.socialButtonText}>Connect with Google</Text>
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={onFacebook}
-              style={({ pressed }) => [styles.socialButton, styles.buttonFacebook, pressed && styles.pressed]}>
-              <FacebookIcon size={22} color="#fff" />
-              <Text style={[styles.socialButtonText, styles.socialButtonTextLight]}>Connect with Facebook</Text>
             </Pressable>
           </View>
         </View>
@@ -339,17 +323,10 @@ const createStyles = (colors: { background: string; primary: string; text: strin
     buttonGoogle: {
       backgroundColor: '#fff',
     },
-    buttonFacebook: {
-      backgroundColor: '#1877F2',
-      borderColor: '#1877F2',
-    },
     socialButtonText: {
       color: '#000',
       fontSize: 15,
       fontFamily: Fonts.bold,
-    },
-    socialButtonTextLight: {
-      color: '#fff',
     },
     pressed: {
       transform: [{ scale: 0.98 }],

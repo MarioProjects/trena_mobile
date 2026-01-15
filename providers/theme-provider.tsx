@@ -6,7 +6,7 @@ import React, { PropsWithChildren, useCallback, useEffect, useMemo, useState } f
 const THEME_KEY = 'trena:themeMode';
 
 function isThemeMode(v: unknown): v is TrenaThemeMode {
-  return v === 'dark' || v === 'light' || v === 'mono-blue';
+  return v === 'dark' || v === 'mono-blue';
 }
 
 export default function TrenaThemeProvider({ children }: PropsWithChildren) {
@@ -38,7 +38,7 @@ export default function TrenaThemeProvider({ children }: PropsWithChildren) {
 
   const toggle = useCallback(() => {
     setModeState((prev) => {
-      const modes: TrenaThemeMode[] = ['dark', 'light', 'mono-blue'];
+      const modes: TrenaThemeMode[] = ['dark', 'mono-blue'];
       const index = modes.indexOf(prev);
       const next = modes[(index + 1) % modes.length];
       AsyncStorage.setItem(THEME_KEY, next).catch(() => {});
