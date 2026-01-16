@@ -10,43 +10,44 @@ import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView,
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
-  AppleIcon,
-  BackpackIcon,
-  BallIcon,
-  BatteryIcon,
-  BicycleIcon,
-  BrainIcon,
-  BugIcon,
-  CarIcon,
-  CharacterIcon,
-  ChessIcon,
-  DropIcon,
-  DumbbellIcon,
-  DuplicateIcon,
-  FilterIcon,
-  FireIcon,
-  HappyIcon,
-  HourglassIcon,
-  LeafIcon,
-  LegIcon,
-  MoreHorizIcon,
-  MountainIcon,
-  MuscleIcon,
-  NeutralIcon,
-  PinIcon,
-  PizzaIcon,
-  RainIcon,
-  RollerskateIcon,
-  SadIcon,
-  ShoeIcon,
-  SkippingRopeIcon,
-  SnowIcon,
-  StarIcon,
-  StatusIcon,
-  TrashIcon,
-  VideoIcon,
-  XIcon,
-  YogaIcon
+    AppleIcon,
+    BackpackIcon,
+    BallIcon,
+    BatteryIcon,
+    BicycleIcon,
+    BrainIcon,
+    BugIcon,
+    CarIcon,
+    CharacterIcon,
+    ChessIcon,
+    DropIcon,
+    DumbbellIcon,
+    DuplicateIcon,
+    FilterIcon,
+    FireIcon,
+    HappyIcon,
+    HourglassIcon,
+    LeafIcon,
+    LegIcon,
+    MoreHorizIcon,
+    MountainIcon,
+    MuscleIcon,
+    NeutralIcon,
+    PackageIcon,
+    PinIcon,
+    PizzaIcon,
+    RainIcon,
+    RollerskateIcon,
+    SadIcon,
+    ShoeIcon,
+    SkippingRopeIcon,
+    SnowIcon,
+    StarIcon,
+    StatusIcon,
+    TrashIcon,
+    VideoIcon,
+    XIcon,
+    YogaIcon
 } from '@/components/icons';
 import { PlayIcon } from '@/components/icons/PlayIcon';
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
@@ -390,6 +391,11 @@ export default function ActivitiesIndexScreen() {
     } finally {
       setDuplicatingId(null);
     }
+  };
+
+  const onCreateTemplateFromWorkout = (id: string) => {
+    setMenuTargetId(null);
+    router.push({ pathname: '/activities/templates', params: { sourceSessionId: id } } as any);
   };
 
   const openRename = (id: string) => {
@@ -801,6 +807,17 @@ export default function ActivitiesIndexScreen() {
             >
               <DuplicateIcon size={20} color={colors.text} />
               <Text style={styles.menuItemText}>Duplicate Workout</Text>
+            </Pressable>
+
+            <View style={styles.menuSeparator} />
+
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+              onPress={() => menuTargetId && onCreateTemplateFromWorkout(menuTargetId)}
+            >
+              <PackageIcon size={20} color={colors.text} />
+              <Text style={styles.menuItemText}>Create template</Text>
             </Pressable>
 
             <View style={styles.menuSeparator} />

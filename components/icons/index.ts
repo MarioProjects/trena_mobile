@@ -17,6 +17,7 @@ export { LearnIcon } from './LearnIcon';
 export { MethodsIcon } from './MethodsIcon';
 export { MoreHorizIcon } from './MoreHorizIcon';
 export { NotebookIcon } from './NotebookIcon';
+export { PackageIcon } from './PackageIcon';
 export { PlusIcon } from './PlusIcon';
 export { ProfileIcon } from './ProfileIcon';
 export { RocketIcon } from './RocketIcon';

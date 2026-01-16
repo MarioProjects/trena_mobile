@@ -5,19 +5,19 @@ import { Toast } from '@/components/ui/Toast';
 import { Fonts, rgba } from '@/constants/theme';
 import { learnData } from '@/data/learn';
 import { useTrenaTheme } from '@/hooks/use-theme-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WorkoutsSkeleton } from '@/components/WorkoutsSkeleton';
 import { getAddExerciseDraft } from '@/lib/workouts/methods/ui-draft';
-import { createTemplate, deleteTemplate, duplicateTemplate, listTemplates, startSessionFromTemplate, updateTemplate } from '@/lib/workouts/repo';
+import { createTemplate, deleteTemplate, duplicateTemplate, getSession, listTemplates, startSessionFromTemplate, updateTemplate } from '@/lib/workouts/repo';
 import type {
-  ExerciseRef,
-  MethodKey,
-  WorkoutTemplate,
-  WorkoutTemplateItem,
+    ExerciseRef,
+    MethodKey,
+    WorkoutTemplate,
+    WorkoutTemplateItem,
 } from '@/lib/workouts/types';
 
 const learnExercises = learnData.filter((x) => x.type === 'exercise');
@@ -35,6 +35,8 @@ function coerceExerciseName(ref: ExerciseRef) {
 export default function TemplatesScreen() {
   const { colors } = useTrenaTheme();
   const styles = React.useMemo(() => createStyles(colors), [colors]);
+  const { sourceSessionId } = useLocalSearchParams<{ sourceSessionId?: string }>();
+
   const [templates, setTemplates] = React.useState<WorkoutTemplate[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
@@ -76,6 +78,49 @@ export default function TemplatesScreen() {
   React.useEffect(() => {
     load();
   }, [load]);
+
+  const handleSourceSession = React.useCallback(async (sessionId: string) => {
+    try {
+      const session = await getSession(sessionId);
+      if (!session) return;
+
+      const templateItems: WorkoutTemplateItem[] = session.snapshot.exercises.map((se) => {
+        if (se.source.type === 'method') {
+          return {
+            id: makeLocalId('tpl_item'),
+            type: 'method' as const,
+            exercise: se.exercise,
+            methodInstanceId: se.source.methodInstanceId,
+            binding: se.source.binding,
+            supersetId: se.supersetId,
+            note: se.notes,
+          };
+        }
+        return {
+          id: makeLocalId('tpl_item'),
+          type: 'free' as const,
+          exercise: se.exercise,
+          supersetId: se.supersetId,
+          note: se.notes,
+        };
+      });
+
+      setEditingId('NEW');
+      setName(session.title);
+      setItems(templateItems);
+
+      // Clear the param so it doesn't re-trigger
+      router.setParams({ sourceSessionId: undefined } as any);
+    } catch (e) {
+      console.error('[templates] failed to load source session:', e);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (sourceSessionId) {
+      handleSourceSession(sourceSessionId);
+    }
+  }, [sourceSessionId, handleSourceSession]);
 
   const resetEditor = () => {
     setEditingId(null);
