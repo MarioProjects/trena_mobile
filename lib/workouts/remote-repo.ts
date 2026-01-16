@@ -5,16 +5,16 @@ import { applyMethodResult, generatePlannedSets } from './methods';
 import { coerceWorkoutSessionStatus } from './status';
 import { coerceWorkoutTags } from './tags';
 import type {
-  ExerciseRef,
-  MethodBinding,
-  MethodInstanceRow,
-  MethodKey,
-  PerformedSet,
-  SessionExercise,
-  WorkoutSessionRow,
-  WorkoutSessionSnapshotV1,
-  WorkoutTemplate,
-  WorkoutTemplateItem,
+    ExerciseRef,
+    MethodBinding,
+    MethodInstanceRow,
+    MethodKey,
+    PerformedSet,
+    SessionExercise,
+    WorkoutSessionRow,
+    WorkoutSessionSnapshotV1,
+    WorkoutTemplate,
+    WorkoutTemplateItem,
 } from './types';
 
 function makeLocalId(prefix: string) {
@@ -271,12 +271,50 @@ export async function duplicateSession(id: string) {
   if (getErr) throw getErr;
 
   const originalSnapshot = original.snapshot as WorkoutSessionSnapshotV1;
+
+  const exercises = await Promise.all(
+    (originalSnapshot.exercises || []).map(async (ex) => {
+      if (ex.source.type === 'method') {
+        const methodKey = ex.source.methodKey;
+        const methodInstanceId = ex.source.methodInstanceId;
+        const binding = ex.source.binding;
+        const methodConfig = ex.source.methodConfig;
+
+        const latestState = await getLatestStateForMethodInstance({
+          methodInstanceId,
+          methodKey,
+          config: methodConfig,
+          currentState: ex.source.methodStateAtStart,
+        });
+
+        const { plannedSets, coercedConfig, coercedState } = generatePlannedSets({
+          methodKey,
+          binding,
+          methodConfig,
+          methodState: latestState,
+        });
+
+        return {
+          ...ex,
+          source: {
+            ...ex.source,
+            methodConfig: coercedConfig,
+            methodStateAtStart: coercedState,
+          },
+          plannedSets,
+          performedSets: [],
+        };
+      }
+      return {
+        ...ex,
+        performedSets: [],
+      };
+    })
+  );
+
   const newSnapshot: WorkoutSessionSnapshotV1 = {
     ...originalSnapshot,
-    exercises: (originalSnapshot.exercises || []).map((ex) => ({
-      ...ex,
-      performedSets: [],
-    })),
+    exercises,
   };
 
   // 2. Insert new session
@@ -288,6 +326,7 @@ export async function duplicateSession(id: string) {
       title: original.title,
       tags: coerceWorkoutTags((original as any).tags),
       started_at: new Date().toISOString(),
+      status: 'in_progress',
       snapshot: newSnapshot,
     })
     .select('id, title, template_id, started_at, ended_at, status, tags, snapshot, created_at, updated_at')

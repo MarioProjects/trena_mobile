@@ -489,12 +489,52 @@ export async function duplicateSession(id: string) {
   if (!original) throw new Error('Session not found.');
 
   const originalSnapshot = original.snapshot as WorkoutSessionSnapshotV1;
+
+  const exercises = await Promise.all(
+    (originalSnapshot.exercises || []).map(async (ex) => {
+      if (ex.source.type === 'method') {
+        const methodKey = ex.source.methodKey;
+        const methodInstanceId = ex.source.methodInstanceId;
+        const binding = ex.source.binding;
+        const methodConfig = ex.source.methodConfig;
+
+        // Refresh state from most recent completions to respect progression
+        const latestState = await getLatestStateForMethodInstanceLocal({
+          userId,
+          methodInstanceId,
+          methodKey,
+          config: methodConfig,
+          currentState: ex.source.methodStateAtStart,
+        });
+
+        const { plannedSets, coercedConfig, coercedState } = generatePlannedSets({
+          methodKey,
+          binding,
+          methodConfig,
+          methodState: latestState,
+        });
+
+        return {
+          ...ex,
+          source: {
+            ...ex.source,
+            methodConfig: coercedConfig,
+            methodStateAtStart: coercedState,
+          },
+          plannedSets,
+          performedSets: [],
+        };
+      }
+      return {
+        ...ex,
+        performedSets: [],
+      };
+    })
+  );
+
   const newSnapshot: WorkoutSessionSnapshotV1 = {
     ...originalSnapshot,
-    exercises: (originalSnapshot.exercises || []).map((ex) => ({
-      ...ex,
-      performedSets: [],
-    })),
+    exercises,
   };
 
   const now = isoNow();
@@ -503,6 +543,7 @@ export async function duplicateSession(id: string) {
     id: makeUuid(),
     started_at: now,
     ended_at: null,
+    status: 'in_progress',
     snapshot: newSnapshot,
     created_at: now,
     updated_at: now,
