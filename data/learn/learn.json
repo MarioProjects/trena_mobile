@@ -8,11 +8,7 @@
     "goal": "Explosive Strength / Hypertrophy",
     "description": "A method focusing on explosive strength using a single AMRAP (As Many Reps As Possible) set with cyclical progression.",
     "long_description": "The AMRAP Method operates on a cyclical progression model where athletes perform a single maximal-effort set to failure per session. Starting with moderate loads near 50% of capacity, the lifter executes repetitions with maximum explosive velocity, strictly ensuring a distinct muscular pause at the bottom to eliminate momentum and rebound. As weight increases incrementally each session, the repetition count naturally decreases from high ranges down to a threshold (typically 15 reps), triggering a cycle reset that drives continuous neural and hypertrophic adaptation.",
-    "equipment": [
-      "Barbell",
-      "Bench",
-      "Plates"
-    ],
+    "equipment": ["Barbell", "Bench", "Plates"],
     "dos": [
       "Do warm up thoroughly before the main set.",
       "Do perform the repetitions as explosively as possible.",
@@ -22,13 +18,9 @@
       "Don't grind the reps; speed is key.",
       "Don't do this for every exercise; focus on main compounds."
     ],
-    "tags": [
-      "Hypertrophy",
-      "Speed",
-      "Bench Press Specialist"
-    ],
-    "image": "assets/images/learn/methods/amrap.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_amrap",
+    "tags": ["Hypertrophy", "Speed", "Bench Press Specialist"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -40,11 +32,7 @@
     "goal": "Raw Strength",
     "description": "A slow and steady progression system based on monthly cycles using 90% of your 1RM.",
     "long_description": "One of the most popular strength programs in existence. It revolves around four main lifts (Squat, Deadlift, Bench, Press) and uses a wave loading progression over 3 or 4 weeks. It emphasizes starting light and progressing slowly.",
-    "equipment": [
-      "Barbell",
-      "Rack",
-      "Plates"
-    ],
+    "equipment": ["Barbell", "Rack", "Plates"],
     "dos": [
       "Do calculate your training max correctly (90% of true 1RM).",
       "Do focus on the PR set (the final set of the main lift).",
@@ -54,13 +42,9 @@
       "Don't increase the weight faster than the program prescribes.",
       "Don't skip the assistance work (but don't overdo it either)."
     ],
-    "tags": [
-      "Powerlifting",
-      "Strength",
-      "Long-term"
-    ],
+    "tags": ["Powerlifting", "Strength", "Long-term"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_531",
+    "videoUrl": "https://www.youtube.com/watch?v=DVjLwzMAJSM",
     "isFavorite": false
   },
   {
@@ -72,11 +56,7 @@
     "goal": "Strength",
     "description": "A weekly periodization model for those who have stalled on beginner linear progression.",
     "long_description": "Unlike beginner programs where you increase weight every workout, Madcow increases weight weekly. It utilizes 'ramping sets' where only the final set of 5 is the heavy top set.",
-    "equipment": [
-      "Barbell",
-      "Rack",
-      "Bench"
-    ],
+    "equipment": ["Barbell", "Rack", "Bench"],
     "dos": [
       "Do follow the spreadsheet/calculator strictly.",
       "Do treat the light day (Wednesday) seriously for recovery."
@@ -85,75 +65,9 @@
       "Don't underestimate the volume; it catches up quickly.",
       "Don't skip the deload weeks."
     ],
-    "tags": [
-      "Strength",
-      "Old School",
-      "5x5"
-    ],
+    "tags": ["Strength", "Old School", "5x5"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_madcow",
-    "isFavorite": false
-  },
-  {
-    "id": "stronglifts-5x5",
-    "name": "StrongLifts 5x5",
-    "type": "method",
-    "level": "Beginner-Intermediate",
-    "days_per_week": "3",
-    "goal": "Strength / Muscle",
-    "description": "Simple and effective. 5 sets of 5 reps on compound exercises.",
-    "long_description": "Similar to Starting Strength but with more volume (5x5 instead of 3x5). It includes two workouts (A and B) alternated three times a week. Excellent for mastering technique through repetition.",
-    "equipment": [
-      "Barbell",
-      "Rack",
-      "Bench"
-    ],
-    "dos": [
-      "Do download the tracking app or use a logbook.",
-      "Do start with an empty bar if you are a total beginner."
-    ],
-    "donts": [
-      "Don't ignore stalling; switch to 3x5 when 5x5 becomes impossible.",
-      "Don't train two days in a row."
-    ],
-    "tags": [
-      "Volume",
-      "Simplicity"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_sl",
-    "isFavorite": false
-  },
-  {
-    "id": "westside-conjugate",
-    "name": "Westside Barbell / Conjugate",
-    "type": "method",
-    "level": "Advanced",
-    "days_per_week": "4",
-    "goal": "Powerlifting",
-    "description": "Rotates exercises weekly to avoid accommodation. Combines Max Effort and Dynamic Effort days.",
-    "long_description": "Developed by Louie Simmons, this method splits training into Max Effort (lifting 1RM-3RM) and Dynamic Effort (speed work). It relies heavily on exercise variation (using bands, chains, and different bars).",
-    "equipment": [
-      "Barbell",
-      "Bands",
-      "Chains",
-      "Specialty Bars"
-    ],
-    "dos": [
-      "Do rotate your main lift every single week.",
-      "Do focus on your weak points (triceps, glutes, lower back)."
-    ],
-    "donts": [
-      "Don't try this without a solid strength foundation.",
-      "Don't skip the speed work; it builds explosive power."
-    ],
-    "tags": [
-      "Powerlifting",
-      "Complex",
-      "Elite"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_westside",
+    "videoUrl": "https://www.youtube.com/watch?v=p2f5ZLwAdu0",
     "isFavorite": false
   },
   {
@@ -165,9 +79,7 @@
     "goal": "Hypertrophy & Strength",
     "description": "Power Hypertrophy Adaptive Training. Combines heavy lifting and bodybuilding work.",
     "long_description": "Dr. Layne Norton's program. The first two days of the week are split into Upper and Lower Power days. The last three days are bodybuilding 'hypertrophy' days with higher reps and shorter rest periods.",
-    "equipment": [
-      "Full Gym Access"
-    ],
+    "equipment": ["Full Gym Access"],
     "dos": [
       "Do keep the power days heavy and the hypertrophy days explosive.",
       "Do manage fatigue; this is a high-volume program."
@@ -176,101 +88,9 @@
       "Don't lift heavy on hypertrophy days; focus on the 'pump'.",
       "Don't skip the rest days."
     ],
-    "tags": [
-      "Bodybuilding",
-      "Hybrid",
-      "Aesthetics"
-    ],
+    "tags": ["Bodybuilding", "Hybrid", "Aesthetics"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_phat",
-    "isFavorite": false
-  },
-  {
-    "id": "ppl-split",
-    "name": "PPL (Push, Pull, Legs)",
-    "type": "method",
-    "level": "Intermediate",
-    "days_per_week": "3 or 6",
-    "goal": "Aesthetics / Balance",
-    "description": "Splits movements into pushing, pulling, and leg exercises. Highly adaptable.",
-    "long_description": "Push days target chest, shoulders, and triceps. Pull days target back and biceps. Legs target quads, hams, and calves. Can be run 3 days a week (low frequency) or 6 days (high frequency).",
-    "equipment": [
-      "Full Gym Access"
-    ],
-    "dos": [
-      "Do balance compound lifts with isolation movements.",
-      "Do organize exercises from most demanding to least demanding."
-    ],
-    "donts": [
-      "Don't neglect the rear delts on Pull day.",
-      "Don't skip Leg day."
-    ],
-    "tags": [
-      "Split",
-      "Popular",
-      "Flexible"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_ppl",
-    "isFavorite": false
-  },
-  {
-    "id": "upper-lower",
-    "name": "Upper/Lower Split",
-    "type": "method",
-    "level": "Beginner-Intermediate",
-    "days_per_week": "4",
-    "goal": "General Fitness / Strength",
-    "description": "Divides the body into Torso and Legs. Great for recovery and frequency.",
-    "long_description": "Typically run as: Upper A, Lower A, Rest, Upper B, Lower B. This allows you to hit every muscle group twice a week with ample recovery time in between.",
-    "equipment": [
-      "Full Gym Access"
-    ],
-    "dos": [
-      "Do include both vertical and horizontal pushing/pulling.",
-      "Do vary the rep ranges between the A and B days."
-    ],
-    "donts": [
-      "Don't perform two Upper days in a row.",
-      "Don't forget core work on Lower days."
-    ],
-    "tags": [
-      "Split",
-      "Recovery",
-      "Standard"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_ul",
-    "isFavorite": false
-  },
-  {
-    "id": "gvt",
-    "name": "German Volume Training (GVT)",
-    "type": "method",
-    "level": "Advanced",
-    "days_per_week": "3-4",
-    "goal": "Hypertrophy",
-    "description": "10 sets of 10 reps. A brutal method for maximizing muscle size.",
-    "long_description": "Also known as the '10 sets method'. You select a weight you can do for 20 reps (approx 60% 1RM) and perform 10 sets of 10 reps with strict rest intervals (60-90s).",
-    "equipment": [
-      "Barbell",
-      "Dumbbells"
-    ],
-    "dos": [
-      "Do strict timing on your rest periods.",
-      "Do expect soreness like you've never felt before."
-    ],
-    "donts": [
-      "Don't increase the weight until you complete 10x10 strictly.",
-      "Don't use this method for deadlifts or highly technical lifts."
-    ],
-    "tags": [
-      "Hypertrophy",
-      "High Volume",
-      "Shock"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_gvt",
+    "videoUrl": "https://www.youtube.com/watch?v=DOfMY_21I1E",
     "isFavorite": false
   },
   {
@@ -282,9 +102,7 @@
     "goal": "Peaking Strength",
     "description": "A very intense Russian squat cycle designed to add significant weight to your max.",
     "long_description": "Split into phases (Base, Switching, Intense). It requires squatting 4 times a week at high percentages. High risk of injury but high reward.",
-    "equipment": [
-      "Squat Rack"
-    ],
+    "equipment": ["Squat Rack"],
     "dos": [
       "Do eat and sleep significantly more than usual.",
       "Do stretch and foam roll daily."
@@ -293,13 +111,9 @@
       "Don't do this if you have any existing injuries.",
       "Don't perform other heavy leg work (deadlifts) during the Base cycle."
     ],
-    "tags": [
-      "Squat",
-      "Peaking",
-      "Russian"
-    ],
+    "tags": ["Squat", "Peaking", "Russian"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_smolov",
+    "videoUrl": "https://www.youtube.com/watch?v=16nKYXnEo48",
     "isFavorite": false
   },
   {
@@ -311,10 +125,7 @@
     "goal": "Posterior Chain",
     "description": "Lifting a dead weight from the floor. Builds total body strength.",
     "long_description": "Engages the hamstrings, glutes, lower back, lats, and grip. It is a pure test of strength requiring lifting the bar from the floor to a lockout position.",
-    "equipment": [
-      "Barbell",
-      "Plates"
-    ],
+    "equipment": ["Barbell", "Plates"],
     "dos": [
       "Do keep the bar close to your shins.",
       "Do engage your lats before pulling."
@@ -323,13 +134,9 @@
       "Don't round your lower back (cat back).",
       "Don't hyperextend your back at the top."
     ],
-    "tags": [
-      "Compound",
-      "Back",
-      "Big 3"
-    ],
+    "tags": ["Compound", "Back", "Big 3"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_deadlift",
+    "videoUrl": "https://www.youtube.com/shorts/McCDaAsSeRc",
     "isFavorite": false
   },
   {
@@ -341,10 +148,7 @@
     "goal": "Upper Body Strength",
     "description": "The primary upper body pushing exercise. Targets chest, shoulders, and triceps.",
     "long_description": "Lying on a bench, the athlete un-racks the weight, lowers it to the chest, and presses it back up. It allows for the heaviest loading of the upper body musculature.",
-    "equipment": [
-      "Bench",
-      "Barbell"
-    ],
+    "equipment": ["Bench", "Barbell"],
     "dos": [
       "Do keep your feet planted firmly on the floor.",
       "Do retract your shoulder blades (pinch them together)."
@@ -353,13 +157,9 @@
       "Don't flare your elbows out 90 degrees.",
       "Don't bounce the bar off your chest."
     ],
-    "tags": [
-      "Compound",
-      "Push",
-      "Big 3"
-    ],
+    "tags": ["Compound", "Push", "Big 3"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_bench",
+    "videoUrl": "https://www.youtube.com/shorts/hWbUlkb5Ms4",
     "isFavorite": false
   },
   {
@@ -371,9 +171,7 @@
     "goal": "Single-Leg Strength",
     "description": "A unilateral leg exercise that builds quads and glutes while improving balance.",
     "long_description": "Step onto a stable box/bench with one foot, drive through the whole foot to stand tall, then control the descent back to the floor. Can be done bodyweight or loaded with dumbbells for progressive overload.",
-    "equipment": [
-      "Box/Bench"
-    ],
+    "equipment": ["Box/Bench"],
     "dos": [
       "Do keep your torso tall and core braced.",
       "Do drive through your whole foot and control the lowering."
@@ -382,14 +180,9 @@
       "Don't push off aggressively with the back leg.",
       "Don't use a box height that forces your pelvis to tilt or your knee to cave in."
     ],
-    "tags": [
-      "Legs",
-      "Unilateral",
-      "Glutes",
-      "Quads"
-    ],
+    "tags": ["Legs", "Unilateral", "Glutes", "Quads"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_step_ups",
+    "videoUrl": "https://www.youtube.com/shorts/PzDbmqL6qo8",
     "isFavorite": false
   },
   {
@@ -401,9 +194,7 @@
     "goal": "Conditioning",
     "description": "A simple, scalable cardio drill that improves coordination and footwork.",
     "long_description": "Using a jump rope, perform small, rhythmic hops while maintaining an upright posture. Keep the jumps low, land softly, and turn the rope with the wrists rather than the arms. Excellent for warm-ups, intervals, and general conditioning.",
-    "equipment": [
-      "Jump Rope"
-    ],
+    "equipment": ["Jump Rope"],
     "dos": [
       "Do keep your jumps low and land softly on the midfoot.",
       "Do rotate the rope with your wrists to stay efficient."
@@ -412,16 +203,12 @@
       "Don't stomp or jump excessively high.",
       "Don't let your shoulders shrug up; stay relaxed."
     ],
-    "tags": [
-      "Cardio",
-      "Warm-up",
-      "Coordination"
-    ],
+    "tags": ["Cardio", "Warm-up", "Coordination"],
     "tracking": {
       "type": "interval_time"
     },
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_jump_rope",
+    "videoUrl": "https://www.youtube.com/shorts/VLC6YO9w5iU",
     "isFavorite": false
   },
   {
@@ -433,9 +220,7 @@
     "goal": "Cardiovascular Fitness",
     "description": "A foundational cardio activity for endurance, health, and conditioning.",
     "long_description": "Run at an easy steady pace for aerobic base, or use intervals for conditioning. Maintain a tall posture, slight forward lean, and quick light steps. Progress volume gradually to reduce injury risk.",
-    "equipment": [
-      "Shoes"
-    ],
+    "equipment": ["Shoes"],
     "dos": [
       "Do build volume gradually (10% rule as a guideline).",
       "Do keep a cadence that feels quick and light."
@@ -444,18 +229,14 @@
       "Don't increase intensity and volume at the same time.",
       "Don't ignore persistent pain; adjust and recover."
     ],
-    "tags": [
-      "Cardio",
-      "Endurance",
-      "Conditioning"
-    ],
+    "tags": ["Cardio", "Endurance", "Conditioning"],
     "tracking": {
       "type": "distance_time",
       "distanceUnit": "km",
       "showPace": true
     },
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_running",
+    "videoUrl": "https://www.youtube.com/shorts/A5uZobDo80Q",
     "isFavorite": false
   },
   {
@@ -467,10 +248,7 @@
     "goal": "Strength (Posterior Emphasis)",
     "description": "A squat variation with the bar lower on the back to leverage the hips and posterior chain.",
     "long_description": "With the bar placed across the rear delts (below the traps), the lifter uses a slightly more forward torso angle and hip drive. Often allows heavier loads and is common in powerlifting. Maintain a rigid brace and consistent bar path over midfoot.",
-    "equipment": [
-      "Barbell",
-      "Rack"
-    ],
+    "equipment": ["Barbell", "Rack"],
     "dos": [
       "Do create a stable shelf on the rear delts and keep wrists neutral.",
       "Do brace hard and keep the bar over midfoot."
@@ -479,14 +257,9 @@
       "Don't let the bar roll up your back as you stand.",
       "Don't lose upper-back tightness; it collapses the squat."
     ],
-    "tags": [
-      "Compound",
-      "Squat",
-      "Legs",
-      "Powerlifting"
-    ],
+    "tags": ["Compound", "Squat", "Legs", "Powerlifting"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_low_bar_squat",
+    "videoUrl": "https://www.youtube.com/shorts/eZ71Nukcvjk",
     "isFavorite": false
   },
   {
@@ -498,10 +271,7 @@
     "goal": "Leg Strength (Quad Emphasis)",
     "description": "A squat variation with the bar on the upper traps, typically more upright and quad-focused.",
     "long_description": "With the bar resting higher on the traps, the lifter generally maintains a more upright torso and allows the knees to travel forward more, increasing quad involvement. Keep the bar path vertical over midfoot and control depth with a strong brace.",
-    "equipment": [
-      "Barbell",
-      "Rack"
-    ],
+    "equipment": ["Barbell", "Rack"],
     "dos": [
       "Do keep your chest up and ribs down with a strong brace.",
       "Do let knees track over toes and keep heels grounded."
@@ -510,45 +280,9 @@
       "Don't relax at the bottom; stay tight.",
       "Don't shift to the toes; keep pressure balanced over midfoot."
     ],
-    "tags": [
-      "Compound",
-      "Squat",
-      "Legs",
-      "Quads"
-    ],
+    "tags": ["Compound", "Squat", "Legs", "Quads"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_high_bar_squat",
-    "isFavorite": false
-  },
-  {
-    "id": "exercise-barbell-overhead-press",
-    "name": "Barbell Overhead Press",
-    "type": "exercise",
-    "level": "All levels",
-    "days_per_week": "N/A",
-    "goal": "Shoulder Strength",
-    "description": "A standing press that builds shoulders, triceps, and total-body tension.",
-    "long_description": "Press a barbell from the front rack position overhead to a locked-out finish with the biceps near the ears. Use glutes and abs to create a stable base. The bar should travel close to the face with a slight head 'through' at the top.",
-    "equipment": [
-      "Barbell",
-      "Rack"
-    ],
-    "dos": [
-      "Do squeeze glutes and brace your abs to avoid over-arching.",
-      "Do keep the bar path close and finish with a stacked lockout."
-    ],
-    "donts": [
-      "Don't turn it into a push press unless intended.",
-      "Don't flare ribs up and hyperextend your lower back."
-    ],
-    "tags": [
-      "Compound",
-      "Push",
-      "Shoulders",
-      "Triceps"
-    ],
-    "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_barbell_ohp",
+    "videoUrl": "https://www.youtube.com/shorts/eZ71Nukcvjk",
     "isFavorite": false
   },
   {
@@ -560,9 +294,7 @@
     "goal": "Shoulder Hypertrophy",
     "description": "An overhead press using dumbbells for a larger range of motion and unilateral control.",
     "long_description": "Press two dumbbells overhead from shoulder height to a stable lockout. Dumbbells allow natural wrist and elbow paths and can be done seated or standing. Control the lowering phase and avoid bouncing.",
-    "equipment": [
-      "Dumbbells"
-    ],
+    "equipment": ["Dumbbells"],
     "dos": [
       "Do control the eccentric and keep forearms vertical.",
       "Do keep your core braced and avoid leaning back."
@@ -571,14 +303,9 @@
       "Don't let dumbbells drift too far forward; keep them stacked.",
       "Don't slam them together overhead."
     ],
-    "tags": [
-      "Push",
-      "Shoulders",
-      "Dumbbells",
-      "Hypertrophy"
-    ],
+    "tags": ["Push", "Shoulders", "Dumbbells", "Hypertrophy"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_db_ohp",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -590,28 +317,15 @@
     "goal": "Shoulder Strength",
     "description": "A strict barbell overhead press performed with feet close together, emphasizing shoulder strength and core stability.",
     "long_description": "Standard military press is done with heels touching. This narrow base forces more core engagement and eliminates leg drive. Keep the bar path vertical and finish with biceps by ears.",
-    "equipment": [
-      "Barbell",
-      "Plates",
-      "Rack"
-    ],
+    "equipment": ["Barbell", "Plates", "Rack"],
     "dos": [
       "Do keep your heels close together.",
       "Do squeeze your glutes and abs hard."
     ],
-    "donts": [
-      "Don't use any leg drive.",
-      "Don't arch your back excessively."
-    ],
-    "tags": [
-      "Compound",
-      "Push",
-      "Shoulders",
-      "Core",
-      "Barbell"
-    ],
+    "donts": ["Don't use any leg drive.", "Don't arch your back excessively."],
+    "tags": ["Compound", "Push", "Shoulders", "Core", "Barbell"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_military_press_bb",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -623,9 +337,7 @@
     "goal": "Shoulder Strength & Stability",
     "description": "A strict dumbbell overhead press using a narrow stance to challenge balance and shoulder control.",
     "long_description": "Perform a standing dumbbell press with feet close together. Using dumbbells requires more stabilization than a barbell and helps identify strength imbalances between sides.",
-    "equipment": [
-      "Dumbbells"
-    ],
+    "equipment": ["Dumbbells"],
     "dos": [
       "Do maintain a narrow stance.",
       "Do control the dumbbells throughout the full range of motion."
@@ -634,14 +346,9 @@
       "Don't allow the dumbbells to drift away from your body.",
       "Don't use leg drive."
     ],
-    "tags": [
-      "Push",
-      "Shoulders",
-      "Dumbbells",
-      "Stability"
-    ],
+    "tags": ["Push", "Shoulders", "Dumbbells", "Stability"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_military_press_db",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -653,9 +360,7 @@
     "goal": "Biceps Hypertrophy",
     "description": "A classic isolation movement for the biceps using dumbbells.",
     "long_description": "Curl the dumbbells from arms-extended to shoulder height while keeping elbows close to the torso. Use a controlled tempo and avoid swinging. Can be done alternating or both arms together.",
-    "equipment": [
-      "Dumbbells"
-    ],
+    "equipment": ["Dumbbells"],
     "dos": [
       "Do keep elbows pinned and move only at the elbow joint.",
       "Do control the lowering and fully extend between reps."
@@ -664,14 +369,9 @@
       "Don't swing your torso to cheat the weight up.",
       "Don't let wrists collapse; keep them neutral."
     ],
-    "tags": [
-      "Arms",
-      "Biceps",
-      "Isolation",
-      "Dumbbells"
-    ],
+    "tags": ["Arms", "Biceps", "Isolation", "Dumbbells"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_db_curl",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -683,9 +383,7 @@
     "goal": "Biceps & Forearms",
     "description": "A neutral-grip curl that emphasizes brachialis and forearms.",
     "long_description": "Hold dumbbells with palms facing each other and curl without supinating. Keep elbows close and avoid shoulder swing. Great accessory for elbow health and grip/forearm development.",
-    "equipment": [
-      "Dumbbells"
-    ],
+    "equipment": ["Dumbbells"],
     "dos": [
       "Do keep a neutral wrist and steady elbow position.",
       "Do control both the lift and the lowering."
@@ -694,14 +392,9 @@
       "Don't turn it into a front raise; avoid shoulder flexion.",
       "Don't let the dumbbells drift behind you."
     ],
-    "tags": [
-      "Arms",
-      "Biceps",
-      "Forearms",
-      "Isolation"
-    ],
+    "tags": ["Arms", "Biceps", "Forearms", "Isolation"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_hammer_curl",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -713,9 +406,7 @@
     "goal": "Biceps Strength",
     "description": "A curl with a straight bar that allows heavier loading than dumbbells.",
     "long_description": "Using a supinated grip on a barbell, curl the weight up while keeping elbows close and shoulders down. Maintain a tight core and avoid swinging. The barbell provides a fixed hand position and stable loading.",
-    "equipment": [
-      "Barbell"
-    ],
+    "equipment": ["Barbell"],
     "dos": [
       "Do keep your ribs down and glutes tight to prevent swing.",
       "Do use a full range of motion with controlled tempo."
@@ -724,14 +415,9 @@
       "Don't lean back to 'hip thrust' the bar up.",
       "Don't shrug shoulders forward at the top."
     ],
-    "tags": [
-      "Arms",
-      "Biceps",
-      "Isolation",
-      "Barbell"
-    ],
+    "tags": ["Arms", "Biceps", "Isolation", "Barbell"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_barbell_curl",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -743,9 +429,7 @@
     "goal": "Back Strength",
     "description": "A bodyweight vertical pull focusing on lats, upper back, and biceps.",
     "long_description": "Hang from a pull-up bar with a pronated grip, then pull your chest toward the bar by driving elbows down and back. Control the descent to a full hang. Use assistance or bands if needed to maintain quality reps.",
-    "equipment": [
-      "Pull-up Bar"
-    ],
+    "equipment": ["Pull-up Bar"],
     "dos": [
       "Do start each rep from a controlled hang and engage the lats.",
       "Do think 'elbows to pockets' to avoid overusing the arms."
@@ -754,14 +438,9 @@
       "Don't kip or swing unless you're doing a specific kipping style.",
       "Don't crane your neck; keep it neutral."
     ],
-    "tags": [
-      "Pull",
-      "Back",
-      "Bodyweight",
-      "Compound"
-    ],
+    "tags": ["Pull", "Back", "Bodyweight", "Compound"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_pullups",
+    "videoUrl": "",
     "isFavorite": false
   },
   {
@@ -773,9 +452,7 @@
     "goal": "Chest & Triceps",
     "description": "A bodyweight pressing movement that builds triceps and chest.",
     "long_description": "Support yourself on parallel bars, lower under control until shoulders are comfortably below elbows (as mobility allows), then press back up to lockout. A slight forward lean increases chest involvement; a more upright torso shifts emphasis to triceps.",
-    "equipment": [
-      "Dip Bars"
-    ],
+    "equipment": ["Dip Bars"],
     "dos": [
       "Do keep shoulders down and stable and use a controlled range.",
       "Do lock out with control at the top."
@@ -784,14 +461,9 @@
       "Don't dive-bomb into the bottom position.",
       "Don't force depth past a comfortable shoulder range."
     ],
-    "tags": [
-      "Push",
-      "Bodyweight",
-      "Chest",
-      "Triceps"
-    ],
+    "tags": ["Push", "Bodyweight", "Chest", "Triceps"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_dips",
+    "videoUrl": "https://www.youtube.com/shorts/SXBksC78v8M",
     "isFavorite": false
   },
   {
@@ -803,9 +475,7 @@
     "goal": "Upper Body Endurance",
     "description": "A foundational bodyweight push exercise for chest, shoulders, and triceps.",
     "long_description": "From a plank position with hands under shoulders, lower the chest toward the floor while keeping body rigid, then press back up. Variations (incline, decline, weighted) adjust difficulty. Great for volume and technique practice.",
-    "equipment": [
-      "Bodyweight"
-    ],
+    "equipment": ["Bodyweight"],
     "dos": [
       "Do keep a straight line from head to heels and brace your core.",
       "Do use a full range of motion with controlled tempo."
@@ -814,14 +484,9 @@
       "Don't let hips sag or pike up.",
       "Don't flare elbows excessively; keep a comfortable angle."
     ],
-    "tags": [
-      "Push",
-      "Bodyweight",
-      "Chest",
-      "Triceps"
-    ],
+    "tags": ["Push", "Bodyweight", "Chest", "Triceps"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_pushups",
+    "videoUrl": "https://www.youtube.com/shorts/pKZ-lkKKMws",
     "isFavorite": false
   },
   {
@@ -833,10 +498,7 @@
     "goal": "Leg Hypertrophy",
     "description": "A challenging unilateral squat variation that targets quads and glutes.",
     "long_description": "With the rear foot elevated on a bench/box, lower the hips down and slightly back by bending the front knee and hip, then drive up through the front foot. Great for building single-leg strength and addressing left/right imbalances.",
-    "equipment": [
-      "Bench",
-      "Bodyweight"
-    ],
+    "equipment": ["Bench", "Bodyweight"],
     "dos": [
       "Do keep your front foot planted and knee tracking over toes.",
       "Do control depth and keep your torso stable."
@@ -845,14 +507,9 @@
       "Don't bounce off the bottom.",
       "Don't let the front heel lift off the ground."
     ],
-    "tags": [
-      "Legs",
-      "Unilateral",
-      "Glutes",
-      "Quads"
-    ],
+    "tags": ["Legs", "Unilateral", "Glutes", "Quads"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_bulgarian_split_squat",
+    "videoUrl": "https://www.youtube.com/shorts/uODWo4YqbT8",
     "isFavorite": false
   },
   {
@@ -864,10 +521,7 @@
     "goal": "Upper Back Strength",
     "description": "A compound horizontal pull that builds lats, upper back, and grip.",
     "long_description": "Hinge at the hips with a flat back, then row the barbell toward the lower ribs/upper abdomen. Control the eccentric and keep the torso angle consistent. Great balance to pressing volume.",
-    "equipment": [
-      "Barbell",
-      "Plates"
-    ],
+    "equipment": ["Barbell", "Plates"],
     "dos": [
       "Do keep your back flat and brace your core.",
       "Do pull elbows back and squeeze the upper back."
@@ -876,14 +530,9 @@
       "Don't use excessive body English to move the load.",
       "Don't round the lower back during the hinge."
     ],
-    "tags": [
-      "Pull",
-      "Back",
-      "Compound",
-      "Barbell"
-    ],
+    "tags": ["Pull", "Back", "Compound", "Barbell"],
     "image": "assets/images/mock.webp",
-    "videoUrl": "https://www.youtube.com/watch?v=placeholder_barbell_row",
+    "videoUrl": "https://www.youtube.com/shorts/Nqh7q3zDCoQ",
     "isFavorite": false
   }
 ]

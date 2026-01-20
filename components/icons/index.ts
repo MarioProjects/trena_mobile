@@ -1,46 +1,58 @@
-export { ActivitiesIcon } from './ActivitiesIcon';
-export { CalendarIcon } from './CalendarIcon';
-export { CharacterIcon } from './CharacterIcon';
-export { CheckIcon } from './CheckIcon';
-export { ChevronLeftIcon } from './ChevronLeftIcon';
-export { DragHandleIcon } from './DragHandleIcon';
-export { DuplicateIcon } from './DuplicateIcon';
-export { EditIcon } from './EditIcon';
-export { EnergyIcon } from './EnergyIcon';
-export { ExercisesIcon } from './ExercisesIcon';
-export { ExpandIcon } from './ExpandIcon';
-export { FilterIcon } from './FilterIcon';
-export { FloppyIcon } from './FloppyIcon';
-export { GoogleIcon } from './GoogleIcon';
-export { InfoIcon } from './InfoIcon';
-export { LearnIcon } from './LearnIcon';
-export { MethodsIcon } from './MethodsIcon';
-export { MoreHorizIcon } from './MoreHorizIcon';
-export { NotebookIcon } from './NotebookIcon';
-export { PackageIcon } from './PackageIcon';
-export { PlusIcon } from './PlusIcon';
-export { ProfileIcon } from './ProfileIcon';
-export { RocketIcon } from './RocketIcon';
-export { SearchIcon } from './SearchIcon';
-export { ShrinkIcon } from './ShrinkIcon';
-export { SkipStatusIcon } from './SkipStatusIcon';
-export { StatusIcon } from './StatusIcon';
-export { StickyNoteIcon } from './StickyNoteIcon';
-export { TagIcon } from './TagIcon';
-export { TodayIcon } from './TodayIcon';
-export { TrashIcon } from './TrashIcon';
-export { ViewIcon } from './ViewIcon';
-export { XIcon } from './XIcon';
+export { ActivitiesIcon } from "./ActivitiesIcon";
+export { CalendarIcon } from "./CalendarIcon";
+export { CharacterIcon } from "./CharacterIcon";
+export { CheckIcon } from "./CheckIcon";
+export { ChevronLeftIcon } from "./ChevronLeftIcon";
+export { DragHandleIcon } from "./DragHandleIcon";
+export { DuplicateIcon } from "./DuplicateIcon";
+export { EditIcon } from "./EditIcon";
+export { EnergyIcon } from "./EnergyIcon";
+export { ExercisesIcon } from "./ExercisesIcon";
+export { ExpandIcon } from "./ExpandIcon";
+export { FilterIcon } from "./FilterIcon";
+export { FloppyIcon } from "./FloppyIcon";
+export { GoogleIcon } from "./GoogleIcon";
+export { InfoIcon } from "./InfoIcon";
+export { LearnIcon } from "./LearnIcon";
+export { MethodsIcon } from "./MethodsIcon";
+export { MoreHorizIcon } from "./MoreHorizIcon";
+export { NotebookIcon } from "./NotebookIcon";
+export { PackageIcon } from "./PackageIcon";
+export { PlayIcon } from "./PlayIcon";
+export { PlusIcon } from "./PlusIcon";
+export { ProfileIcon } from "./ProfileIcon";
+export { RocketIcon } from "./RocketIcon";
+export { SearchIcon } from "./SearchIcon";
+export { ShrinkIcon } from "./ShrinkIcon";
+export { SkipStatusIcon } from "./SkipStatusIcon";
+export { StatusIcon } from "./StatusIcon";
+export { StickyNoteIcon } from "./StickyNoteIcon";
+export { TagIcon } from "./TagIcon";
+export { TodayIcon } from "./TodayIcon";
+export { TrashIcon } from "./TrashIcon";
+export { ViewIcon } from "./ViewIcon";
+export { XIcon } from "./XIcon";
 
 export {
     AppleIcon,
     BackpackIcon,
     BallIcon,
-    BatteryIcon, BicycleIcon, BrainIcon, BugIcon, CarIcon, ChessIcon, DropIcon,
+    BatteryIcon,
+    BicycleIcon,
+    BrainIcon,
+    BugIcon,
+    CarIcon,
+    ChessIcon,
+    DropIcon,
     DumbbellIcon,
     FireIcon,
     HappyIcon,
-    HourglassIcon, LeafIcon, LegIcon, MountainIcon, MuscleIcon, NeutralIcon,
+    HourglassIcon,
+    LeafIcon,
+    LegIcon,
+    MountainIcon,
+    MuscleIcon,
+    NeutralIcon,
     PinIcon,
     PizzaIcon,
     RainIcon,
@@ -52,6 +64,6 @@ export {
     StarIcon,
     VideoIcon,
     YogaIcon
-} from './tags';
+} from "./tags";
 
-export type { IconProps, StrokeIconProps } from './types';
+export type { IconProps, StrokeIconProps } from "./types";
