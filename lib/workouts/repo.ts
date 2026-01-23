@@ -1,8 +1,12 @@
-import { cancelAllReminders, cancelWorkoutReminder, scheduleWorkoutReminder } from '@/lib/notifications';
-import { makeUuid } from '@/lib/offline/uuid';
-import { supabase } from '@/lib/supabase';
+import {
+    cancelAllReminders,
+    cancelWorkoutReminder,
+    scheduleWorkoutReminder,
+} from "@/lib/notifications";
+import { makeUuid } from "@/lib/offline/uuid";
+import { supabase } from "@/lib/supabase";
 
-import { defaultTrackingForExerciseRef } from './exercise-tracking';
+import { defaultTrackingForExerciseRef } from "./exercise-tracking";
 import {
     enqueueOutbox,
     getMethodInstancesByIdsLocal,
@@ -20,10 +24,10 @@ import {
     upsertMethodInstanceLocal,
     upsertSessionLocal,
     upsertTemplateLocal,
-} from './local-repo';
-import { applyMethodResult, generatePlannedSets } from './methods';
-import { coerceWorkoutSessionStatus } from './status';
-import { coerceWorkoutTags } from './tags';
+} from "./local-repo";
+import { applyMethodResult, generatePlannedSets } from "./methods";
+import { coerceWorkoutSessionStatus } from "./status";
+import { coerceWorkoutTags } from "./tags";
 import type {
     ExerciseRef,
     MethodBinding,
@@ -36,7 +40,7 @@ import type {
     WorkoutSessionStatus,
     WorkoutTemplate,
     WorkoutTemplateItem,
-} from './types';
+} from "./types";
 
 /**
  * Best-effort sync trigger.
@@ -47,13 +51,13 @@ import type {
  */
 async function tryRunSyncOnce(): Promise<void> {
   try {
-    const { runSyncOnce } = await import('@/lib/sync/sync-engine');
+    const { runSyncOnce } = await import("@/lib/sync/sync-engine");
     await runSyncOnce();
   } catch (e) {
     // Best-effort: callers typically have local data to fall back to.
     // If we ever want to surface this, we can plumb a toast/logger here.
     const msg = e instanceof Error ? e.message : String(e);
-    console.warn('[sync] runSyncOnce unavailable/failed:', msg);
+    console.warn("[sync] runSyncOnce unavailable/failed:", msg);
   }
 }
 
@@ -68,12 +72,13 @@ async function requireUserIdFromCachedSession() {
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   const userId = data.session?.user?.id;
-  if (!userId) throw new Error('Not signed in.');
+  if (!userId) throw new Error("Not signed in.");
   return userId;
 }
 
 function asObject(x: unknown): Record<string, unknown> {
-  if (x && typeof x === 'object' && !Array.isArray(x)) return x as Record<string, unknown>;
+  if (x && typeof x === "object" && !Array.isArray(x))
+    return x as Record<string, unknown>;
   return {};
 }
 
@@ -83,35 +88,45 @@ function asArray(x: unknown): unknown[] {
 
 function coerceExerciseRef(x: unknown): ExerciseRef {
   const obj = asObject(x);
-  if (obj.kind === 'learn' && typeof obj.learnExerciseId === 'string') {
-    return { kind: 'learn', learnExerciseId: obj.learnExerciseId };
+  if (obj.kind === "learn" && typeof obj.learnExerciseId === "string") {
+    return { kind: "learn", learnExerciseId: obj.learnExerciseId };
   }
-  if (obj.kind === 'free' && typeof obj.name === 'string') {
-    return { kind: 'free', name: obj.name };
+  if (obj.kind === "free" && typeof obj.name === "string") {
+    return { kind: "free", name: obj.name };
   }
-  if (obj.kind === 'method' && typeof obj.methodInstanceId === 'string') {
-    return { kind: 'method', methodInstanceId: obj.methodInstanceId };
+  if (obj.kind === "method" && typeof obj.methodInstanceId === "string") {
+    return { kind: "method", methodInstanceId: obj.methodInstanceId };
   }
-  return { kind: 'free', name: 'Unknown exercise' };
+  return { kind: "free", name: "Unknown exercise" };
 }
 
 function coerceTemplateItem(x: unknown): WorkoutTemplateItem | null {
   const obj = asObject(x);
-  const id = typeof obj.id === 'string' ? obj.id : makeUuid();
+  const id = typeof obj.id === "string" ? obj.id : makeUuid();
   const type = obj.type;
   const exercise = coerceExerciseRef(obj.exercise);
-  const note = typeof obj.note === 'string' ? obj.note : undefined;
-  const supersetId = typeof obj.supersetId === 'string' ? obj.supersetId : undefined;
+  const note = typeof obj.note === "string" ? obj.note : undefined;
+  const supersetId =
+    typeof obj.supersetId === "string" ? obj.supersetId : undefined;
 
-  if (type === 'free') {
-    return { id, type: 'free', exercise, note, supersetId };
+  if (type === "free") {
+    return { id, type: "free", exercise, note, supersetId };
   }
 
-  if (type === 'method') {
-    const methodInstanceId = typeof obj.methodInstanceId === 'string' ? obj.methodInstanceId : '';
+  if (type === "method") {
+    const methodInstanceId =
+      typeof obj.methodInstanceId === "string" ? obj.methodInstanceId : "";
     const binding = obj.binding as MethodBinding | undefined;
     if (!methodInstanceId || !binding || !binding.methodKey) return null;
-    return { id, type: 'method', exercise, methodInstanceId, binding, note, supersetId };
+    return {
+      id,
+      type: "method",
+      exercise,
+      methodInstanceId,
+      binding,
+      note,
+      supersetId,
+    };
   }
 
   return null;
@@ -119,7 +134,9 @@ function coerceTemplateItem(x: unknown): WorkoutTemplateItem | null {
 
 function normalizeTemplate(row: WorkoutTemplate): WorkoutTemplate {
   const itemsRaw = asArray((row as any).items);
-  const items: WorkoutTemplateItem[] = itemsRaw.map(coerceTemplateItem).filter(Boolean) as WorkoutTemplateItem[];
+  const items: WorkoutTemplateItem[] = itemsRaw
+    .map(coerceTemplateItem)
+    .filter(Boolean) as WorkoutTemplateItem[];
   return {
     id: row.id,
     name: row.name,
@@ -161,22 +178,33 @@ async function getLatestStateForMethodInstanceLocal(args: {
   currentState: unknown;
 }) {
   // Scan most recent completed sessions from local cache.
-  const sessions = await listRecentCompletedSessionsLocal({ userId: args.userId, limit: 200 });
+  const sessions = await listRecentCompletedSessionsLocal({
+    userId: args.userId,
+    limit: 200,
+  });
 
   for (const s of sessions) {
     const snap = s.snapshot;
     if (!snap || !Array.isArray(snap.exercises)) continue;
 
     const matchingExercises = snap.exercises.filter(
-      (ex) => ex.source.type === 'method' && ex.source.methodInstanceId === args.methodInstanceId
-    ) as Array<SessionExercise & { source: Extract<SessionExercise['source'], { type: 'method' }> }>;
+      (ex) =>
+        ex.source.type === "method" &&
+        ex.source.methodInstanceId === args.methodInstanceId,
+    ) as Array<
+      SessionExercise & {
+        source: Extract<SessionExercise["source"], { type: "method" }>;
+      }
+    >;
 
     if (matchingExercises.length === 0) continue;
 
     // Use the state-at-start from the first matching exercise,
     // but use CURRENT config to determine the next state (so latest rules apply).
     const first = matchingExercises[0];
-    const mergedPerformedSets = matchingExercises.flatMap((ex) => ex.performedSets ?? []);
+    const mergedPerformedSets = matchingExercises.flatMap(
+      (ex) => ex.performedSets ?? [],
+    );
 
     const { nextState, completed } = applyMethodResult({
       methodKey: args.methodKey,
@@ -233,7 +261,7 @@ export async function buildSessionExerciseFromMethodSelection(args: {
     id: makeUuid(),
     exercise: args.exercise,
     source: {
-      type: 'method',
+      type: "method",
       methodInstanceId: args.methodInstanceId,
       methodKey: args.methodInstance.method_key,
       binding: args.binding,
@@ -247,7 +275,7 @@ export async function buildSessionExerciseFromMethodSelection(args: {
 
 export async function createMethodInstance(args: {
   method_key: MethodKey;
-  scope: 'exercise' | 'group';
+  scope: "exercise" | "group";
   name: string;
   config: unknown;
   state: unknown;
@@ -270,8 +298,8 @@ export async function createMethodInstance(args: {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'method_instances',
-    op: 'upsert',
+    entity: "method_instances",
+    op: "upsert",
     entityId: row.id,
     payload: {
       id: row.id,
@@ -290,11 +318,15 @@ export async function createMethodInstance(args: {
 
 export async function updateMethodInstance(args: {
   id: string;
-  patch: Partial<Pick<MethodInstanceRow, 'name' | 'config' | 'state' | 'archived'>>;
+  patch: Partial<
+    Pick<MethodInstanceRow, "name" | "config" | "state" | "archived">
+  >;
 }) {
   const userId = await requireUserIdFromCachedSession();
-  const existing = (await getMethodInstancesByIdsLocal({ userId, ids: [args.id] })).get(args.id);
-  if (!existing) throw new Error('Method instance not found.');
+  const existing = (
+    await getMethodInstancesByIdsLocal({ userId, ids: [args.id] })
+  ).get(args.id);
+  if (!existing) throw new Error("Method instance not found.");
 
   const now = isoNow();
   const next: MethodInstanceRow = {
@@ -307,8 +339,8 @@ export async function updateMethodInstance(args: {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'method_instances',
-    op: 'upsert',
+    entity: "method_instances",
+    op: "upsert",
     entityId: next.id,
     payload: {
       id: next.id,
@@ -331,8 +363,8 @@ export async function deleteMethodInstance(id: string) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'method_instances',
-    op: 'delete',
+    entity: "method_instances",
+    op: "delete",
     entityId: id,
     payload: null,
   });
@@ -348,7 +380,11 @@ export async function listTemplates() {
   return rows.map(normalizeTemplate);
 }
 
-export async function createTemplate(args: { name: string; items: WorkoutTemplateItem[]; tags?: WorkoutTemplate['tags'] }) {
+export async function createTemplate(args: {
+  name: string;
+  items: WorkoutTemplateItem[];
+  tags?: WorkoutTemplate["tags"];
+}) {
   const userId = await requireUserIdFromCachedSession();
   const now = isoNow();
   const row: WorkoutTemplate = normalizeTemplate({
@@ -364,25 +400,37 @@ export async function createTemplate(args: { name: string; items: WorkoutTemplat
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_templates',
-    op: 'upsert',
+    entity: "workout_templates",
+    op: "upsert",
     entityId: row.id,
-    payload: { id: row.id, user_id: userId, name: row.name, items: row.items, tags: row.tags ?? [] },
+    payload: {
+      id: row.id,
+      user_id: userId,
+      name: row.name,
+      items: row.items,
+      tags: row.tags ?? [],
+    },
   });
 
   return row;
 }
 
-export async function updateTemplate(args: { id: string; patch: Partial<Pick<WorkoutTemplate, 'name' | 'items' | 'tags'>> }) {
+export async function updateTemplate(args: {
+  id: string;
+  patch: Partial<Pick<WorkoutTemplate, "name" | "items" | "tags">>;
+}) {
   const userId = await requireUserIdFromCachedSession();
   const existing = await getTemplateLocal({ userId, id: args.id });
-  if (!existing) throw new Error('Template not found.');
+  if (!existing) throw new Error("Template not found.");
 
   const now = isoNow();
   const next = normalizeTemplate({
     ...existing,
     ...args.patch,
-    tags: 'tags' in args.patch ? coerceWorkoutTags((args.patch as any).tags) : (existing as any).tags,
+    tags:
+      "tags" in args.patch
+        ? coerceWorkoutTags((args.patch as any).tags)
+        : (existing as any).tags,
     updated_at: now,
   } as WorkoutTemplate);
 
@@ -390,10 +438,16 @@ export async function updateTemplate(args: { id: string; patch: Partial<Pick<Wor
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_templates',
-    op: 'upsert',
+    entity: "workout_templates",
+    op: "upsert",
     entityId: next.id,
-    payload: { id: next.id, user_id: userId, name: next.name, items: next.items, tags: next.tags ?? [] },
+    payload: {
+      id: next.id,
+      user_id: userId,
+      name: next.name,
+      items: next.items,
+      tags: next.tags ?? [],
+    },
   });
 
   return next;
@@ -405,8 +459,8 @@ export async function deleteTemplate(id: string) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_templates',
-    op: 'delete',
+    entity: "workout_templates",
+    op: "delete",
     entityId: id,
     payload: null,
   });
@@ -415,7 +469,7 @@ export async function deleteTemplate(id: string) {
 export async function duplicateTemplate(id: string) {
   const userId = await requireUserIdFromCachedSession();
   const original = await getTemplateLocal({ userId, id });
-  if (!original) throw new Error('Template not found.');
+  if (!original) throw new Error("Template not found.");
 
   const now = isoNow();
   const next: WorkoutTemplate = normalizeTemplate({
@@ -430,10 +484,16 @@ export async function duplicateTemplate(id: string) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_templates',
-    op: 'upsert',
+    entity: "workout_templates",
+    op: "upsert",
     entityId: next.id,
-    payload: { id: next.id, user_id: userId, name: next.name, items: next.items, tags: next.tags ?? [] },
+    payload: {
+      id: next.id,
+      user_id: userId,
+      name: next.name,
+      items: next.items,
+      tags: next.tags ?? [],
+    },
   });
 
   return next;
@@ -449,12 +509,23 @@ export async function listSessions(limit = 20) {
   return rows.map(normalizeSession);
 }
 
-export async function listCompletedSessionsForStats(args?: { max?: number; pageSize?: number }) {
+export async function listCompletedSessionsForStats(args?: {
+  max?: number;
+  pageSize?: number;
+}) {
   const userId = await requireUserIdFromCachedSession();
-  let rows = await listCompletedSessionsForStatsLocal({ userId, max: args?.max, pageSize: args?.pageSize });
+  let rows = await listCompletedSessionsForStatsLocal({
+    userId,
+    max: args?.max,
+    pageSize: args?.pageSize,
+  });
   if (rows.length === 0) {
     await tryRunSyncOnce();
-    rows = await listCompletedSessionsForStatsLocal({ userId, max: args?.max, pageSize: args?.pageSize });
+    rows = await listCompletedSessionsForStatsLocal({
+      userId,
+      max: args?.max,
+      pageSize: args?.pageSize,
+    });
   }
   return rows.map(normalizeSession);
 }
@@ -462,7 +533,7 @@ export async function listCompletedSessionsForStats(args?: { max?: number; pageS
 export async function getSession(id: string) {
   const userId = await requireUserIdFromCachedSession();
   const row = await getSessionLocal({ userId, id });
-  if (!row) throw new Error('Session not found.');
+  if (!row) throw new Error("Session not found.");
   return normalizeSession(row);
 }
 
@@ -476,8 +547,8 @@ export async function deleteSession(id: string) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'delete',
+    entity: "workout_sessions",
+    op: "delete",
     entityId: id,
     payload: null,
   });
@@ -486,13 +557,13 @@ export async function deleteSession(id: string) {
 export async function duplicateSession(id: string) {
   const userId = await requireUserIdFromCachedSession();
   const original = await getSessionLocal({ userId, id });
-  if (!original) throw new Error('Session not found.');
+  if (!original) throw new Error("Session not found.");
 
   const originalSnapshot = original.snapshot as WorkoutSessionSnapshotV1;
 
   const exercises = await Promise.all(
     (originalSnapshot.exercises || []).map(async (ex) => {
-      if (ex.source.type === 'method') {
+      if (ex.source.type === "method") {
         const methodKey = ex.source.methodKey;
         const methodInstanceId = ex.source.methodInstanceId;
         const binding = ex.source.binding;
@@ -507,12 +578,13 @@ export async function duplicateSession(id: string) {
           currentState: ex.source.methodStateAtStart,
         });
 
-        const { plannedSets, coercedConfig, coercedState } = generatePlannedSets({
-          methodKey,
-          binding,
-          methodConfig,
-          methodState: latestState,
-        });
+        const { plannedSets, coercedConfig, coercedState } =
+          generatePlannedSets({
+            methodKey,
+            binding,
+            methodConfig,
+            methodState: latestState,
+          });
 
         return {
           ...ex,
@@ -527,9 +599,13 @@ export async function duplicateSession(id: string) {
       }
       return {
         ...ex,
-        performedSets: [],
+        performedSets: (ex.performedSets || []).map((s) => ({
+          ...s,
+          id: makeUuid(),
+          done: false,
+        })),
       };
-    })
+    }),
   );
 
   const newSnapshot: WorkoutSessionSnapshotV1 = {
@@ -543,7 +619,7 @@ export async function duplicateSession(id: string) {
     id: makeUuid(),
     started_at: now,
     ended_at: null,
-    status: 'in_progress',
+    status: "in_progress",
     snapshot: newSnapshot,
     created_at: now,
     updated_at: now,
@@ -553,8 +629,8 @@ export async function duplicateSession(id: string) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: next.id,
     payload: {
       id: next.id,
@@ -572,19 +648,29 @@ export async function duplicateSession(id: string) {
   return normalizeSession(next);
 }
 
-export async function updateSessionTimes(args: { id: string; started_at?: string; ended_at?: string | null }) {
+export async function updateSessionTimes(args: {
+  id: string;
+  started_at?: string;
+  ended_at?: string | null;
+}) {
   const userId = await requireUserIdFromCachedSession();
   await updateSessionFieldsLocal({
     userId,
     id: args.id,
-    patch: { ...(args.started_at ? { started_at: args.started_at } : {}), ...(args.ended_at !== undefined ? { ended_at: args.ended_at } : {}) },
+    patch: {
+      ...(args.started_at ? { started_at: args.started_at } : {}),
+      ...(args.ended_at !== undefined ? { ended_at: args.ended_at } : {}),
+    },
   });
   const row = await getSessionLocal({ userId, id: args.id });
-  if (!row) throw new Error('Session not found.');
+  if (!row) throw new Error("Session not found.");
   const normalized = normalizeSession(row);
 
   // Handle reminder
-  if (normalized.started_at && (normalized.status === 'pending' || !normalized.status)) {
+  if (
+    normalized.started_at &&
+    (normalized.status === "pending" || !normalized.status)
+  ) {
     const startTime = new Date(normalized.started_at);
     if (startTime > new Date()) {
       await scheduleWorkoutReminder(normalized.id, normalized.title, startTime);
@@ -598,8 +684,8 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: normalized.id,
     payload: {
       id: normalized.id,
@@ -616,14 +702,19 @@ export async function updateSessionTimes(args: { id: string; started_at?: string
   return normalized;
 }
 
-export async function updateSessionStatus(args: { id: string; status: WorkoutSessionStatus }) {
+export async function updateSessionStatus(args: {
+  id: string;
+  status: WorkoutSessionStatus;
+}) {
   const userId = await requireUserIdFromCachedSession();
   const row = await getSessionLocal({ userId, id: args.id });
-  if (!row) throw new Error('Session not found.');
+  if (!row) throw new Error("Session not found.");
   const normalized = normalizeSession(row);
 
-  const patch: Partial<Pick<WorkoutSessionRow, 'status' | 'ended_at'>> = { status: args.status };
-  if (args.status === 'done') {
+  const patch: Partial<Pick<WorkoutSessionRow, "status" | "ended_at">> = {
+    status: args.status,
+  };
+  if (args.status === "done") {
     patch.ended_at = normalized.ended_at ?? normalized.started_at;
   } else {
     patch.ended_at = null;
@@ -631,11 +722,11 @@ export async function updateSessionStatus(args: { id: string; status: WorkoutSes
 
   await updateSessionFieldsLocal({ userId, id: args.id, patch });
   const updated = await getSessionLocal({ userId, id: args.id });
-  if (!updated) throw new Error('Session not found.');
+  if (!updated) throw new Error("Session not found.");
   const next = normalizeSession(updated);
 
   // Handle reminder
-  if (next.started_at && next.status === 'pending') {
+  if (next.started_at && next.status === "pending") {
     const startTime = new Date(next.started_at);
     if (startTime > new Date()) {
       await scheduleWorkoutReminder(next.id, next.title, startTime);
@@ -649,8 +740,8 @@ export async function updateSessionStatus(args: { id: string; status: WorkoutSes
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: next.id,
     payload: {
       id: next.id,
@@ -670,13 +761,17 @@ export async function updateSessionStatus(args: { id: string; status: WorkoutSes
 
 export async function updateSessionTitle(args: { id: string; title: string }) {
   const userId = await requireUserIdFromCachedSession();
-  await updateSessionFieldsLocal({ userId, id: args.id, patch: { title: args.title } });
+  await updateSessionFieldsLocal({
+    userId,
+    id: args.id,
+    patch: { title: args.title },
+  });
   const row = await getSessionLocal({ userId, id: args.id });
-  if (!row) throw new Error('Session not found.');
+  if (!row) throw new Error("Session not found.");
   const normalized = normalizeSession(row);
 
   // Handle reminder
-  if (normalized.started_at && normalized.status === 'pending') {
+  if (normalized.started_at && normalized.status === "pending") {
     const startTime = new Date(normalized.started_at);
     if (startTime > new Date()) {
       await scheduleWorkoutReminder(normalized.id, normalized.title, startTime);
@@ -686,8 +781,8 @@ export async function updateSessionTitle(args: { id: string; title: string }) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: normalized.id,
     payload: {
       id: normalized.id,
@@ -706,15 +801,19 @@ export async function updateSessionTitle(args: { id: string; title: string }) {
 
 export async function updateSessionTags(args: { id: string; tags: string[] }) {
   const userId = await requireUserIdFromCachedSession();
-  await updateSessionFieldsLocal({ userId, id: args.id, patch: { tags: coerceWorkoutTags(args.tags) } });
+  await updateSessionFieldsLocal({
+    userId,
+    id: args.id,
+    patch: { tags: coerceWorkoutTags(args.tags) },
+  });
   const row = await getSessionLocal({ userId, id: args.id });
-  if (!row) throw new Error('Session not found.');
+  if (!row) throw new Error("Session not found.");
   const normalized = normalizeSession(row);
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: normalized.id,
     payload: {
       id: normalized.id,
@@ -738,11 +837,11 @@ async function buildSessionExerciseFromTemplateItem(args: {
 }): Promise<SessionExercise> {
   const { item, methodInstance, userId } = args;
 
-  if (item.type === 'free') {
+  if (item.type === "free") {
     return {
       id: makeUuid(),
       exercise: item.exercise,
-      source: { type: 'free' },
+      source: { type: "free" },
       tracking: defaultTrackingForExerciseRef(item.exercise),
       plannedSets: [],
       performedSets: [],
@@ -774,7 +873,7 @@ async function buildSessionExerciseFromTemplateItem(args: {
     id: makeUuid(),
     exercise: item.exercise,
     source: {
-      type: 'method',
+      type: "method",
       methodInstanceId: item.methodInstanceId,
       methodKey,
       binding: item.binding,
@@ -790,11 +889,13 @@ async function buildSessionExerciseFromTemplateItem(args: {
 export async function startSessionFromTemplate(args: { templateId: string }) {
   const userId = await requireUserIdFromCachedSession();
   const tpl = await getTemplateLocal({ userId, id: args.templateId });
-  if (!tpl) throw new Error('Template not found.');
+  if (!tpl) throw new Error("Template not found.");
 
   const tplNorm = normalizeTemplate(tpl);
   const items = tplNorm.items;
-  const methodIds = items.filter((x) => x.type === 'method').map((x) => (x as any).methodInstanceId as string);
+  const methodIds = items
+    .filter((x) => x.type === "method")
+    .map((x) => (x as any).methodInstanceId as string);
   const miMap = await getMethodInstancesByIdsLocal({ userId, ids: methodIds });
 
   const exercises = await Promise.all(
@@ -802,9 +903,10 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
       buildSessionExerciseFromTemplateItem({
         userId,
         item,
-        methodInstance: item.type === 'method' ? miMap.get(item.methodInstanceId) : undefined,
-      })
-    )
+        methodInstance:
+          item.type === "method" ? miMap.get(item.methodInstanceId) : undefined,
+      }),
+    ),
   );
 
   const now = isoNow();
@@ -824,8 +926,8 @@ export async function startSessionFromTemplate(args: { templateId: string }) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: row.id,
     payload: {
       id: row.id,
@@ -849,7 +951,7 @@ export async function startQuickSession(args?: { title?: string }) {
   const row: WorkoutSessionRow = {
     id: makeUuid(),
     template_id: null,
-    title: args?.title?.trim() || 'Quick workout',
+    title: args?.title?.trim() || "Quick workout",
     started_at: now,
     ended_at: null,
     snapshot: emptySnapshot(),
@@ -862,8 +964,8 @@ export async function startQuickSession(args?: { title?: string }) {
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: row.id,
     payload: {
       id: row.id,
@@ -881,17 +983,24 @@ export async function startQuickSession(args?: { title?: string }) {
   return normalizeSession(row);
 }
 
-export async function updateSessionSnapshot(args: { id: string; snapshot: WorkoutSessionSnapshotV1 }) {
+export async function updateSessionSnapshot(args: {
+  id: string;
+  snapshot: WorkoutSessionSnapshotV1;
+}) {
   const userId = await requireUserIdFromCachedSession();
-  await updateSessionFieldsLocal({ userId, id: args.id, patch: { snapshot: args.snapshot } });
+  await updateSessionFieldsLocal({
+    userId,
+    id: args.id,
+    patch: { snapshot: args.snapshot },
+  });
   const row = await getSessionLocal({ userId, id: args.id });
-  if (!row) throw new Error('Session not found.');
+  if (!row) throw new Error("Session not found.");
   const normalized = normalizeSession(row);
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: normalized.id,
     payload: {
       id: normalized.id,
@@ -908,7 +1017,10 @@ export async function updateSessionSnapshot(args: { id: string; snapshot: Workou
   return normalized;
 }
 
-export async function finishSessionAndAdvanceMethods(args: { id: string; snapshot: WorkoutSessionSnapshotV1 }): Promise<WorkoutSessionRow | null> {
+export async function finishSessionAndAdvanceMethods(args: {
+  id: string;
+  snapshot: WorkoutSessionSnapshotV1;
+}): Promise<WorkoutSessionRow | null> {
   const userId = await requireUserIdFromCachedSession();
 
   // Check if the workout is empty - if so, delete it instead of saving
@@ -919,13 +1031,21 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
 
   // 1) Save the finished session locally.
   const endedAt = isoNow();
-  await updateSessionFieldsLocal({ userId, id: args.id, patch: { ended_at: endedAt, snapshot: args.snapshot, status: 'done' } });
+  await updateSessionFieldsLocal({
+    userId,
+    id: args.id,
+    patch: { ended_at: endedAt, snapshot: args.snapshot, status: "done" },
+  });
   const saved = await getSessionLocal({ userId, id: args.id });
-  if (!saved) throw new Error('Session not found.');
+  if (!saved) throw new Error("Session not found.");
 
   // 2) Aggregate per-method updates (avoid advancing 5/3/1 multiple times in one session).
-  const methodExercises = args.snapshot.exercises.filter((x) => x.source.type === 'method') as Array<
-    SessionExercise & { source: Extract<SessionExercise['source'], { type: 'method' }> }
+  const methodExercises = args.snapshot.exercises.filter(
+    (x) => x.source.type === "method",
+  ) as Array<
+    SessionExercise & {
+      source: Extract<SessionExercise["source"], { type: "method" }>;
+    }
   >;
 
   const byMethod = new Map<
@@ -951,7 +1071,10 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
         performedSets: ex.performedSets ?? [],
       });
     } else {
-      cur.performedSets = [...(cur.performedSets ?? []), ...(ex.performedSets ?? [])];
+      cur.performedSets = [
+        ...(cur.performedSets ?? []),
+        ...(ex.performedSets ?? []),
+      ];
     }
   }
 
@@ -967,17 +1090,23 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
 
     if (!completed) continue;
 
-    const existing = (await getMethodInstancesByIdsLocal({ userId, ids: [methodInstanceId] })).get(methodInstanceId);
+    const existing = (
+      await getMethodInstancesByIdsLocal({ userId, ids: [methodInstanceId] })
+    ).get(methodInstanceId);
     if (!existing) continue;
 
-    const next: MethodInstanceRow = { ...existing, state: nextState, updated_at: isoNow() };
+    const next: MethodInstanceRow = {
+      ...existing,
+      state: nextState,
+      updated_at: isoNow(),
+    };
     await upsertMethodInstanceLocal({ userId, row: next });
 
     await enqueueOutbox({
       id: makeUuid(),
       userId,
-      entity: 'method_instances',
-      op: 'upsert',
+      entity: "method_instances",
+      op: "upsert",
       entityId: next.id,
       payload: {
         id: next.id,
@@ -993,12 +1122,16 @@ export async function finishSessionAndAdvanceMethods(args: { id: string; snapsho
   }
 
   // Enqueue the completed session update (ended_at + snapshot).
-  const normalized = normalizeSession({ ...saved, ended_at: endedAt, snapshot: args.snapshot });
+  const normalized = normalizeSession({
+    ...saved,
+    ended_at: endedAt,
+    snapshot: args.snapshot,
+  });
   await enqueueOutbox({
     id: makeUuid(),
     userId,
-    entity: 'workout_sessions',
-    op: 'upsert',
+    entity: "workout_sessions",
+    op: "upsert",
     entityId: normalized.id,
     payload: {
       id: normalized.id,
@@ -1027,7 +1160,7 @@ export async function listDistinctFreeExercises() {
     const tpl = normalizeTemplate(row);
     tpl.items.forEach((item) => {
       const ex = coerceExerciseRef((item as any).exercise);
-      if (ex.kind === 'free') names.add(ex.name);
+      if (ex.kind === "free") names.add(ex.name);
     });
   });
 
@@ -1035,14 +1168,13 @@ export async function listDistinctFreeExercises() {
     const snap = row.snapshot as WorkoutSessionSnapshotV1 | undefined;
     if (snap?.exercises) {
       snap.exercises.forEach((ex) => {
-        if (ex.exercise.kind === 'free') names.add(ex.exercise.name);
+        if (ex.exercise.kind === "free") names.add(ex.exercise.name);
       });
     }
   });
 
   return Array.from(names).sort();
 }
-
 
 export async function rescheduleAllReminders() {
   const userId = await requireUserIdFromCachedSession();
@@ -1054,7 +1186,7 @@ export async function rescheduleAllReminders() {
 
   for (const row of sessions) {
     const norm = normalizeSession(row);
-    if (norm.started_at && norm.status === 'pending') {
+    if (norm.started_at && norm.status === "pending") {
       const startTime = new Date(norm.started_at);
       if (startTime > now) {
         await scheduleWorkoutReminder(norm.id, norm.title, startTime, true);
