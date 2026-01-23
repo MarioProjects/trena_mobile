@@ -67,3 +67,4 @@ export {
 } from "./tags";
 
 export type { IconProps, StrokeIconProps } from "./types";
+export { QuillIcon } from "./QuillIcon";

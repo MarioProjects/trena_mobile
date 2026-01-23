@@ -1,52 +1,75 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
-import React from 'react';
-import { FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React from "react";
+import {
+  FlatList,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
-    AppleIcon,
-    BackpackIcon,
-    BallIcon,
-    BatteryIcon,
-    BicycleIcon,
-    BrainIcon,
-    BugIcon,
-    CarIcon,
-    ChessIcon,
-    DropIcon,
-    DumbbellIcon,
-    FireIcon,
-    HappyIcon,
-    HourglassIcon,
-    LeafIcon,
-    LegIcon,
-    MountainIcon,
-    MuscleIcon,
-    NeutralIcon,
-    PinIcon,
-    PizzaIcon,
-    RainIcon,
-    RollerskateIcon,
-    SadIcon,
-    ShoeIcon,
-    SkippingRopeIcon,
-    SnowIcon,
-    StarIcon,
-    StickyNoteIcon,
-    VideoIcon,
-    XIcon,
-    YogaIcon,
-} from '@/components/icons';
-import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Fonts, rgba } from '@/constants/theme';
-import { learnData } from '@/data/learn';
-import { useHaptics } from '@/hooks/use-haptics';
-import { useTrenaTheme } from '@/hooks/use-theme-context';
-import { listDistinctFreeExercises, listMethodInstances } from '@/lib/workouts/repo';
-import { WORKOUT_TAGS, type WorkoutTag } from '@/lib/workouts/tags';
-import type { ExerciseRef, MethodInstanceRow, WorkoutSessionRow } from '@/lib/workouts/types';
+  AppleIcon,
+  BackpackIcon,
+  BallIcon,
+  BatteryIcon,
+  BicycleIcon,
+  BrainIcon,
+  BugIcon,
+  CarIcon,
+  ChessIcon,
+  DropIcon,
+  DumbbellIcon,
+  FireIcon,
+  HappyIcon,
+  HourglassIcon,
+  LeafIcon,
+  LegIcon,
+  MountainIcon,
+  MuscleIcon,
+  NeutralIcon,
+  PinIcon,
+  PizzaIcon,
+  QuillIcon,
+  RainIcon,
+  RollerskateIcon,
+  SadIcon,
+  ShoeIcon,
+  SkippingRopeIcon,
+  SnowIcon,
+  StarIcon,
+  StickyNoteIcon,
+  VideoIcon,
+  XIcon,
+  YogaIcon,
+} from "@/components/icons";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { Fonts, rgba } from "@/constants/theme";
+import { learnData } from "@/data/learn";
+import { useHaptics } from "@/hooks/use-haptics";
+import { useTrenaTheme } from "@/hooks/use-theme-context";
+import {
+  listDistinctFreeExercises,
+  listMethodInstances,
+} from "@/lib/workouts/repo";
+import { WORKOUT_TAGS, type WorkoutTag } from "@/lib/workouts/tags";
+import type {
+  ExerciseRef,
+  MethodInstanceRow,
+  WorkoutSessionRow,
+} from "@/lib/workouts/types";
 
-export type ActivitiesDatePreset = 'any' | 'today' | 'last7' | 'last30' | 'custom';
+export type ActivitiesDatePreset =
+  | "any"
+  | "today"
+  | "last7"
+  | "last30"
+  | "custom";
 
 export type SelectedWorkout = {
   id: string;
@@ -79,34 +102,52 @@ export function isActivitiesFilterActive(filters: ActivitiesFilters): boolean {
     filters.notesQuery.trim().length > 0 ||
     filters.selectedNotes.length > 0 ||
     filters.selectedTags.length > 0 ||
-    filters.datePreset !== 'any' ||
+    filters.datePreset !== "any" ||
     filters.startDate != null ||
     filters.endDate != null
   );
 }
 
-export function countActiveActivitiesFilters(filters: ActivitiesFilters): number {
+export function countActiveActivitiesFilters(
+  filters: ActivitiesFilters,
+): number {
   let c = 0;
   if (filters.workoutQuery.trim() || filters.selectedWorkouts.length) c += 1;
   if (filters.selectedExercises.length) c += 1;
   if (filters.notesQuery.trim() || filters.selectedNotes.length) c += 1;
   if (filters.selectedTags.length) c += 1;
-  if (filters.datePreset !== 'any' || filters.startDate != null || filters.endDate != null) c += 1;
+  if (
+    filters.datePreset !== "any" ||
+    filters.startDate != null ||
+    filters.endDate != null
+  )
+    c += 1;
   return c;
 }
 
-const learnExercises = learnData.filter((x) => x.type === 'exercise');
-const learnExerciseNameById = new Map<string, string>(learnExercises.map((x) => [x.id, x.name]));
+const learnExercises = learnData.filter((x) => x.type === "exercise");
+const learnExerciseNameById = new Map<string, string>(
+  learnExercises.map((x) => [x.id, x.name]),
+);
 
 function formatDateLabel(d: Date | null) {
-  if (!d) return 'Any';
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  if (!d) return "Any";
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function formatSessionDate(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function normalize(s: string) {
@@ -132,10 +173,13 @@ function levenshtein(a: string, b: string): number {
 }
 
 function formatExerciseName(ref: ExerciseRef): string {
-  if (ref.kind === 'learn') return learnExerciseNameById.get(ref.learnExerciseId) ?? ref.learnExerciseId;
-  if (ref.kind === 'method') return 'Method';
-  if (ref.kind === 'free') return ref.name;
-  return 'Unknown';
+  if (ref.kind === "learn")
+    return (
+      learnExerciseNameById.get(ref.learnExerciseId) ?? ref.learnExerciseId
+    );
+  if (ref.kind === "method") return "Method";
+  if (ref.kind === "free") return ref.name;
+  return "Unknown";
 }
 
 type NoteSearchResult = {
@@ -148,13 +192,16 @@ type NoteSearchResult = {
 };
 
 function exerciseKey(ref: ExerciseRef): string {
-  if (ref.kind === 'learn') return `learn:${ref.learnExerciseId}`;
-  if (ref.kind === 'method') return `method:${ref.methodInstanceId}`;
-  if (ref.kind === 'free') return `free:${normalize(ref.name)}`;
-  return 'unknown';
+  if (ref.kind === "learn") return `learn:${ref.learnExerciseId}`;
+  if (ref.kind === "method") return `method:${ref.methodInstanceId}`;
+  if (ref.kind === "free") return `free:${normalize(ref.name)}`;
+  return "unknown";
 }
 
-function fuzzyMatch(target: string, query: string): { matched: boolean; score: number } {
+function fuzzyMatch(
+  target: string,
+  query: string,
+): { matched: boolean; score: number } {
   const t = target.toLowerCase();
   const q = query.toLowerCase();
 
@@ -205,77 +252,88 @@ function fuzzyMatch(target: string, query: string): { matched: boolean; score: n
   return { matched: false, score: 0 };
 }
 
-function labelForExercise(ref: ExerciseRef, methods: MethodInstanceRow[] = []): string {
-  if (ref.kind === 'free') return ref.name;
-  if (ref.kind === 'method') {
+function labelForExercise(
+  ref: ExerciseRef,
+  methods: MethodInstanceRow[] = [],
+): string {
+  if (ref.kind === "free") return ref.name;
+  if (ref.kind === "method") {
     const hit = methods.find((m) => m.id === ref.methodInstanceId);
-    return hit?.name ?? 'Unknown method';
+    return hit?.name ?? "Unknown method";
   }
   const hit = learnExercises.find((x) => x.id === ref.learnExerciseId);
-  return hit?.name ?? 'Unknown exercise';
+  return hit?.name ?? "Unknown exercise";
 }
 
-function WorkoutTagIcon({ tag, size = 18, color }: { tag: WorkoutTag; size?: number; color?: string }) {
+function WorkoutTagIcon({
+  tag,
+  size = 18,
+  color,
+}: {
+  tag: WorkoutTag;
+  size?: number;
+  color?: string;
+}) {
   switch (tag) {
-    case 'skippingrope':
+    case "skippingrope":
       return <SkippingRopeIcon size={size} color={color} />;
-    case 'leg':
+    case "leg":
       return <LegIcon size={size} color={color} />;
-    case 'yoga':
+    case "yoga":
       return <YogaIcon size={size} color={color} />;
-    case 'chess':
+    case "chess":
       return <ChessIcon size={size} color={color} />;
-    case 'bicycle':
+    case "bicycle":
       return <BicycleIcon size={size} color={color} />;
-    case 'snow':
+    case "snow":
       return <SnowIcon size={size} color={color} />;
-    case 'hourglass':
+    case "hourglass":
       return <HourglassIcon size={size} color={color} />;
-    case 'pin':
+    case "pin":
       return <PinIcon size={size} color={color} />;
-    case 'pizza':
+    case "pizza":
       return <PizzaIcon size={size} color={color} />;
-    case 'rollerskate':
+    case "rollerskate":
       return <RollerskateIcon size={size} color={color} />;
-    case 'apple':
+    case "apple":
       return <AppleIcon size={size} color={color} />;
-    case 'backpack':
+    case "backpack":
       return <BackpackIcon size={size} color={color} />;
-    case 'mountain':
+    case "mountain":
       return <MountainIcon size={size} color={color} />;
-    case 'bug':
+    case "bug":
       return <BugIcon size={size} color={color} />;
-    case 'rain':
+    case "rain":
       return <RainIcon size={size} color={color} />;
-    case 'car':
+    case "car":
       return <CarIcon size={size} color={color} />;
-    case 'video':
+    case "video":
       return <VideoIcon size={size} color={color} />;
-    case 'battery':
+    case "battery":
       return <BatteryIcon size={size} color={color} />;
-    case 'muscle':
+    case "muscle":
       return <MuscleIcon size={size} color={color} />;
-    case 'leaf':
+    case "leaf":
       return <LeafIcon size={size} color={color} />;
-    case 'ball':
+    case "ball":
       return <BallIcon size={size} color={color} />;
-    case 'drop':
+    case "drop":
       return <DropIcon size={size} color={color} />;
-    case 'fire':
+    case "fire":
       return <FireIcon size={size} color={color} />;
-    case 'shoe':
+    case "shoe":
       return <ShoeIcon size={size} color={color} />;
-    case 'happy':
+    case "happy":
       return <HappyIcon size={size} color={color} />;
-    case 'neutral':
+    case "neutral":
       return <NeutralIcon size={size} color={color} />;
-    case 'sad':
+    case "sad":
       return <SadIcon size={size} color={color} />;
-    case 'dumbbell':
+    case "dumbbell":
       return <DumbbellIcon size={size} color={color} />;
-    case 'star':
+    case "star":
       return <StarIcon size={size} color={color} />;
-    case 'brain':
+    case "brain":
       return <BrainIcon size={size} color={color} />;
   }
 }
@@ -296,7 +354,7 @@ export function ActivitiesFilterSheet(props: {
   const { filters, sessions = [] } = props;
 
   const [exPickerOpen, setExPickerOpen] = React.useState(false);
-  const [exTerm, setExTerm] = React.useState('');
+  const [exTerm, setExTerm] = React.useState("");
   const [customExercises, setCustomExercises] = React.useState<string[]>([]);
   const [methods, setMethods] = React.useState<MethodInstanceRow[]>([]);
 
@@ -325,7 +383,7 @@ export function ActivitiesFilterSheet(props: {
     if (!nameTerm.trim()) return sessions; // Show all when no search term
 
     const scored = sessions.map((s) => {
-      const fuzzy = fuzzyMatch(s.title ?? '', nameTerm);
+      const fuzzy = fuzzyMatch(s.title ?? "", nameTerm);
       return { s, ...fuzzy };
     });
 
@@ -333,7 +391,10 @@ export function ActivitiesFilterSheet(props: {
       .filter((x) => x.matched)
       .sort((a, b) => {
         if (a.score !== b.score) return a.score - b.score;
-        return new Date(b.s.started_at).getTime() - new Date(a.s.started_at).getTime();
+        return (
+          new Date(b.s.started_at).getTime() -
+          new Date(a.s.started_at).getTime()
+        );
       })
       .map((x) => x.s);
   }, [nameTerm, sessions]);
@@ -349,7 +410,7 @@ export function ActivitiesFilterSheet(props: {
       const sessionDate = formatSessionDate(s.started_at);
 
       // Check workout-level notes
-      const workoutNotes = s.snapshot?.notes ?? '';
+      const workoutNotes = s.snapshot?.notes ?? "";
       if (workoutNotes.trim()) {
         results.push({
           sessionId: s.id,
@@ -357,13 +418,13 @@ export function ActivitiesFilterSheet(props: {
           sessionDate,
           exerciseCount,
           noteContent: workoutNotes,
-          noteContext: 'Workout note',
+          noteContext: "Workout note",
         });
       }
 
       // Check exercise-level notes
       for (const ex of s.snapshot?.exercises ?? []) {
-        const exNotes = ex.notes ?? '';
+        const exNotes = ex.notes ?? "";
         if (exNotes.trim()) {
           results.push({
             sessionId: s.id,
@@ -392,7 +453,7 @@ export function ActivitiesFilterSheet(props: {
       const bestScore = Math.min(
         fuzzyContent.matched ? fuzzyContent.score : 100,
         fuzzyContext.matched ? fuzzyContext.score : 100,
-        fuzzyTitle.matched ? fuzzyTitle.score : 100
+        fuzzyTitle.matched ? fuzzyTitle.score : 100,
       );
 
       return { r, matched: bestScore < 100, score: bestScore };
@@ -416,37 +477,46 @@ export function ActivitiesFilterSheet(props: {
 
   const [androidPickerVisible, setAndroidPickerVisible] = React.useState(false);
   const [iosPickerVisible, setIosPickerVisible] = React.useState(false);
-  const [pickerTarget, setPickerTarget] = React.useState<'start' | 'end'>('start');
+  const [pickerTarget, setPickerTarget] = React.useState<"start" | "end">(
+    "start",
+  );
   const [tempDate, setTempDate] = React.useState<Date>(new Date());
 
-  const openPicker = (target: 'start' | 'end') => {
+  const openPicker = (target: "start" | "end") => {
     setPickerTarget(target);
-    const current = target === 'start' ? filters.startDate : filters.endDate;
+    const current = target === "start" ? filters.startDate : filters.endDate;
     setTempDate(current ?? new Date());
-    if (Platform.OS === 'android') setAndroidPickerVisible(true);
+    if (Platform.OS === "android") setAndroidPickerVisible(true);
     else setIosPickerVisible(true);
   };
 
   const commitDate = (next: Date | null) => {
     if (!next) {
-      props.onChange(pickerTarget === 'start' ? { startDate: null } : { endDate: null });
+      props.onChange(
+        pickerTarget === "start" ? { startDate: null } : { endDate: null },
+      );
       return;
     }
-    const start = pickerTarget === 'start' ? next : filters.startDate;
-    const end = pickerTarget === 'end' ? next : filters.endDate;
+    const start = pickerTarget === "start" ? next : filters.startDate;
+    const end = pickerTarget === "end" ? next : filters.endDate;
     if (start && end && start.getTime() > end.getTime()) {
       // Keep range sane by snapping the other edge.
-      if (pickerTarget === 'start') props.onChange({ startDate: start, endDate: start });
+      if (pickerTarget === "start")
+        props.onChange({ startDate: start, endDate: start });
       else props.onChange({ startDate: end, endDate: end });
       return;
     }
-    props.onChange(pickerTarget === 'start' ? { startDate: start ?? null } : { endDate: end ?? null });
+    props.onChange(
+      pickerTarget === "start"
+        ? { startDate: start ?? null }
+        : { endDate: end ?? null },
+    );
   };
 
   const setPreset = (preset: ActivitiesDatePreset) => {
     haptics.selection();
-    if (preset === 'custom') {
-      props.onChange({ datePreset: 'custom' });
+    if (preset === "custom") {
+      props.onChange({ datePreset: "custom" });
       return;
     }
     props.onChange({ datePreset: preset, startDate: null, endDate: null });
@@ -454,7 +524,7 @@ export function ActivitiesFilterSheet(props: {
 
   const selectedExerciseKeys = React.useMemo(
     () => new Set(filters.selectedExercises.map(exerciseKey)),
-    [filters.selectedExercises]
+    [filters.selectedExercises],
   );
 
   const filteredLearn = React.useMemo(() => {
@@ -472,7 +542,10 @@ export function ActivitiesFilterSheet(props: {
   const filteredMethods = React.useMemo(() => {
     const t = normalize(exTerm);
     if (!t) return methods;
-    return methods.filter((m) => normalize(m.name).includes(t) || normalize(m.method_key).includes(t));
+    return methods.filter(
+      (m) =>
+        normalize(m.name).includes(t) || normalize(m.method_key).includes(t),
+    );
   }, [exTerm, methods]);
 
   const exactMatch =
@@ -494,8 +567,10 @@ export function ActivitiesFilterSheet(props: {
           <View style={styles.headerRow}>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={styles.title}>Filters</Text>
-              {typeof props.matchCount === 'number' ? (
-                <Text style={styles.subtitle}>{props.matchCount} workout{props.matchCount === 1 ? '' : 's'}</Text>
+              {typeof props.matchCount === "number" ? (
+                <Text style={styles.subtitle}>
+                  {props.matchCount} workout{props.matchCount === 1 ? "" : "s"}
+                </Text>
               ) : null}
             </View>
             <View style={styles.headerActions}>
@@ -507,7 +582,10 @@ export function ActivitiesFilterSheet(props: {
                   props.onClear();
                 }}
                 hitSlop={10}
-                style={({ pressed }) => [styles.headerAction, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.headerAction,
+                  pressed && styles.pressed,
+                ]}
               >
                 <Text style={styles.headerActionText}>Clear</Text>
               </Pressable>
@@ -519,7 +597,10 @@ export function ActivitiesFilterSheet(props: {
                   props.onClose();
                 }}
                 hitSlop={10}
-                style={({ pressed }) => [styles.headerPrimaryAction, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.headerPrimaryAction,
+                  pressed && styles.pressed,
+                ]}
               >
                 <Text style={styles.headerPrimaryActionText}>Apply</Text>
               </Pressable>
@@ -540,7 +621,10 @@ export function ActivitiesFilterSheet(props: {
                 accessibilityRole="button"
                 accessibilityLabel="Search workout name"
                 onPress={() => setNamePickerOpen(true)}
-                style={({ pressed }) => [styles.inputLike, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.inputLike,
+                  pressed && styles.pressed,
+                ]}
               >
                 {filters.selectedWorkouts.length > 0 ? (
                   <View style={styles.chipsRow}>
@@ -552,9 +636,18 @@ export function ActivitiesFilterSheet(props: {
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={`Remove ${w.title}`}
-                          onPress={() => props.onChange({ selectedWorkouts: filters.selectedWorkouts.filter((x) => x.id !== w.id) })}
+                          onPress={() =>
+                            props.onChange({
+                              selectedWorkouts: filters.selectedWorkouts.filter(
+                                (x) => x.id !== w.id,
+                              ),
+                            })
+                          }
                           hitSlop={10}
-                          style={({ pressed }) => [styles.chipX, pressed && { opacity: 0.75 }]}
+                          style={({ pressed }) => [
+                            styles.chipX,
+                            pressed && { opacity: 0.75 },
+                          ]}
                         >
                           <XIcon size={14} color={rgba(colors.text, 0.75)} />
                         </Pressable>
@@ -573,7 +666,10 @@ export function ActivitiesFilterSheet(props: {
                 accessibilityRole="button"
                 accessibilityLabel="Pick exercises"
                 onPress={() => setExPickerOpen(true)}
-                style={({ pressed }) => [styles.inputLike, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.inputLike,
+                  pressed && styles.pressed,
+                ]}
               >
                 {filters.selectedExercises.length === 0 ? (
                   <Text style={styles.placeholderText}>Pick exercises…</Text>
@@ -591,11 +687,17 @@ export function ActivitiesFilterSheet(props: {
                             accessibilityLabel={`Remove ${labelForExercise(ref, methods)}`}
                             onPress={() =>
                               props.onChange({
-                                selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key),
+                                selectedExercises:
+                                  filters.selectedExercises.filter(
+                                    (x) => exerciseKey(x) !== key,
+                                  ),
                               })
                             }
                             hitSlop={10}
-                            style={({ pressed }) => [styles.chipX, pressed && { opacity: 0.75 }]}
+                            style={({ pressed }) => [
+                              styles.chipX,
+                              pressed && { opacity: 0.75 },
+                            ]}
                           >
                             <XIcon size={14} color={rgba(colors.text, 0.75)} />
                           </Pressable>
@@ -613,7 +715,10 @@ export function ActivitiesFilterSheet(props: {
                 accessibilityRole="button"
                 accessibilityLabel="Pick tags"
                 onPress={() => setTagsPickerOpen(true)}
-                style={({ pressed }) => [styles.inputLike, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.inputLike,
+                  pressed && styles.pressed,
+                ]}
               >
                 {filters.selectedTags.length === 0 ? (
                   <Text style={styles.placeholderText}>Pick tags…</Text>
@@ -621,16 +726,29 @@ export function ActivitiesFilterSheet(props: {
                   <View style={styles.chipsRow}>
                     {filters.selectedTags.map((tag) => (
                       <View key={tag} style={styles.chip}>
-                        <WorkoutTagIcon tag={tag} size={16} color={rgba(colors.text, 0.85)} />
+                        <WorkoutTagIcon
+                          tag={tag}
+                          size={16}
+                          color={rgba(colors.text, 0.85)}
+                        />
                         <Text style={styles.chipText} numberOfLines={1}>
                           {tag}
                         </Text>
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={`Remove ${tag}`}
-                          onPress={() => props.onChange({ selectedTags: filters.selectedTags.filter((x) => x !== tag) })}
+                          onPress={() =>
+                            props.onChange({
+                              selectedTags: filters.selectedTags.filter(
+                                (x) => x !== tag,
+                              ),
+                            })
+                          }
                           hitSlop={10}
-                          style={({ pressed }) => [styles.chipX, pressed && { opacity: 0.75 }]}
+                          style={({ pressed }) => [
+                            styles.chipX,
+                            pressed && { opacity: 0.75 },
+                          ]}
                         >
                           <XIcon size={14} color={rgba(colors.text, 0.75)} />
                         </Pressable>
@@ -647,21 +765,34 @@ export function ActivitiesFilterSheet(props: {
                 accessibilityRole="button"
                 accessibilityLabel="Search workout notes"
                 onPress={() => setNotesPickerOpen(true)}
-                style={({ pressed }) => [styles.inputLike, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.inputLike,
+                  pressed && styles.pressed,
+                ]}
               >
                 {filters.selectedNotes.length > 0 ? (
                   <View style={styles.chipsRow}>
                     {filters.selectedNotes.map((n, idx) => (
                       <View key={`${n.sessionId}-${idx}`} style={styles.chip}>
                         <Text style={styles.chipText} numberOfLines={1}>
-                          {n.noteContent.slice(0, 30)}{n.noteContent.length > 30 ? '…' : ''}
+                          {n.noteContent.slice(0, 30)}
+                          {n.noteContent.length > 30 ? "…" : ""}
                         </Text>
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel="Remove note filter"
-                          onPress={() => props.onChange({ selectedNotes: filters.selectedNotes.filter((_, i) => i !== idx) })}
+                          onPress={() =>
+                            props.onChange({
+                              selectedNotes: filters.selectedNotes.filter(
+                                (_, i) => i !== idx,
+                              ),
+                            })
+                          }
                           hitSlop={10}
-                          style={({ pressed }) => [styles.chipX, pressed && { opacity: 0.75 }]}
+                          style={({ pressed }) => [
+                            styles.chipX,
+                            pressed && { opacity: 0.75 },
+                          ]}
                         >
                           <XIcon size={14} color={rgba(colors.text, 0.75)} />
                         </Pressable>
@@ -679,11 +810,11 @@ export function ActivitiesFilterSheet(props: {
               <View style={styles.presetRow}>
                 {(
                   [
-                    ['any', 'Any'],
-                    ['today', 'Today'],
-                    ['last7', 'Last 7'],
-                    ['last30', 'Last 30'],
-                    ['custom', 'Custom'],
+                    ["any", "Any"],
+                    ["today", "Today"],
+                    ["last7", "Last 7"],
+                    ["last30", "Last 30"],
+                    ["custom", "Custom"],
                   ] as const
                 ).map(([key, label]) => {
                   const selected = filters.datePreset === key;
@@ -695,11 +826,20 @@ export function ActivitiesFilterSheet(props: {
                       onPress={() => setPreset(key)}
                       style={({ pressed }) => [
                         styles.presetPill,
-                        selected ? styles.presetPillSelected : styles.presetPillUnselected,
+                        selected
+                          ? styles.presetPillSelected
+                          : styles.presetPillUnselected,
                         pressed && styles.pressed,
                       ]}
                     >
-                      <Text style={[styles.presetText, selected ? styles.presetTextSelected : styles.presetTextUnselected]}>
+                      <Text
+                        style={[
+                          styles.presetText,
+                          selected
+                            ? styles.presetTextSelected
+                            : styles.presetTextUnselected,
+                        ]}
+                      >
                         {label}
                       </Text>
                     </Pressable>
@@ -707,23 +847,31 @@ export function ActivitiesFilterSheet(props: {
                 })}
               </View>
 
-              {filters.datePreset === 'custom' ? (
+              {filters.datePreset === "custom" ? (
                 <View style={styles.customDateWrap}>
                   <View style={styles.customDateRow}>
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel="Set start date"
-                      onPress={() => openPicker('start')}
-                      style={({ pressed }) => [styles.dateButton, pressed && styles.pressed]}
+                      onPress={() => openPicker("start")}
+                      style={({ pressed }) => [
+                        styles.dateButton,
+                        pressed && styles.pressed,
+                      ]}
                     >
                       <Text style={styles.dateButtonLabel}>Start</Text>
-                      <Text style={styles.dateButtonValue}>{formatDateLabel(filters.startDate)}</Text>
+                      <Text style={styles.dateButtonValue}>
+                        {formatDateLabel(filters.startDate)}
+                      </Text>
                     </Pressable>
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel="Clear start date"
                       onPress={() => props.onChange({ startDate: null })}
-                      style={({ pressed }) => [styles.miniButton, pressed && styles.pressed]}
+                      style={({ pressed }) => [
+                        styles.miniButton,
+                        pressed && styles.pressed,
+                      ]}
                     >
                       <Text style={styles.miniButtonText}>Clear</Text>
                     </Pressable>
@@ -733,17 +881,25 @@ export function ActivitiesFilterSheet(props: {
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel="Set end date"
-                      onPress={() => openPicker('end')}
-                      style={({ pressed }) => [styles.dateButton, pressed && styles.pressed]}
+                      onPress={() => openPicker("end")}
+                      style={({ pressed }) => [
+                        styles.dateButton,
+                        pressed && styles.pressed,
+                      ]}
                     >
                       <Text style={styles.dateButtonLabel}>End</Text>
-                      <Text style={styles.dateButtonValue}>{formatDateLabel(filters.endDate)}</Text>
+                      <Text style={styles.dateButtonValue}>
+                        {formatDateLabel(filters.endDate)}
+                      </Text>
                     </Pressable>
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel="Clear end date"
                       onPress={() => props.onChange({ endDate: null })}
-                      style={({ pressed }) => [styles.miniButton, pressed && styles.pressed]}
+                      style={({ pressed }) => [
+                        styles.miniButton,
+                        pressed && styles.pressed,
+                      ]}
                     >
                       <Text style={styles.miniButtonText}>Clear</Text>
                     </Pressable>
@@ -755,14 +911,14 @@ export function ActivitiesFilterSheet(props: {
         </View>
       </BottomSheet>
 
-      {androidPickerVisible && Platform.OS === 'android' ? (
+      {androidPickerVisible && Platform.OS === "android" ? (
         <DateTimePicker
           value={tempDate}
           mode="date"
           display="default"
           onChange={(e, d) => {
             setAndroidPickerVisible(false);
-            if (e.type === 'dismissed') return;
+            if (e.type === "dismissed") return;
             if (d) {
               setTempDate(d);
               commitDate(d);
@@ -772,14 +928,22 @@ export function ActivitiesFilterSheet(props: {
       ) : null}
 
       <Modal
-        visible={iosPickerVisible && Platform.OS === 'ios'}
+        visible={iosPickerVisible && Platform.OS === "ios"}
         transparent
         animationType="fade"
         onRequestClose={() => setIosPickerVisible(false)}
       >
-        <Pressable style={styles.iosPickerBackdrop} onPress={() => setIosPickerVisible(false)}>
-          <View style={styles.iosPickerCard} onStartShouldSetResponder={() => true}>
-            <Text style={styles.iosPickerTitle}>{pickerTarget === 'start' ? 'Start date' : 'End date'}</Text>
+        <Pressable
+          style={styles.iosPickerBackdrop}
+          onPress={() => setIosPickerVisible(false)}
+        >
+          <View
+            style={styles.iosPickerCard}
+            onStartShouldSetResponder={() => true}
+          >
+            <Text style={styles.iosPickerTitle}>
+              {pickerTarget === "start" ? "Start date" : "End date"}
+            </Text>
             <DateTimePicker
               value={tempDate}
               mode="date"
@@ -793,7 +957,11 @@ export function ActivitiesFilterSheet(props: {
                 accessibilityRole="button"
                 accessibilityLabel="Cancel date"
                 onPress={() => setIosPickerVisible(false)}
-                style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed, { flex: 1 }]}
+                style={({ pressed }) => [
+                  styles.secondaryButton,
+                  pressed && styles.pressed,
+                  { flex: 1 },
+                ]}
               >
                 <Text style={styles.secondaryButtonText}>Cancel</Text>
               </Pressable>
@@ -804,7 +972,11 @@ export function ActivitiesFilterSheet(props: {
                   setIosPickerVisible(false);
                   commitDate(tempDate);
                 }}
-                style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, { flex: 1 }]}
+                style={({ pressed }) => [
+                  styles.primaryButton,
+                  pressed && styles.pressed,
+                  { flex: 1 },
+                ]}
               >
                 <Text style={styles.primaryButtonText}>Set</Text>
               </Pressable>
@@ -813,7 +985,12 @@ export function ActivitiesFilterSheet(props: {
         </Pressable>
       </Modal>
 
-      <Modal visible={exPickerOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setExPickerOpen(false)}>
+      <Modal
+        visible={exPickerOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setExPickerOpen(false)}
+      >
         <SafeAreaView style={styles.exSafe}>
           <View style={styles.exHeader}>
             <Text style={styles.exTitle}>Pick exercises</Text>
@@ -822,7 +999,7 @@ export function ActivitiesFilterSheet(props: {
               accessibilityLabel="Done picking exercises"
               onPress={() => {
                 setExPickerOpen(false);
-                setExTerm('');
+                setExTerm("");
               }}
               style={styles.exDoneBtn}
             >
@@ -851,25 +1028,40 @@ export function ActivitiesFilterSheet(props: {
               <View style={{ gap: 8 }}>
                 <Text style={styles.exSectionHeader}>Custom</Text>
                 {filteredCustom.slice(0, 30).map((name) => {
-                  const ref: ExerciseRef = { kind: 'free', name };
+                  const ref: ExerciseRef = { kind: "free", name };
                   const key = exerciseKey(ref);
                   const selected = selectedExerciseKeys.has(key);
                   return (
                     <Pressable
                       key={key}
                       accessibilityRole="button"
-                      accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${name}`}
-                      style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
+                      accessibilityLabel={`${selected ? "Remove" : "Add"} ${name}`}
+                      style={({ pressed }) => [
+                        styles.exRow,
+                        selected && styles.exRowSelected,
+                        pressed && styles.rowPressed,
+                      ]}
                       onPress={() => {
                         haptics.selection();
                         if (selected) {
-                          props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
+                          props.onChange({
+                            selectedExercises: filters.selectedExercises.filter(
+                              (x) => exerciseKey(x) !== key,
+                            ),
+                          });
                         } else {
-                          props.onChange({ selectedExercises: [...filters.selectedExercises, ref] });
+                          props.onChange({
+                            selectedExercises: [
+                              ...filters.selectedExercises,
+                              ref,
+                            ],
+                          });
                         }
                       }}
                     >
-                      <View style={styles.exIconBox} />
+                      <View style={styles.exIconBox}>
+                        <QuillIcon size={16} color={rgba(colors.text, 0.5)} />
+                      </View>
                       <Text style={styles.exRowTitle}>{name}</Text>
                     </Pressable>
                   );
@@ -878,33 +1070,69 @@ export function ActivitiesFilterSheet(props: {
             ) : null}
 
             {filteredMethods.length > 0 ? (
-              <View style={{ gap: 8, marginTop: filteredCustom.length > 0 ? 14 : 0 }}>
+              <View
+                style={{
+                  gap: 8,
+                  marginTop: filteredCustom.length > 0 ? 14 : 0,
+                }}
+              >
                 <Text style={styles.exSectionHeader}>Programs</Text>
                 {filteredMethods.slice(0, 30).map((m) => {
-                  const ref: ExerciseRef = { kind: 'method', methodInstanceId: m.id };
+                  const ref: ExerciseRef = {
+                    kind: "method",
+                    methodInstanceId: m.id,
+                  };
                   const key = exerciseKey(ref);
                   const selected = selectedExerciseKeys.has(key);
                   return (
                     <Pressable
                       key={key}
                       accessibilityRole="button"
-                      accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${m.name}`}
-                      style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
+                      accessibilityLabel={`${selected ? "Remove" : "Add"} ${m.name}`}
+                      style={({ pressed }) => [
+                        styles.exRow,
+                        selected && styles.exRowSelected,
+                        pressed && styles.rowPressed,
+                      ]}
                       onPress={() => {
                         haptics.selection();
                         if (selected) {
-                          props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
+                          props.onChange({
+                            selectedExercises: filters.selectedExercises.filter(
+                              (x) => exerciseKey(x) !== key,
+                            ),
+                          });
                         } else {
-                          props.onChange({ selectedExercises: [...filters.selectedExercises, ref] });
+                          props.onChange({
+                            selectedExercises: [
+                              ...filters.selectedExercises,
+                              ref,
+                            ],
+                          });
                         }
                       }}
                     >
-                      <View style={[styles.exIconBox, { backgroundColor: rgba(colors.primary, 0.1) }]}>
-                        <Text style={[styles.exIconText, { color: colors.primary }]}>{m.method_key.slice(0, 1).toUpperCase()}</Text>
+                      <View
+                        style={[
+                          styles.exIconBox,
+                          { backgroundColor: rgba(colors.primary, 0.1) },
+                        ]}
+                      >
+                        <Text
+                          style={[styles.exIconText, { color: colors.primary }]}
+                        >
+                          {m.method_key.slice(0, 1).toUpperCase()}
+                        </Text>
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.exRowTitle}>{m.name}</Text>
-                        <Text style={styles.exRowMeta}>{m.method_key === 'amrap' ? 'AMRAP' : m.method_key === 'wendler_531' ? 'Wendler 5/3/1' : m.method_key}</Text>
+                        <Text style={styles.exRowMeta}>
+                          {m.method_key === "amrap"
+                            ? "AMRAP"
+                            : m.method_key === "wendler_531"
+                              ? "Wendler 5/3/1"
+                              : m.method_key}
+                        </Text>
                       </View>
                     </Pressable>
                   );
@@ -913,33 +1141,61 @@ export function ActivitiesFilterSheet(props: {
             ) : null}
 
             {filteredLearn.length > 0 ? (
-              <View style={{ gap: 8, marginTop: (filteredCustom.length > 0 || filteredMethods.length > 0) ? 14 : 0 }}>
+              <View
+                style={{
+                  gap: 8,
+                  marginTop:
+                    filteredCustom.length > 0 || filteredMethods.length > 0
+                      ? 14
+                      : 0,
+                }}
+              >
                 <Text style={styles.exSectionHeader}>Library</Text>
                 {filteredLearn.slice(0, 60).map((ex) => {
-                  const ref: ExerciseRef = { kind: 'learn', learnExerciseId: ex.id };
+                  const ref: ExerciseRef = {
+                    kind: "learn",
+                    learnExerciseId: ex.id,
+                  };
                   const key = exerciseKey(ref);
                   const selected = selectedExerciseKeys.has(key);
                   return (
                     <Pressable
                       key={key}
                       accessibilityRole="button"
-                      accessibilityLabel={`${selected ? 'Remove' : 'Add'} ${ex.name}`}
-                      style={({ pressed }) => [styles.exRow, selected && styles.exRowSelected, pressed && styles.rowPressed]}
+                      accessibilityLabel={`${selected ? "Remove" : "Add"} ${ex.name}`}
+                      style={({ pressed }) => [
+                        styles.exRow,
+                        selected && styles.exRowSelected,
+                        pressed && styles.rowPressed,
+                      ]}
                       onPress={() => {
                         haptics.selection();
                         if (selected) {
-                          props.onChange({ selectedExercises: filters.selectedExercises.filter((x) => exerciseKey(x) !== key) });
+                          props.onChange({
+                            selectedExercises: filters.selectedExercises.filter(
+                              (x) => exerciseKey(x) !== key,
+                            ),
+                          });
                         } else {
-                          props.onChange({ selectedExercises: [...filters.selectedExercises, ref] });
+                          props.onChange({
+                            selectedExercises: [
+                              ...filters.selectedExercises,
+                              ref,
+                            ],
+                          });
                         }
                       }}
                     >
                       <View style={styles.exIconBox}>
-                        <Text style={styles.exIconText}>{ex.name.slice(0, 1)}</Text>
+                        <Text style={styles.exIconText}>
+                          {ex.name.slice(0, 1)}
+                        </Text>
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.exRowTitle}>{ex.name}</Text>
-                        <Text style={styles.exRowMeta}>{(ex.equipment ?? []).join(', ')}</Text>
+                        <Text style={styles.exRowMeta}>
+                          {(ex.equipment ?? []).join(", ")}
+                        </Text>
                       </View>
                     </Pressable>
                   );
@@ -947,14 +1203,22 @@ export function ActivitiesFilterSheet(props: {
               </View>
             ) : null}
 
-            {filteredLearn.length === 0 && filteredCustom.length === 0 && filteredMethods.length === 0 && !!exTerm ? (
+            {filteredLearn.length === 0 &&
+            filteredCustom.length === 0 &&
+            filteredMethods.length === 0 &&
+            !!exTerm ? (
               <Text style={styles.exEmpty}>No matching exercises found.</Text>
             ) : null}
           </ScrollView>
         </SafeAreaView>
       </Modal>
 
-      <Modal visible={tagsPickerOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setTagsPickerOpen(false)}>
+      <Modal
+        visible={tagsPickerOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setTagsPickerOpen(false)}
+      >
         <SafeAreaView style={styles.tagsSafe}>
           <View style={styles.tagsHeader}>
             <Text style={styles.tagsTitle}>Pick tags</Text>
@@ -982,19 +1246,37 @@ export function ActivitiesFilterSheet(props: {
                   <View style={styles.tagsGridCell}>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel={selected ? `Remove ${tag}` : `Add ${tag}`}
+                      accessibilityLabel={
+                        selected ? `Remove ${tag}` : `Add ${tag}`
+                      }
                       onPress={() => {
                         haptics.selection();
-                        if (selected) props.onChange({ selectedTags: filters.selectedTags.filter((x) => x !== tag) });
-                        else props.onChange({ selectedTags: [...filters.selectedTags, tag] });
+                        if (selected)
+                          props.onChange({
+                            selectedTags: filters.selectedTags.filter(
+                              (x) => x !== tag,
+                            ),
+                          });
+                        else
+                          props.onChange({
+                            selectedTags: [...filters.selectedTags, tag],
+                          });
                       }}
                       style={({ pressed }) => [
                         styles.tagButton,
-                        selected ? styles.tagButtonSelected : styles.tagButtonUnselected,
+                        selected
+                          ? styles.tagButtonSelected
+                          : styles.tagButtonUnselected,
                         pressed && styles.pressed,
                       ]}
                     >
-                      <WorkoutTagIcon tag={tag} size={18} color={selected ? colors.onPrimary : rgba(colors.text, 0.85)} />
+                      <WorkoutTagIcon
+                        tag={tag}
+                        size={18}
+                        color={
+                          selected ? colors.onPrimary : rgba(colors.text, 0.85)
+                        }
+                      />
                     </Pressable>
                   </View>
                 );
@@ -1005,7 +1287,12 @@ export function ActivitiesFilterSheet(props: {
       </Modal>
 
       {/* Name Picker Modal */}
-      <Modal visible={namePickerOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setNamePickerOpen(false)}>
+      <Modal
+        visible={namePickerOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setNamePickerOpen(false)}
+      >
         <SafeAreaView style={styles.exSafe}>
           <View style={styles.exHeader}>
             <Text style={styles.exTitle}>Pick workouts</Text>
@@ -1014,7 +1301,7 @@ export function ActivitiesFilterSheet(props: {
               accessibilityLabel="Done picking workouts"
               onPress={() => {
                 setNamePickerOpen(false);
-                setNameTerm('');
+                setNameTerm("");
               }}
               style={styles.exDoneBtn}
             >
@@ -1045,42 +1332,70 @@ export function ActivitiesFilterSheet(props: {
             {filteredWorkoutsByName.length > 0 ? (
               <View style={{ gap: 8 }}>
                 <Text style={styles.exSectionHeader}>
-                  {nameTerm.trim() ? `${filteredWorkoutsByName.length} result${filteredWorkoutsByName.length === 1 ? '' : 's'}` : 'All workouts'}
+                  {nameTerm.trim()
+                    ? `${filteredWorkoutsByName.length} result${filteredWorkoutsByName.length === 1 ? "" : "s"}`
+                    : "All workouts"}
                 </Text>
                 {filteredWorkoutsByName.slice(0, 50).map((s) => {
-                  const isSelected = filters.selectedWorkouts.some((w) => w.id === s.id);
+                  const isSelected = filters.selectedWorkouts.some(
+                    (w) => w.id === s.id,
+                  );
                   return (
                     <Pressable
                       key={s.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`${isSelected ? 'Remove' : 'Add'} ${s.title}`}
+                      accessibilityLabel={`${isSelected ? "Remove" : "Add"} ${s.title}`}
                       onPress={() => {
                         haptics.selection();
                         if (isSelected) {
-                          props.onChange({ selectedWorkouts: filters.selectedWorkouts.filter((w) => w.id !== s.id) });
+                          props.onChange({
+                            selectedWorkouts: filters.selectedWorkouts.filter(
+                              (w) => w.id !== s.id,
+                            ),
+                          });
                         } else {
-                          props.onChange({ selectedWorkouts: [...filters.selectedWorkouts, { id: s.id, title: s.title }] });
+                          props.onChange({
+                            selectedWorkouts: [
+                              ...filters.selectedWorkouts,
+                              { id: s.id, title: s.title },
+                            ],
+                          });
                         }
                       }}
-                      style={({ pressed }) => [styles.searchResultCard, isSelected && styles.searchResultCardSelected, pressed && styles.rowPressed]}
+                      style={({ pressed }) => [
+                        styles.searchResultCard,
+                        isSelected && styles.searchResultCardSelected,
+                        pressed && styles.rowPressed,
+                      ]}
                     >
                       <View style={styles.searchResultIconBox}>
-                        <DumbbellIcon size={18} color={rgba(colors.text, 0.7)} />
+                        <DumbbellIcon
+                          size={18}
+                          color={rgba(colors.text, 0.7)}
+                        />
                       </View>
                       <View style={styles.searchResultContent}>
-                        <Text style={styles.searchResultTitle} numberOfLines={1}>
+                        <Text
+                          style={styles.searchResultTitle}
+                          numberOfLines={1}
+                        >
                           {s.title}
                         </Text>
                         <Text style={styles.searchResultMeta}>
-                          {formatSessionDate(s.started_at)} • {s.snapshot?.exercises?.length ?? 0} exercise
-                          {(s.snapshot?.exercises?.length ?? 0) === 1 ? '' : 's'}
+                          {formatSessionDate(s.started_at)} •{" "}
+                          {s.snapshot?.exercises?.length ?? 0} exercise
+                          {(s.snapshot?.exercises?.length ?? 0) === 1
+                            ? ""
+                            : "s"}
                         </Text>
                       </View>
                     </Pressable>
                   );
                 })}
                 {filteredWorkoutsByName.length > 50 && (
-                  <Text style={styles.searchResultsMore}>+{filteredWorkoutsByName.length - 50} more results</Text>
+                  <Text style={styles.searchResultsMore}>
+                    +{filteredWorkoutsByName.length - 50} more results
+                  </Text>
                 )}
               </View>
             ) : nameTerm.trim() ? (
@@ -1093,7 +1408,12 @@ export function ActivitiesFilterSheet(props: {
       </Modal>
 
       {/* Notes Picker Modal */}
-      <Modal visible={notesPickerOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setNotesPickerOpen(false)}>
+      <Modal
+        visible={notesPickerOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setNotesPickerOpen(false)}
+      >
         <SafeAreaView style={styles.exSafe}>
           <View style={styles.exHeader}>
             <Text style={styles.exTitle}>Pick notes</Text>
@@ -1102,7 +1422,7 @@ export function ActivitiesFilterSheet(props: {
               accessibilityLabel="Done picking notes"
               onPress={() => {
                 setNotesPickerOpen(false);
-                setNotesTerm('');
+                setNotesTerm("");
               }}
               style={styles.exDoneBtn}
             >
@@ -1133,59 +1453,89 @@ export function ActivitiesFilterSheet(props: {
             {filteredByNotes.length > 0 ? (
               <View style={{ gap: 8 }}>
                 <Text style={styles.exSectionHeader}>
-                  {notesTerm.trim() ? `${filteredByNotes.length} result${filteredByNotes.length === 1 ? '' : 's'}` : 'All notes'}
+                  {notesTerm.trim()
+                    ? `${filteredByNotes.length} result${filteredByNotes.length === 1 ? "" : "s"}`
+                    : "All notes"}
                 </Text>
                 {filteredByNotes.slice(0, 50).map((result, idx) => {
                   const noteKey = `${result.sessionId}-${result.noteContext}-${result.noteContent.slice(0, 20)}`;
                   const isSelected = filters.selectedNotes.some(
-                    (n) => n.sessionId === result.sessionId && n.noteContent === result.noteContent && n.noteContext === result.noteContext
+                    (n) =>
+                      n.sessionId === result.sessionId &&
+                      n.noteContent === result.noteContent &&
+                      n.noteContext === result.noteContext,
                   );
                   return (
                     <Pressable
                       key={`${result.sessionId}-${idx}`}
                       accessibilityRole="button"
-                      accessibilityLabel={`${isSelected ? 'Remove' : 'Add'} note`}
+                      accessibilityLabel={`${isSelected ? "Remove" : "Add"} note`}
                       onPress={() => {
                         haptics.selection();
                         if (isSelected) {
                           props.onChange({
                             selectedNotes: filters.selectedNotes.filter(
-                              (n) => !(n.sessionId === result.sessionId && n.noteContent === result.noteContent && n.noteContext === result.noteContext)
+                              (n) =>
+                                !(
+                                  n.sessionId === result.sessionId &&
+                                  n.noteContent === result.noteContent &&
+                                  n.noteContext === result.noteContext
+                                ),
                             ),
                           });
                         } else {
                           props.onChange({
                             selectedNotes: [
                               ...filters.selectedNotes,
-                              { sessionId: result.sessionId, noteContent: result.noteContent, noteContext: result.noteContext },
+                              {
+                                sessionId: result.sessionId,
+                                noteContent: result.noteContent,
+                                noteContext: result.noteContext,
+                              },
                             ],
                           });
                         }
                       }}
-                      style={({ pressed }) => [styles.searchResultCard, isSelected && styles.searchResultCardSelected, pressed && styles.rowPressed]}
+                      style={({ pressed }) => [
+                        styles.searchResultCard,
+                        isSelected && styles.searchResultCardSelected,
+                        pressed && styles.rowPressed,
+                      ]}
                     >
                       <View style={styles.searchResultIconBox}>
-                        <StickyNoteIcon size={18} color={rgba(colors.text, 0.7)} />
+                        <StickyNoteIcon
+                          size={18}
+                          color={rgba(colors.text, 0.7)}
+                        />
                       </View>
                       <View style={styles.searchResultContent}>
-                        <Text style={styles.searchResultNoteText} numberOfLines={2}>
+                        <Text
+                          style={styles.searchResultNoteText}
+                          numberOfLines={2}
+                        >
                           {result.noteContent}
                         </Text>
                         <View style={styles.searchResultNoteContext}>
-                          <Text style={styles.searchResultContextLabel}>{result.noteContext}</Text>
+                          <Text style={styles.searchResultContextLabel}>
+                            {result.noteContext}
+                          </Text>
                           <Text style={styles.searchResultContextDot}>•</Text>
-                          <Text style={styles.searchResultContextLabel}>{result.sessionTitle}</Text>
+                          <Text style={styles.searchResultContextLabel}>
+                            {result.sessionTitle}
+                          </Text>
                         </View>
                         <Text style={styles.searchResultMeta}>
                           {result.sessionDate} • {result.exerciseCount} exercise
-                          {result.exerciseCount === 1 ? '' : 's'}
+                          {result.exerciseCount === 1 ? "" : "s"}
                         </Text>
                       </View>
                     </Pressable>
                   );
                 })}
                 {filteredByNotes.length > 50 && (
-                  <Text style={styles.searchResultsMore}>+{filteredByNotes.length - 50} more results</Text>
+                  <Text style={styles.searchResultsMore}>
+                    +{filteredByNotes.length - 50} more results
+                  </Text>
                 )}
               </View>
             ) : notesTerm.trim() ? (
@@ -1223,13 +1573,13 @@ const createStyles = (colors: {
       gap: 12,
     },
     headerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 10,
     },
     headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 10,
     },
     headerAction: {
@@ -1248,7 +1598,7 @@ const createStyles = (colors: {
       borderRadius: 12,
       backgroundColor: colors.primary,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: 'rgba(0, 0, 0, 0.25)',
+      borderColor: "rgba(0, 0, 0, 0.25)",
     },
     headerPrimaryActionText: {
       fontFamily: Fonts.extraBold,
@@ -1295,7 +1645,7 @@ const createStyles = (colors: {
       paddingHorizontal: 12,
       paddingVertical: 11,
       minHeight: 46,
-      justifyContent: 'center',
+      justifyContent: "center",
     },
     placeholderText: {
       fontFamily: Fonts.medium,
@@ -1303,15 +1653,15 @@ const createStyles = (colors: {
       color: rgba(colors.text, 0.45),
     },
     chipsRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: 8,
     },
     chip: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 6,
-      maxWidth: '100%',
+      maxWidth: "100%",
       borderRadius: 999,
       paddingVertical: 6,
       paddingLeft: 10,
@@ -1330,8 +1680,8 @@ const createStyles = (colors: {
       padding: 2,
     },
     presetRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexDirection: "row",
+      flexWrap: "wrap",
       gap: 8,
     },
     presetPill: {
@@ -1363,9 +1713,9 @@ const createStyles = (colors: {
       marginTop: 6,
     },
     customDateRow: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 10,
-      alignItems: 'center',
+      alignItems: "center",
     },
     dateButton: {
       flex: 1,
@@ -1405,23 +1755,23 @@ const createStyles = (colors: {
       gap: 10,
     },
     tagsGridRow: {
-      justifyContent: 'space-between',
+      justifyContent: "space-between",
     },
     tagsGridCell: {
-      width: '16.66%',
-      alignItems: 'center',
+      width: "16.66%",
+      alignItems: "center",
     },
     tagButton: {
       width: 44,
       height: 44,
       borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       borderWidth: 1,
     },
     tagButtonSelected: {
       backgroundColor: colors.primary,
-      borderColor: 'rgba(0, 0, 0, 0.25)',
+      borderColor: "rgba(0, 0, 0, 0.25)",
     },
     tagButtonUnselected: {
       backgroundColor: rgba(colors.text, 0.04),
@@ -1431,11 +1781,11 @@ const createStyles = (colors: {
       borderRadius: 14,
       paddingVertical: 14,
       paddingHorizontal: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: colors.primary,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: 'rgba(0, 0, 0, 0.25)',
+      borderColor: "rgba(0, 0, 0, 0.25)",
     },
     primaryButtonText: {
       color: colors.onPrimary,
@@ -1446,8 +1796,8 @@ const createStyles = (colors: {
       borderRadius: 14,
       paddingVertical: 14,
       paddingHorizontal: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: rgba(colors.text, 0.08),
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: rgba(colors.text, 0.12),
@@ -1464,13 +1814,13 @@ const createStyles = (colors: {
 
     iosPickerBackdrop: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      justifyContent: 'center',
-      alignItems: 'center',
+      backgroundColor: "rgba(0,0,0,0.6)",
+      justifyContent: "center",
+      alignItems: "center",
       padding: 20,
     },
     iosPickerCard: {
-      width: '100%',
+      width: "100%",
       maxWidth: 380,
       backgroundColor: colors.surface,
       borderRadius: 16,
@@ -1483,10 +1833,10 @@ const createStyles = (colors: {
       fontFamily: Fonts.extraBold,
       fontSize: 16,
       color: colors.text,
-      textAlign: 'center',
+      textAlign: "center",
     },
     iosPickerActions: {
-      flexDirection: 'row',
+      flexDirection: "row",
       gap: 12,
     },
 
@@ -1495,9 +1845,9 @@ const createStyles = (colors: {
       backgroundColor: colors.background,
     },
     exHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       paddingHorizontal: 16,
       paddingVertical: 14,
       borderBottomWidth: 1,
@@ -1550,12 +1900,12 @@ const createStyles = (colors: {
       fontFamily: Fonts.bold,
       fontSize: 13,
       color: rgba(colors.text, 0.7),
-      textTransform: 'uppercase',
+      textTransform: "uppercase",
       letterSpacing: 0.5,
     },
     exRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 12,
       paddingVertical: 12,
       paddingHorizontal: 10,
@@ -1576,8 +1926,8 @@ const createStyles = (colors: {
       width: 36,
       height: 36,
       borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: rgba(colors.text, 0.08),
     },
     exIconText: {
@@ -1602,7 +1952,7 @@ const createStyles = (colors: {
       fontSize: 13,
       color: rgba(colors.text, 0.6),
       paddingVertical: 10,
-      textAlign: 'center',
+      textAlign: "center",
     },
 
     tagsSafe: {
@@ -1610,9 +1960,9 @@ const createStyles = (colors: {
       backgroundColor: colors.background,
     },
     tagsHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       paddingHorizontal: 16,
       paddingVertical: 14,
       borderBottomWidth: 1,
@@ -1647,8 +1997,8 @@ const createStyles = (colors: {
       marginTop: 4,
     },
     searchResultCard: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
+      flexDirection: "row",
+      alignItems: "flex-start",
       gap: 10,
       paddingVertical: 10,
       paddingHorizontal: 10,
@@ -1665,8 +2015,8 @@ const createStyles = (colors: {
       width: 32,
       height: 32,
       borderRadius: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: rgba(colors.text, 0.06),
       marginTop: 2,
     },
@@ -1691,10 +2041,10 @@ const createStyles = (colors: {
       lineHeight: 18,
     },
     searchResultNoteContext: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 5,
-      flexWrap: 'wrap',
+      flexWrap: "wrap",
     },
     searchResultContextLabel: {
       fontFamily: Fonts.semiBold,
@@ -1710,8 +2060,7 @@ const createStyles = (colors: {
       fontFamily: Fonts.medium,
       fontSize: 12,
       color: rgba(colors.text, 0.5),
-      textAlign: 'center',
+      textAlign: "center",
       paddingTop: 4,
     },
   });
-
