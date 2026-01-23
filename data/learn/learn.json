@@ -534,5 +534,1661 @@
     "image": "assets/images/mock.webp",
     "videoUrl": "https://www.youtube.com/shorts/Nqh7q3zDCoQ",
     "isFavorite": false
+  },
+  {
+    "id": "exercise-leg-press",
+    "name": "Leg Press",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Leg Hypertrophy",
+    "description": "A machine-based compound leg exercise allowing heavy loading.",
+    "long_description": "Sit in the machine with back flat against the pad. Place feet on the platform shoulder-width apart. Lower the weight until knees are bent around 90 degrees, then drive back up without locking out knees excessively.",
+    "equipment": ["Leg Press Machine"],
+    "dos": [
+      "Do keep your lower back pressed against the pad.",
+      "Do control the descent."
+    ],
+    "donts": [
+      "Don't lock your knees forcefully at the top.",
+      "Don't perform 'ego reps' with limited range of motion."
+    ],
+    "tags": ["Legs", "Machine", "Quads", "Glutes"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-leg-extension",
+    "name": "Leg Extension",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Quad Isolation",
+    "description": "An isolation exercise for the quadriceps performed on a machine.",
+    "long_description": "Sit with the pad adjusted against your lower shins. Extend your legs until they are straight, squeezing the quads at the top. Lower under control. Great for finishing the quads.",
+    "equipment": ["Leg Extension Machine"],
+    "dos": [
+      "Do adjust the machine to align your knee with the pivot point.",
+      "Do squeeze hard at the top."
+    ],
+    "donts": [
+      "Don't swing the weight up.",
+      "Don't go too heavy and sacrifice form."
+    ],
+    "tags": ["Legs", "Machine", "Quads", "Isolation"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-leg-curl",
+    "name": "Leg Curl",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Hamstring Isolation",
+    "description": "Isolates the hamstrings through knee flexion using a machine.",
+    "long_description": "Can be seated or lying. Curl the pad towards your glutes by contracting the hamstrings. Control the eccentric phase to fully lengthen the muscle.",
+    "equipment": ["Leg Curl Machine"],
+    "dos": [
+      "Do keep your hips pressed against the pad.",
+      "Do control the release of the weight."
+    ],
+    "donts": [
+      "Don't lift your hips off the pad to assist the weight.",
+      "Don't kick the weight down; control it."
+    ],
+    "tags": ["Legs", "Machine", "Hamstrings", "Isolation"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-lat-pulldown",
+    "name": "Lat Pulldown",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Back Width",
+    "description": "A vertical pulling exercise for the lats, simulating a pull-up.",
+    "long_description": "Sit with knees secured under pads. Grasp the bar with a wide grip and pull it down to your upper chest, leading with the elbows. Excellent for building back width.",
+    "equipment": ["Cable Machine", "Lat Pulldown"],
+    "dos": [
+      "Do initiate the pull by depressing shoulder blades.",
+      "Do bring the bar to the upper chest, not the stomach."
+    ],
+    "donts": [
+      "Don't lean back excessively.",
+      "Don't use momentum to jerk the weight down."
+    ],
+    "tags": ["Pull", "Back", "Machine", "Lats"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-cable-row",
+    "name": "Seated Cable Row",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Back Thickness",
+    "description": "A horizontal pulling exercise for the mid-back and lats.",
+    "long_description": "Sit with feet on the platform and knees slightly bent. Pull the handle toward your lower abdomen, retracting the scapula. Keep the torso relatively upright.",
+    "equipment": ["Cable Machine"],
+    "dos": [
+      "Do squeeze your shoulder blades together at the peak.",
+      "Do keep a neutral spine."
+    ],
+    "donts": [
+      "Don't round your back forward.",
+      "Don't lean way back to leverage the weight."
+    ],
+    "tags": ["Pull", "Back", "Machine", "Thickness"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-pec-deck",
+    "name": "Pec Deck Fly",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Chest Isolation",
+    "description": "Isolates the chest muscles horizontally without triceps involvement.",
+    "long_description": "Sit with back flat on pad. Place forearms or grip handles depending on the machine. Bring arms together in front of the chest, squeezing the pecs. Open wide to stretch the muscle.",
+    "equipment": ["Pec Deck Machine"],
+    "dos": [
+      "Do keep elbows slightly below shoulder height.",
+      "Do focus on the stretch and the squeeze."
+    ],
+    "donts": [
+      "Don't bang the weights together.",
+      "Don't overstretch shoulder joints range of motion."
+    ],
+    "tags": ["Push", "Chest", "Machine", "Isolation"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-triceps-pushdown",
+    "name": "Triceps Pushdown",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Triceps Isolation",
+    "description": "A cable exercise targeting the triceps muscles.",
+    "long_description": "Stand facing a high pulley with a rope or bar attachment. Keep elbows pinned to your sides and extend the forearms down until arms are straight. Squeeze triceps at the bottom.",
+    "equipment": ["Cable Machine"],
+    "dos": [
+      "Do keep elbows fixed at your sides.",
+      "Do use a full range of motion."
+    ],
+    "donts": [
+      "Don't use bodyweight to press the bar down.",
+      "Don't let elbows flare out too much."
+    ],
+    "tags": ["Push", "Triceps", "Arms", "Cable"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-face-pull",
+    "name": "Face Pull",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Rear Delts & Posture",
+    "description": "A cable exercise for the rear deltoids and rotater cuff.",
+    "long_description": "Set pulley to face height. Pull the rope towards your face/forehead, separating the hands and driving elbows back and externally rotating the shoulders. Crucial for shoulder health.",
+    "equipment": ["Cable Machine"],
+    "dos": [
+      "Do focus on pulling the rope apart.",
+      "Do hold the contraction for a second."
+    ],
+    "donts": [
+      "Don't go too heavy; form is priority.",
+      "Don't jut your head forward."
+    ],
+    "tags": ["Pull", "Shoulders", "Rear Delts", "Prehab"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-incline-bench",
+    "name": "Incline Bench Press",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Upper Chest",
+    "description": "Bench pressing on an inclined angle to target the upper pectorals.",
+    "long_description": "Lie on a bench inclined at roughly 30-45 degrees. Unrack the bar and lower it to the upper chest/collarbone area. Press back up. Increases shoulder involvement compared to flat bench.",
+    "equipment": ["Barbell", "Incline Bench"],
+    "dos": [
+      "Do keep your elbows tucked at roughly 45 degrees.",
+      "Do control the bar path to the upper chest."
+    ],
+    "donts": [
+      "Don't bridge your hips excessively.",
+      "Don't bounce the bar off your clavicles."
+    ],
+    "tags": ["Push", "Chest", "Shoulders", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-front-squat",
+    "name": "Front Squat",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Quad Strength & Core",
+    "description": "A squat variant where the bar is racked on the front delts.",
+    "long_description": "Rest the bar on the front deltoids, keeping elbows high to create a shelf. Squat down with a very upright torso. Places high demand on quads and upper back strength.",
+    "equipment": ["Barbell", "Rack"],
+    "dos": [
+      "Do keep your elbows as high as possible throughout.",
+      "Do brace your abs hard."
+    ],
+    "donts": [
+      "Don't let your upper back round forward.",
+      "Don't let the bar slide down your arms."
+    ],
+    "tags": ["Legs", "Quads", "Core", "Squat"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-rdl",
+    "name": "Romanian Deadlift (RDL)",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Hamstrings & Glutes",
+    "description": "A hip-hinge movement starting from the top down, focusing on the stretch.",
+    "long_description": "Start standing with the bar. Hinge hips back while keeping legs slightly bent but rigid. Lower bar along shins until you feel a deep stretch in hamstrings, then drive hips forward to stand.",
+    "equipment": ["Barbell"],
+    "dos": [
+      "Do keep the bar in contact with your legs.",
+      "Do focus on pushing hips back, not bending over."
+    ],
+    "donts": [
+      "Don't round your lower back.",
+      "Don't lower weights past your flexibility limit."
+    ],
+    "tags": ["Legs", "Hamstrings", "Glutes", "Hinge"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-lateral-raise",
+    "name": "Dumbbell Lateral Raise",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Side Delts",
+    "description": "An isolation exercise for broadening the shoulders.",
+    "long_description": "Stand with dumbbells at sides. Raise arms out to the sides until they reach shoulder height, leading with the elbows. Lower under control. Critical for the 'V-taper' look.",
+    "equipment": ["Dumbbells"],
+    "dos": ["Do lead with your elbows.", "Do keep a slight bend in the arms."],
+    "donts": [
+      "Don't swing the weights up with your hips.",
+      "Don't raise hands higher than elbows."
+    ],
+    "tags": ["Push", "Shoulders", "Isolation", "Dumbbells"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-skullcrusher",
+    "name": "Skullcrushers",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Triceps Mass",
+    "description": "Lying triceps extension using a barbell or EZ-bar.",
+    "long_description": "Lie on a bench holding the bar above chest. Bend elbows to lower the bar towards the forehead or behind head. Extend arms back to starting position. Hits the long head of the triceps.",
+    "equipment": ["Barbell/EZ-Bar", "Bench"],
+    "dos": [
+      "Do keep elbows pointed towards the ceiling (mostly).",
+      "Do control the bar carefully near your head."
+    ],
+    "donts": ["Don't flare elbows out too wide.", "Don't use momentum."],
+    "tags": ["Push", "Triceps", "Arms"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-walking-lunges",
+    "name": "Walking Lunges",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Leg Endurance & Glutes",
+    "description": "A dynamic unilateral leg exercise moving forward.",
+    "long_description": "Take a step forward, lower hips until back knee hovers over ground, then drive up and forward into the next step. Can be loaded with dumbbells or barbell.",
+    "equipment": ["Bodyweight/Dumbbells"],
+    "dos": [
+      "Do keep your torso upright (or slight lean for glutes).",
+      "Do keep knees in line with toes."
+    ],
+    "donts": [
+      "Don't smash your knee into the ground.",
+      "Don't take steps that are too short."
+    ],
+    "tags": ["Legs", "Glutes", "Quads", "Dynamic"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hip-thrust",
+    "name": "Barbell Hip Thrust",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Glute Strength",
+    "description": "The premier exercise for isolating and overloading the glutes.",
+    "long_description": "Sit with upper back against a bench and barbell in the hip crease (use a pad!). Drive hips up until body is parallel to floor and glutes heavily contracted. Lower down with control.",
+    "equipment": ["Barbell", "Bench"],
+    "dos": [
+      "Do chin tuck to keep spine neutral.",
+      "Do forcefuly squeeze glutes at the top."
+    ],
+    "donts": [
+      "Don't hyperextend your lower back.",
+      "Don't use just your hamstrings; mind-muscle connection is key."
+    ],
+    "tags": ["Legs", "Glutes", "Hinge", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-cycling-indoor",
+    "name": "Cycling (Indoor)",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Cardio",
+    "description": "Stationary cycling for cardiovascular conditioning.",
+    "long_description": "Using a spinning bike or stationary cycle. Great for low-impact cardio. Can be steady state or high intensity intervals.",
+    "equipment": ["Stationary Bike"],
+    "dos": [
+      "Do adjust seat height so leg is almost straight at bottom.",
+      "Do engage core slightly."
+    ],
+    "donts": [
+      "Don't hunch over the handlebars excessively.",
+      "Don't bounce in the saddle at high rpm."
+    ],
+    "tags": ["Cardio", "Endurance", " legs"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "km"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-cycling-outdoor",
+    "name": "Cycling (Outdoor)",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Cardio & Transport",
+    "description": "Riding a bicycle outdoors.",
+    "long_description": "Excellent for cardiovascular health and leg endurance. Varies greatly with terrain.",
+    "equipment": ["Bicycle", "Helmet"],
+    "dos": ["Do wear a helmet.", "Do follow traffic rules."],
+    "donts": [
+      "Don't ignore hydration on long rides.",
+      "Don't ride with poor visibility without lights."
+    ],
+    "tags": ["Cardio", "Outdoor", "Endurance"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "km"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-rowing",
+    "name": "Rowing",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Full Body Cardio",
+    "description": "A full-body cardiovascular exercise using a rowing machine (ergometer).",
+    "long_description": "Push with legs, lean back slightly, then pull arms to chest. Reverse the specific sequence. Uses over 80% of muscles in body.",
+    "equipment": ["Rowing Machine"],
+    "dos": ["Do drive with legs first, not arms.", "Do keep a straight back."],
+    "donts": [
+      "Don't shoot your butt out early.",
+      "Don't elevate shoulders to your ears."
+    ],
+    "tags": ["Cardio", "Full Body", "Endurance"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "m"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-swimming",
+    "name": "Swimming",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Full Body Cardio",
+    "description": "Propelling through water using limbs. Zero impact on joints.",
+    "long_description": "Includes various strokes (Freestyle, Breaststroke, Butterfly, Backstroke). Provides high resistance and cardio demand while cooling the body.",
+    "equipment": ["Pool", "Goggles"],
+    "dos": [
+      "Do focus on rhythmic breathing.",
+      "Do maintain a streamlined body position."
+    ],
+    "donts": [
+      "Don't hold your breath violently.",
+      "Don't fight the water; use technique."
+    ],
+    "tags": ["Cardio", "Full Body", "Low Impact"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "m"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-boxing",
+    "name": "Boxing",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Conditioning & Coordination",
+    "description": "High intensity combat sport training.",
+    "long_description": "Bag work, shadow boxing, or sparring. Builds immense shoulder endurance, core stability, and cardiovascular health.",
+    "equipment": ["Gloves", "Wraps", "Bag"],
+    "dos": [
+      "Do keep your hands up guarding your face.",
+      "Do rotate hips into punches."
+    ],
+    "donts": [
+      "Don't hold your breath while punching.",
+      "Don't drop your guard when tired."
+    ],
+    "tags": ["Cardio", "Combat", "HIIT"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hiking",
+    "name": "Hiking",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Active Recovery / LISS",
+    "description": "Walking in nature, often with elevation gain.",
+    "long_description": "Great for mental health and low intensity steady state cardio. Builds stabilizer muscles in ankles and knees due to uneven terrain.",
+    "equipment": ["Boots", "Backpack"],
+    "dos": ["Do wear appropriate footwear.", "Do bring water and supplies."],
+    "donts": [
+      "Don't leave trash on the trail.",
+      "Don't underestimate weather changes."
+    ],
+    "tags": ["Cardio", "Outdoor", "Nature"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "km"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-yoga",
+    "name": "Yoga",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Flexibility & Mobility",
+    "description": "Physical, mental, and spiritual practices which originated in ancient India.",
+    "long_description": "Involves holding poses (asanas), breathing techniques (pranayama), and meditation. Improves flexibility, balance, and stress relief.",
+    "equipment": ["Mat"],
+    "dos": ["Do focus on your breath.", "Do listen to your body's limits."],
+    "donts": [
+      "Don't force yourself into painful positions.",
+      "Don't compare your flexibility to others."
+    ],
+    "tags": ["Mobility", "Flexibility", "Mindfulness"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-pilates",
+    "name": "Pilates",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Core Strength",
+    "description": "Low-impact exercise that aims to strengthen muscles while improving postural alignment and flexibility.",
+    "long_description": "Emphasizes core strength, control, precision, and breath. Can be mat-based or use reformer machines.",
+    "equipment": ["Mat", "Reformer"],
+    "dos": [
+      "Do engage your deep core muscles.",
+      "Do maintain precise movements."
+    ],
+    "donts": ["Don't use momentum.", "Don't rush the movements."],
+    "tags": ["Core", "Mobility", "Control"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-elliptical",
+    "name": "Elliptical",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Low Impact Cardio",
+    "description": "Stationary machine simulating walking/running without joint impact.",
+    "long_description": "Moves feet in an ellipse pattern. Good for those with knee issues who want to do cardio.",
+    "equipment": ["Elliptical Machine"],
+    "dos": [
+      "Do use the moving handles to engage upper body.",
+      "Do keep feet flat on the pedals."
+    ],
+    "donts": [
+      "Don't lean heavily on the fixed handles.",
+      "Don't let toes go numb (move feet slightly)."
+    ],
+    "tags": ["Cardio", "Low Impact", "Machine"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "km"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-chest-press-machine",
+    "name": "Chest Press Machine",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Chest Strength",
+    "description": "A machine-based pressing exercise for the chest, shoulders, and triceps.",
+    "long_description": "Sit with your back flat against the pad and handles at chest height. Push the handles forward until arms are extended, then return with control. Great for learning the pressing movement safely.",
+    "equipment": ["Chest Press Machine"],
+    "dos": [
+      "Do keep your elbows slightly below shoulder height.",
+      "Do control the weight on the way back."
+    ],
+    "donts": [
+      "Don't lift your head off the pad.",
+      "Don't lock your elbows aggressively."
+    ],
+    "tags": ["Push", "Chest", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-shoulder-press-machine",
+    "name": "Shoulder Press Machine",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Shoulder Strength",
+    "description": "A safer alternative to free weight overhead pressing.",
+    "long_description": "Press the handles upward from shoulder height to full extension. Good for isolating the deltoids with constant tension.",
+    "equipment": ["Shoulder Press Machine"],
+    "dos": ["Do keep your core tight.", "Do use a full range of motion."],
+    "donts": [
+      "Don't arch your lower back excessively.",
+      "Don't jut your neck forward."
+    ],
+    "tags": ["Push", "Shoulders", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hack-squat",
+    "name": "Hack Squat",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Quad Hypertrophy",
+    "description": "A machine squat that stabilizes the back, allowing focus on quads.",
+    "long_description": "Position yourself in the machine with shoulder pads resting on your shoulders. Lower down until knees are at 90 degrees or less, then drive back up. Excellent for quad development.",
+    "equipment": ["Hack Squat Machine"],
+    "dos": [
+      "Do keeping your back flat against the pad.",
+      "Do place feet to emphasize quads (lower) or glutes (higher)."
+    ],
+    "donts": [
+      "Don't let knees cave inward.",
+      "Don't lock out knees at the top."
+    ],
+    "tags": ["Legs", "Quads", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-smith-machine-squat",
+    "name": "Smith Machine Squat",
+    "type": "exercise",
+    "level": "Beginner-Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Leg Strength",
+    "description": "Squatting with a guided bar path.",
+    "long_description": "Place the bar on your traps. Unlock the safety hooks and squat down. The fixed path removes the need for stabilization, allowing you to focus on pushing.",
+    "equipment": ["Smith Machine"],
+    "dos": [
+      "Do place feet slightly further forward than a free squat.",
+      "Do keep your torso upright."
+    ],
+    "donts": [
+      "Don't rely solely on the machine for balance.",
+      "Don't round your back."
+    ],
+    "tags": ["Legs", "Squat", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-assisted-pull-up",
+    "name": "Assisted Pull-up",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Back Strength",
+    "description": "A machine that counterbalances your weight to make pull-ups easier.",
+    "long_description": "Kneel or stand on the platform. The weight you select lifts you up, reducing the load you have to pull. Great for building up to bodyweight pull-ups.",
+    "equipment": ["Assisted Pull-up Machine"],
+    "dos": ["Do use a full range of motion.", "Do control the descent."],
+    "donts": [
+      "Don't swing your body.",
+      "Don't step off the platform while the weight is up."
+    ],
+    "tags": ["Pull", "Back", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-cable-crossover",
+    "name": "Cable Crossover",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Chest Definition",
+    "description": "A chest isolation exercise producing constant tension.",
+    "long_description": "Stand between two high pulleys. Pull the handles down and across your body, squeezing the chest at the bottom. Varies the angle of attack on the pecs.",
+    "equipment": ["Cable Machine"],
+    "dos": [
+      "Do keep a slight bend in elbows.",
+      "Do squeeze hard at the crossover point."
+    ],
+    "donts": [
+      "Don't use momentum to swing the weight.",
+      "Don't shrug shoulders."
+    ],
+    "tags": ["Push", "Chest", "Cable", "Isolation"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-cable-bicep-curl",
+    "name": "Cable Bicep Curl",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Bicep Isolation",
+    "description": "Curling with a cable for constant resistance.",
+    "long_description": "Stand facing a low pulley with a bar or rope attachment. Curl the weight up while keeping elbows pinned. The cable provides tension throughout the movement.",
+    "equipment": ["Cable Machine"],
+    "dos": ["Do keep elbows stationary.", "Do squeeze at the top."],
+    "donts": [
+      "Don't lean back to lift the weight.",
+      "Don't let the weight stack slam down."
+    ],
+    "tags": ["Pull", "Arms", "Biceps", "Cable"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-cable-tricep-overhead",
+    "name": "Cable Overhead Extension",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Tricep Long Head",
+    "description": "Overhead extension using a cable, targeting the long head of the triceps.",
+    "long_description": "Face away from a low pulley or use a high pulley with a rope, extending arms overhead. Keep elbows high and close to head.",
+    "equipment": ["Cable Machine"],
+    "dos": [
+      "Do keep abs braced to avoid arching back.",
+      "Do get a full stretch at the bottom."
+    ],
+    "donts": [
+      "Don't flare elbows excessively.",
+      "Don't use too much weight that compromises form."
+    ],
+    "tags": ["Push", "Triceps", "Arms", "Cable"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-seated-calf-raise",
+    "name": "Seated Calf Raise",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Soleus Development",
+    "description": "Isolates the soleus muscle of the calf.",
+    "long_description": "Sit with knees bent at 90 degrees and pads on lower thighs. Raise heels as high as possible, then lower for a deep stretch. Targets the lower/outer calf muscle.",
+    "equipment": ["Calf Machine"],
+    "dos": [
+      "Do pause at the bottom for a deep stretch.",
+      "Do pause at the top for a peak contraction."
+    ],
+    "donts": ["Don't bounce the weight.", "Don't rush the reps."],
+    "tags": ["Legs", "Calves", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-abdominal-crunch-machine",
+    "name": "Ab Crunch Machine",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Core Strength",
+    "description": "Weighted resistance for the abdominals.",
+    "long_description": "Sit in the machine and grasp handles. Contract abs to curl the torso forward. Adds progressive overload to ab training.",
+    "equipment": ["Ab Machine"],
+    "dos": [
+      "Do exhale as you crunch down.",
+      "Do use your abs, not your arms/hip flexors."
+    ],
+    "donts": ["Don't set the seat too high or low.", "Don't slam the weights."],
+    "tags": ["Core", "Abs", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-back-extension",
+    "name": "Back Extension",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Lower Back Strength",
+    "description": "Strengthens the erector spinae and glutes.",
+    "long_description": "Lock heels in the pad and hinge at the hips. Lower torso towards the floor, then raise back to parallel. Can be loaded with a plate.",
+    "equipment": ["Hyperextension Bench"],
+    "dos": ["Do keep a neutral spine.", "Do squeeze glutes at the top."],
+    "donts": [
+      "Don't hyperextend (arch) excessively at the top.",
+      "Don't swing with momentum."
+    ],
+    "tags": ["Back", "Core", "Posterior Chain"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-lat-pulldown-close-grip",
+    "name": "Close-Grip Lat Pulldown",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Lat Thickness/Lower Lats",
+    "description": "Lat pulldown variation using a neutral close-grip handle.",
+    "long_description": "Uses the v-bar handle. Pulls elbows down in front of the body, targeting the lower lats and involving more biceps.",
+    "equipment": ["Cable Machine"],
+    "dos": [
+      "Do lead with the chest.",
+      "Do pull all the way to the upper chest."
+    ],
+    "donts": ["Don't lean way back.", "Don't shrug shoulders."],
+    "tags": ["Pull", "Back", "Machine", "Lats"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hip-adduction",
+    "name": "Hip Adduction",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Inner Thigh Strength",
+    "description": "Machine exercise for the adductor muscles (inner thigh).",
+    "long_description": "Sit and squeeze legs together against resistance. Important for hip stability and injury prevention.",
+    "equipment": ["Adduction Machine"],
+    "dos": [
+      "Do use a controlled tempo.",
+      "Do keep your back against the seat."
+    ],
+    "donts": [
+      "Don't go too wide in the stretch position.",
+      "Don't jerk the weight."
+    ],
+    "tags": ["Legs", "Machine", "Accessory"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hip-abduction",
+    "name": "Hip Abduction",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Glute Medius Strength",
+    "description": "Machine exercise for the outer hip/glutes.",
+    "long_description": "Sit and push legs outward against resistance. Targets the gluteus medius and minimus.",
+    "equipment": ["Abduction Machine"],
+    "dos": ["Do pause at the full extension.", "Do keep back flat."],
+    "donts": [
+      "Don't use momentum.",
+      "Don't slouch forward unless targeting specific fibers intentionally."
+    ],
+    "tags": ["Legs", "Glutes", "Machine"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-sumo-deadlift",
+    "name": "Sumo Deadlift",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Posterior Chain (Hips)",
+    "description": "Deadlift with a wide stance, emphasizing hips and quads more than conventional.",
+    "long_description": "Stand wide with toes pointed out. Grip the bar inside the knees. Keep torso upright and drive hips forward. Reduces range of motion compared to conventional.",
+    "equipment": ["Barbell", "Plates"],
+    "dos": [
+      "Do keep knees wide, tracking over toes.",
+      "Do keep the bar close to your body."
+    ],
+    "donts": ["Don't let knees cave in.", "Don't round your back."],
+    "tags": ["Compound", "Legs", "Back", "Powerlifting"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-stiff-leg-deadlift",
+    "name": "Stiff-Legged Deadlift",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Hamstring Stretch",
+    "description": "A deadlift variation that keeps legs straighter to target hamstrings.",
+    "long_description": "Start with bar hanging or on floor. Hinge at hips with legs almost straight (slight bend is okay). Lower until a deep hamstring stretch is felt, then return.",
+    "equipment": ["Barbell"],
+    "dos": ["Do keep back flat.", "Do feel the stretch in the hamstrings."],
+    "donts": [
+      "Don't lock knees completely if hyperextended.",
+      "Don't round lower back to get 'deeper'."
+    ],
+    "tags": ["Legs", "Hamstrings", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-good-morning",
+    "name": "Good Morning",
+    "type": "exercise",
+    "level": "Advanced",
+    "days_per_week": "N/A",
+    "goal": "Posterior Chain Strength",
+    "description": "A hip hinge with the barbell on the back/traps.",
+    "long_description": "With bar on back like a squat, hinge forward at the hips while keeping legs slightly bent. Strengthens lower back, glutes, and hamstrings.",
+    "equipment": ["Barbell", "Rack"],
+    "dos": [
+      "Do keep your lower back arched/tight.",
+      "Do start with light weight."
+    ],
+    "donts": [
+      "Don't turn it into a squat.",
+      "Don't go below parallel of the torso unless flexible."
+    ],
+    "tags": ["Back", "Hamstrings", "Glutes", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-pendlay-row",
+    "name": "Pendlay Row",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Explosive Back Strength",
+    "description": "A bent-over row where the weight settles on the floor between each rep.",
+    "long_description": "Bent over parallel to the floor. Pull the bar explosively from the ground to the chest/stomach, then return it to a dead stop on the floor.",
+    "equipment": ["Barbell", "Plates"],
+    "dos": ["Do keep your back parallel to floor.", "Do pull explosively."],
+    "donts": [
+      "Don't use hip drive to lift the weight.",
+      "Don't stand up during the pull."
+    ],
+    "tags": ["Pull", "Back", "Power", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-close-grip-bench",
+    "name": "Close-Grip Bench Press",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Tricep Strength",
+    "description": "Bench pressing with a narrower grip to emphasize triceps.",
+    "long_description": "Hands shoulder-width apart. Lower bar to lower chest. Keeps elbows tucked. Great for tricep mass and bench press lockout strength.",
+    "equipment": ["Barbell", "Bench"],
+    "dos": ["Do keep elbows close to torso.", "Do control the descent."],
+    "donts": [
+      "Don't use a grip that strains wrists (too close).",
+      "Don't flare elbows."
+    ],
+    "tags": ["Push", "Triceps", "Chest", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-decline-bench",
+    "name": "Decline Bench Press",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Lower Chest",
+    "description": "Bench pressing on a decline angle.",
+    "long_description": "Target the sternal head of the pectoralis major. Often allows for more weight than flat bench due to mechanical advantage/reduced ROM.",
+    "equipment": ["Barbell", "Decline Bench"],
+    "dos": [
+      "Do ensure legs are secured.",
+      "Do touch the bar to the lower chest."
+    ],
+    "donts": [
+      "Don't let the bar drift back towards face.",
+      "Don't bounce off chest."
+    ],
+    "tags": ["Push", "Chest", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-floor-press",
+    "name": "Floor Press",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Lockout Strength",
+    "description": "Bench press performed lying on the floor.",
+    "long_description": "Reduces range of motion and takes legs out of the equation. Excellent for tricep strength and overcoming sticking points.",
+    "equipment": ["Barbell", "Rack"],
+    "dos": [
+      "Do pause when elbows touch the floor.",
+      "Do control the weight gently to the floor."
+    ],
+    "donts": [
+      "Don't bounce elbows off the floor.",
+      "Don't loose tension at the bottom."
+    ],
+    "tags": ["Push", "Triceps", "Chest", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-barbell-shrug",
+    "name": "Barbell Shrug",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Upper Traps",
+    "description": "Isolates the upper trapezius muscles.",
+    "long_description": "Hold a heavy barbell in front of you. Shrug shoulders straight up towards ears, hold for a second, then lower. Builds the 'yoke'.",
+    "equipment": ["Barbell"],
+    "dos": ["Do squeeze hard at the top.", "Do keep arms straight."],
+    "donts": [
+      "Don't roll shoulders (bad for rotator cuff).",
+      "Don't use hips to jerk weights up."
+    ],
+    "tags": ["Pull", "Traps", "Back", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-rack-pull",
+    "name": "Rack Pull",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Upper Back & Lockout",
+    "description": "A partial deadlift starting from the knees or shins.",
+    "long_description": "Set pins in a power rack. Pull heavy weight from the pins to lockout. Overloads the upper back and traps.",
+    "equipment": ["Barbell", "Rack"],
+    "dos": ["Do keep neutral spine.", "Do pull shoulders back at the top."],
+    "donts": [
+      "Don't hyper-extend back at lockout.",
+      "Don't bounce bar off pins."
+    ],
+    "tags": ["Pull", "Back", "Traps", "Barbell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-preacher-curl",
+    "name": "Preacher Curl",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Bicep Isolation",
+    "description": "Curls performed on a preacher bench to eliminate swinging.",
+    "long_description": "Arms rest on the slanted pad. Curls are strict and isolate the biceps brachii, specifically the short head.",
+    "equipment": ["EZ-Bar/Barbell", "Preacher Bench"],
+    "dos": [
+      "Do keep armpits snug against the pad.",
+      "Do control the negative."
+    ],
+    "donts": [
+      "Don't lean back to pull.",
+      "Don't fully straighten arm if it causes elbow pain."
+    ],
+    "tags": ["Pull", "Biceps", "Arms", "Isolation"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-zercher-squat",
+    "name": "Zercher Squat",
+    "type": "exercise",
+    "level": "Advanced",
+    "days_per_week": "N/A",
+    "goal": "Core & Leg Strength",
+    "description": "Squatting with the barbell held in the crooks of the elbows.",
+    "long_description": "Builds immense core and upper back strength. Rest the bar on your forearms close to elbows. Squat down while keeping torso upright.",
+    "equipment": ["Barbell", "Rack"],
+    "dos": [
+      "Do wrap the bar or wear long sleeves (it hurts).",
+      "Do keep elbows high."
+    ],
+    "donts": ["Don't round your back.", "Don't let the bar slide forward."],
+    "tags": ["Legs", "Quad", "Core", "Old School"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-arnold-press",
+    "name": "Arnold Press",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Shoulder Hypertrophy",
+    "description": "Dumbbell press with a rotation, popularized by Arnold Schwarzenegger.",
+    "long_description": "Start with palms facing you at shoulder height. Press up while rotating palms to face forward at the top. Hits all three heads of the deltoid.",
+    "equipment": ["Dumbbells", "Bench"],
+    "dos": ["Do control the rotation.", "Do use a full range of motion."],
+    "donts": ["Don't rush the movement.", "Don't knock dumbbells together."],
+    "tags": ["Push", "Shoulders", "Dumbbells"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-dumbbell-pullover",
+    "name": "Dumbbell Pullover",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Chest & Lats",
+    "description": "An exercise that targets both the chest and the lats.",
+    "long_description": "Lie perpendicular on a bench (upper back only) or flat. Hold one dumbbell with both hands above chest. Lower it backward over head until a stretch is felt.",
+    "equipment": ["Dumbbell", "Bench"],
+    "dos": ["Do keep hips low.", "Do keep a slight bend in elbows."],
+    "donts": [
+      "Don't drop the weight on your face.",
+      "Don't overstretch shoulders."
+    ],
+    "tags": ["Push", "Pull", "Chest", "Lats"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-goblet-squat",
+    "name": "Goblet Squat",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Learn to Squat",
+    "description": "Squatting while holding a weight at chest level.",
+    "long_description": "Hold a dumbbell or kettlebell against your chest. Squat down between your legs. The front load acts as a counterbalance, making it easier to keep torso upright.",
+    "equipment": ["Dumbbell/Kettlebell"],
+    "dos": [
+      "Do start the movement by sitting back and down.",
+      "Do keep chest up."
+    ],
+    "donts": ["Don't let knees cave in.", "Don't round forward."],
+    "tags": ["Legs", "Squat", "Kettlebell"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-kettlebell-swing",
+    "name": "Kettlebell Swing",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Explosive Hips & Conditioning",
+    "description": "A dynamic ballistic exercise taking the weight from between legs to shoulder height.",
+    "long_description": "Hinge at hips, hike the bell back between legs, then violently snap hips forward to float the bell up. Strengthening posterior chain and cardio.",
+    "equipment": ["Kettlebell"],
+    "dos": ["Do use your hips, not your arms.", "Do keep a flat back."],
+    "donts": [
+      "Don't squat the swing (it's a hinge).",
+      "Don't overextend back at the top."
+    ],
+    "tags": ["Conditioning", "Hinge", "Kettlebell"],
+    "tracking": {
+      "type": "reps_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-turkish-get-up",
+    "name": "Turkish Get-Up",
+    "type": "exercise",
+    "level": "Advanced",
+    "days_per_week": "N/A",
+    "goal": "Total Body Stability",
+    "description": "Transitioning from lying to standing while holding a weight overhead.",
+    "long_description": "A complex multi-stage movement. Builds shoulder stability, core strength, and mobility.",
+    "equipment": ["Kettlebell/Dumbbell"],
+    "dos": [
+      "Do keep your eyes on the weight.",
+      "Do move slowly through each step."
+    ],
+    "donts": ["Don't rush.", "Don't bend the elbow of the supporting arm."],
+    "tags": ["Full Body", "Core", "Mobility"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-farmers-walk",
+    "name": "Farmer's Walk",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Grip & Core",
+    "description": "Walking while carrying heavy weights.",
+    "long_description": "Pick up heavy dumbbells or kettlebells in each hand and walk for distance or time. Builds grip, traps, and core strength.",
+    "equipment": ["Dumbbells/Kettlebells"],
+    "dos": [
+      "Do keep chest tall and shoulders back.",
+      "Do take short, quick steps."
+    ],
+    "donts": ["Don't slouch.", "Don't let weights swing excessively."],
+    "tags": ["Conditioning", "Grip", "Strongman"],
+    "tracking": {
+      "type": "distance_time",
+      "distanceUnit": "m"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-stair-climber",
+    "name": "Stair Climber",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Cardio & Glutes",
+    "description": "Climbing revolving stairs for cardio.",
+    "long_description": "Great low-impact cardio that also targets glutes and calves.",
+    "equipment": ["Stair Climber Machine"],
+    "dos": ["Do stand upright.", "Do use full steps."],
+    "donts": [
+      "Don't lean on the rails to support your weight.",
+      "Don't take tiny half-steps."
+    ],
+    "tags": ["Cardio", "Legs", "Machine"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-basketball",
+    "name": "Basketball",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Agility & Cardio",
+    "description": "Team sport involving shooting, dribbling, and running.",
+    "long_description": "High intensity interval nature with jumping and lateral movements.",
+    "equipment": ["Ball", "Court"],
+    "dos": ["Do warm up ankles and knees.", "Do stay low on defense."],
+    "donts": ["Don't play rough.", "Don't ignore injuries."],
+    "tags": ["Sport", "Cardio", "Team"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-soccer",
+    "name": "Soccer",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Endurance & Agility",
+    "description": "Field sport involving continuous running and footwork.",
+    "long_description": "Excellent for aerobic capacity and leg coordination.",
+    "equipment": ["Ball", "Field", "Cleats"],
+    "dos": ["Do keep moving.", "Do communicate with teammates."],
+    "donts": [
+      "Don't play in inappropriate footwear.",
+      "Don't tackle dangerously."
+    ],
+    "tags": ["Sport", "Cardio", "Team"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-tennis",
+    "name": "Tennis",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Speed & Coordination",
+    "description": "Racquet sport requiring sprints and hand-eye coordination.",
+    "long_description": "Involves short bursts of sprinting, lateral movement, and upper body rotation.",
+    "equipment": ["Racquet", "Ball", "Court"],
+    "dos": ["Do split step before every shot.", "Do watch the ball."],
+    "donts": [
+      "Don't swing too hard; use technique.",
+      "Don't stop moving feet."
+    ],
+    "tags": ["Sport", "Cardio", "Agility"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-volleyball",
+    "name": "Volleyball",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Power & Agility",
+    "description": "Team sport involving jumping and striking.",
+    "long_description": "Great for explosive power (jumping) and reaction time.",
+    "equipment": ["Ball", "Court/Sand", "Net"],
+    "dos": ["Do call the ball.", "Do land softly from jumps."],
+    "donts": ["Don't touch the net.", "Don't land on other players."],
+    "tags": ["Sport", "Plyometrics", "Team"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-golf",
+    "name": "Golf",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Mobility & Focus",
+    "description": "Club sport requiring mobility and precision.",
+    "long_description": "Low intensity walking (if walking course) and rotational power.",
+    "equipment": ["Clubs", "Course"],
+    "dos": ["Do walk the course if possible.", "Do stretch hips and back."],
+    "donts": [
+      "Don't swing with all arm strength.",
+      "Don't forget sun protection."
+    ],
+    "tags": ["Sport", "Outdoor", "Skill"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-climbing",
+    "name": "Rock Climbing",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Strength & Problem Solving",
+    "description": "Scaling vertical walls using holds.",
+    "long_description": "Full body workout emphasizing grip strength, back, core, and tension.",
+    "equipment": ["Shoes", "Chalk", "Harness"],
+    "dos": [
+      "Do use your legs to push up.",
+      "Do keep arms straight when hanging."
+    ],
+    "donts": ["Don't overgrip.", "Don't forget to check knots/safety."],
+    "tags": ["Sport", "Full Body", "Strength"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-martial-arts",
+    "name": "Martial Arts",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Discipline & Conditioning",
+    "description": "Practice of combat systems (Karate, Jiu-Jitsu, Muay Thai, etc.).",
+    "long_description": "Varies by style but generally improves flexibility, strength, cardio, and mental discipline.",
+    "equipment": ["Gi/Gear"],
+    "dos": ["Do respect training partners.", "Do tap early."],
+    "donts": ["Don't have an ego.", "Don't neglect warmups."],
+    "tags": ["Sport", "Combat", "Skill"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-high-knees",
+    "name": "High Knees",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Cardio & Hip Flexors",
+    "description": "Running in place bringing knees high.",
+    "long_description": "Cardio drill. Pump arms and drive knees up to waist height rapidly.",
+    "equipment": ["Bodyweight"],
+    "dos": ["Do land on balls of feet.", "Do stay upright."],
+    "donts": ["Don't lean back.", "Don't let knees stay low."],
+    "tags": ["Cardio", "Calisthenics", "Warm-up"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-burpees",
+    "name": "Burpees",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Full Body Conditioning",
+    "description": "A full body exercise used in strength training and as an aerobic exercise.",
+    "long_description": "Drop to a pushup position, do a pushup, jump feet in, and jump up with hands overhead. High caloric burn.",
+    "equipment": ["Bodyweight"],
+    "dos": ["Do maintain a rigid plank.", "Do jump intensely."],
+    "donts": [
+      "Don't snake up from the pushup.",
+      "Don't land with locked knees."
+    ],
+    "tags": ["Cardio", "Full Body", "HIIT"],
+    "tracking": {
+      "type": "reps_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-mountain-climbers",
+    "name": "Mountain Climbers",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Core & Cardio",
+    "description": "Running motion in a plank position.",
+    "long_description": "Start in plank. Drive one knee to chest, then switch rapidly. Keeps core under tension while elevating heart rate.",
+    "equipment": ["Bodyweight"],
+    "dos": ["Do keep hips stable and low.", "Do keep shoulders over wrists."],
+    "donts": ["Don't bounce hips up and down.", "Don't breath."],
+    "tags": ["Core", "Cardio", "HITT"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-t-bar-row",
+    "name": "T-Bar Row",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Back Thickness",
+    "description": "Rowing a bar that is anchored at one end.",
+    "long_description": "Straddle the bar. Keep back flat and pull the handle to your chest. Allows for heavy loading of the lats and mid-back.",
+    "equipment": ["T-Bar", "Landmine"],
+    "dos": [
+      "Do keep your spine neutral.",
+      "Do use 25lb plates for better range of motion."
+    ],
+    "donts": [
+      "Don't jerky the weight with your legs.",
+      "Don't round lower back."
+    ],
+    "tags": ["Pull", "Back", "Thickness"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-reverse-lunge",
+    "name": "Reverse Lunge",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Leg Strength (Glute Bias)",
+    "description": "Stepping backward into a lunge.",
+    "long_description": "Easier on the knees than forward lunges. Step back, lower hips until back knee hovers the floor, drive forward to return.",
+    "equipment": ["Dumbbells/Barbell"],
+    "dos": ["Do keep front shin vertical.", "Do drive through the front heel."],
+    "donts": ["Don't push off the back foot too much.", "Don't slam the knee."],
+    "tags": ["Legs", "Glutes", "Unilateral"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-side-lunge",
+    "name": "Side Lunge",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Adductors & Glutes",
+    "description": "Lunging laterally to target hips and adductors.",
+    "long_description": "Step out to the side, keeping one leg straight while bending the other knee and sitting hips back. Push back to center.",
+    "equipment": ["Bodyweight/Dumbbell"],
+    "dos": ["Do keep proper alignment of knee and toe.", "Do keep chest up."],
+    "donts": [
+      "Don't let the bent knee cave in.",
+      "Don't lift the heel of the bent leg."
+    ],
+    "tags": ["Legs", "Adductors", "Lateral"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-hanging-leg-raise",
+    "name": "Hanging Leg Raise",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Core Strength",
+    "description": "Lifting legs while hanging from a bar.",
+    "long_description": "Hang from a pullup bar. Lift legs until parallel to floor (or toes to bar for advanced). immense core and hip flexor challenge.",
+    "equipment": ["Pull-up Bar"],
+    "dos": ["Do control the descent.", "Do compress the abs."],
+    "donts": [
+      "Don't swing significantly.",
+      "Don't hyperextend back at bottom."
+    ],
+    "tags": ["Core", "Abs", "Gymnastics"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-plank",
+    "name": "Plank",
+    "type": "exercise",
+    "level": "All levels",
+    "days_per_week": "N/A",
+    "goal": "Core Stability",
+    "description": "Isometric core hold.",
+    "long_description": "Hold a pushup position (on hands or elbows). Keep body in a straight line. Resists gravity and builds endurance.",
+    "equipment": ["Bodyweight"],
+    "dos": ["Do squeeze glutes and quads.", "Do push floor away with elbows."],
+    "donts": ["Don't promote hips too high.", "Don't sag hips low."],
+    "tags": ["Core", "Stability", "Abs"],
+    "tracking": {
+      "type": "interval_time"
+    },
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-russian-twist",
+    "name": "Russian Twist",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Obliques",
+    "description": "Rotational core exercise seated on the floor.",
+    "long_description": "Sit on floor, lean back slightly, lift feet (boat pose), and rotate torso from side to side holding a weight.",
+    "equipment": ["Medicine Ball/Plate"],
+    "dos": ["Do follow the weight with your eyes.", "Do move with control."],
+    "donts": ["Don't round the back.", "Don't just move arms, rotate torso."],
+    "tags": ["Core", "Abs", "Rotation"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-single-arm-dumbbell-row",
+    "name": "Single Arm Dumbbell Row",
+    "type": "exercise",
+    "level": "Beginner",
+    "days_per_week": "N/A",
+    "goal": "Unilateral Back Strength",
+    "description": "Rowing a dumbbell with one hand supported on a bench.",
+    "long_description": "Kneel on bench with one leg and hand. Pull the dumbbell to the hip with the free hand. Corrects imbalances.",
+    "equipment": ["Dumbbell", "Bench"],
+    "dos": ["Do flatten your back.", "Do pull elbow back toward hip."],
+    "donts": [
+      "Don't rotate torso excessively to throw height.",
+      "Don't flare elbow out."
+    ],
+    "tags": ["Pull", "Back", "Dumbbell", "Unilateral"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-snatch",
+    "name": "Snatch",
+    "type": "exercise",
+    "level": "Advanced",
+    "days_per_week": "N/A",
+    "goal": "Explosive Power",
+    "description": "Olympic lift taking the bar from floor to overhead in one motion.",
+    "long_description": "Highly technical. Requires mobility, speed, and power. Catch the bar in an overhead squat position.",
+    "equipment": ["Barbell", "Bumper Plates"],
+    "dos": ["Do get coaching.", "Do keep bar close."],
+    "donts": [
+      "Don't muscle it up with arms.",
+      "Don't lift heavy without technique."
+    ],
+    "tags": ["Olympic", "Power", "Full Body"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-clean-and-jerk",
+    "name": "Clean and Jerk",
+    "type": "exercise",
+    "level": "Advanced",
+    "days_per_week": "N/A",
+    "goal": "Maximal Power",
+    "description": "Olympic lift taking bar to shoulders (clean) then overhead (jerk).",
+    "long_description": "The King of lifts. Tests total body strength and coordination.",
+    "equipment": ["Barbell", "Bumper Plates"],
+    "dos": [
+      "Do catch the clean with high elbows.",
+      "Do drive hard with legs in the jerk."
+    ],
+    "donts": [
+      "Don't press out the jerk.",
+      "Don't round back on the clean pull."
+    ],
+    "tags": ["Olympic", "Power", "Full Body"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
+  },
+  {
+    "id": "exercise-box-jump",
+    "name": "Box Jump",
+    "type": "exercise",
+    "level": "Intermediate",
+    "days_per_week": "N/A",
+    "goal": "Explosive Power",
+    "description": "Jumping onto a plyo box.",
+    "long_description": "Stand in front of box. Load hips and swing arms, jumping onto box. Land softly.",
+    "equipment": ["Plyo Box"],
+    "dos": ["Do land softly.", "Do stand up fully on the box."],
+    "donts": [
+      "Don't jump down if it hurts knees (step down).",
+      "Don't use a box that is too high (shin scrape risk)."
+    ],
+    "tags": ["Plyometrics", "Legs", "Power"],
+    "image": "assets/images/mock.webp",
+    "videoUrl": "",
+    "isFavorite": false
   }
 ]
